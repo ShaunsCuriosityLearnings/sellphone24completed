@@ -232,6 +232,14 @@ export const api = {
     });
   },
 
+  // --- CUSTOM REQUESTS ---
+  async submitCustomDeviceRequest(requestData: any): Promise<any> {
+    return safeFetch<any>(`${API_BASE}/custom-requests`, {
+      method: "POST",
+      body: JSON.stringify(requestData),
+    });
+  },
+
   // --- BLOGS ---
   async getBlogs(params?: { cat?: string; search?: string }): Promise<BlogType[]> {
     const fallback = mockBlogs;

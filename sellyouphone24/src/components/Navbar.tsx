@@ -49,51 +49,23 @@ const Navbar = () => {
                   <ChevronDown size={14} className="group-hover/menu:rotate-180 transition-transform duration-300 text-slate-400" />
                 </button>
 
-                {/* Level 1 Dropdown: Brands (Category Page) */}
+                {/* Level 1 Dropdown: Categories (Service Page) */}
                 <div className="absolute left-0 top-[80px] w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-300 py-3 z-50">
                   <div className="px-3 mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                    Select a Brand
+                    Select a Service
                   </div>
-                  {brands.map((brand) => {
-                    const brandProducts = getProductsByBrand(brand.name);
+                  {categories.map((category) => {
                     return (
-                      <div key={brand.id} className="relative group/brand px-2">
+                      <div key={category.id} className="relative group/category px-2">
                         <Link
-                          href={`/services/smartphones/${brand.slug}`}
+                          href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
                           className="flex items-center justify-between px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition"
                         >
                           <span className="flex items-center gap-2">
-                            <span className="text-base">{brand.logo}</span>
-                            {brand.name}
+                            Sell {category.name}
                           </span>
-                          <ChevronRight size={14} className="text-slate-500" />
+                          <ChevronRight size={14} className="opacity-0 group-hover/category:opacity-100 transition-opacity" />
                         </Link>
-
-                        {/* Level 2 Dropdown: Products */}
-                        {brandProducts.length > 0 && (
-                          <div className="absolute left-full top-0 ml-1 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl opacity-0 invisible group-hover/brand:opacity-100 group-hover/brand:visible transition-all duration-200 py-3">
-                            <div className="px-4 mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                              Popular {brand.name} Models
-                            </div>
-                            {brandProducts.map((product) => (
-                              <Link
-                                key={product.id}
-                                href={`/products/${product.id}`}
-                                className="block px-4 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 transition"
-                              >
-                                {product.name}
-                              </Link>
-                            ))}
-                            <div className="border-t border-slate-800 mt-2 pt-2 px-2">
-                              <Link
-                                href={`/services/smartphones/${brand.slug}`}
-                                className="block text-center text-xs text-emerald-400 hover:text-emerald-300 py-1 hover:bg-slate-800 rounded-lg transition"
-                              >
-                                View All {brand.name} Devices
-                              </Link>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -151,41 +123,18 @@ const Navbar = () => {
               Sell Devices
             </div>
             
-            {brands.map((brand) => {
-              const brandProducts = getProductsByBrand(brand.name);
-              const isBrandActive = activeMobileBrand === brand.name;
+            {categories.map((category) => {
               return (
-                <div key={brand.id} className="space-y-1">
-                  <button
-                    onClick={() => setActiveMobileBrand(isBrandActive ? null : brand.name)}
+                <div key={category.id} className="space-y-1">
+                  <Link
+                    href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
                     className="flex items-center justify-between w-full px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition"
                   >
                     <span className="flex items-center gap-2">
-                      <span>{brand.logo}</span>
-                      {brand.name}
+                      Sell {category.name}
                     </span>
-                    <ChevronDown size={14} className={`text-slate-500 transition-transform ${isBrandActive ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {isBrandActive && (
-                    <div className="pl-6 space-y-1 border-l border-slate-800 ml-5">
-                      {brandProducts.map((product) => (
-                        <Link
-                          key={product.id}
-                          href={`/products/${product.id}`}
-                          className="block px-3 py-1.5 text-xs text-slate-400 hover:text-white"
-                        >
-                          {product.name}
-                        </Link>
-                      ))}
-                      <Link
-                        href={`/services/smartphones/${brand.slug}`}
-                        className="block px-3 py-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-medium"
-                      >
-                        All {brand.name} Devices →
-                      </Link>
-                    </div>
-                  )}
+                    <ChevronRight size={14} className="text-slate-500" />
+                  </Link>
                 </div>
               );
             })}

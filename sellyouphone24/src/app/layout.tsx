@@ -8,12 +8,13 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Roboto, Poppins, Open_Sans, Lato } from "next/font/google";
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-body",
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-roboto" });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins" });
+const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" });
+const lato = Lato({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-lato" });
 
 export const metadata: Metadata = {
   title: {
@@ -50,12 +51,12 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body
           className={`
-            ${jakarta.variable}
+            ${inter.variable} ${roboto.variable} ${poppins.variable} ${openSans.variable} ${lato.variable}
             bg-slate-50
             text-slate-900
             antialiased
           `}
-          style={{ fontFamily: "var(--font-body), sans-serif" }}
+          style={{ fontFamily: "var(--font-inter), sans-serif" }}
         >
           <div className="min-h-screen flex flex-col">
             {/* Decorative Modern Tech Gradient Background */}

@@ -10,6 +10,7 @@ import brandRoutes from "./routes/brandRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
+import customRequestRoutes from "./routes/customRequestRoutes.js";
 
 if (!process.env.CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
   process.env.CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -49,6 +50,7 @@ app.use("/api/brands", brandRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/blogs", blogRoutes);
+app.use("/api/custom-requests", customRequestRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

@@ -27,6 +27,18 @@ const categoriesData = [
     description: "Turn your old smartwatches into cash. We accept Apple Watch, Galaxy Watch, and others.",
     image: "/products/apple logo.jpg",
   },
+  {
+    name: "Laptops",
+    slug: "laptops",
+    description: "Sell your used MacBooks and Windows laptops for top value instantly.",
+    image: "/products/apple logo.jpg",
+  },
+  {
+    name: "Any Device",
+    slug: "any-device",
+    description: "Have something else? Tell us about your device and get a custom quote.",
+    image: "/products/samsung logo.jpg",
+  },
 ];
 
 const brandsData = [
