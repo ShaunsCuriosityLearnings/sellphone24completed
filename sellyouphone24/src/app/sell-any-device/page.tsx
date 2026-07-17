@@ -16,7 +16,7 @@ const customDeviceSchema = z.object({
   deviceBrand: z.string().min(1, "Brand is required"),
   deviceModel: z.string().min(1, "Model is required"),
   condition: z.enum(["flawless", "good", "average", "broken"], {
-    errorMap: () => ({ message: "Please select a condition" }),
+    message: "Please select a condition",
   }),
   description: z.string().optional(),
 });
