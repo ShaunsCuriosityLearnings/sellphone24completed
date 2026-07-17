@@ -1,4 +1,5 @@
 import HeroSection from "@/components/HeroSection";
+import ServicesGrid from "@/components/ServicesGrid";
 import ProductList from "@/components/ProductList";
 import { brands } from "@/data/mockData";
 import Image from "next/image";
@@ -12,8 +13,11 @@ const Homepage = async () => {
 
   return (
     <div className="space-y-16 pb-12">
-      {/* Search-Based Hero Header */}
+      {/* Hero Header */}
       <HeroSection />
+
+      {/* Services Grid */}
+      <ServicesGrid />
 
       {/* HOW IT WORKS SECTION */}
       <section className="bg-white rounded-[40px] border border-slate-100 p-8 md:p-12 shadow-sm space-y-10">

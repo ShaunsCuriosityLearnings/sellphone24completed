@@ -1,171 +1,67 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Search, ShieldCheck, Sparkles, TrendingUp, Zap } from "lucide-react";
-import { products } from "@/data/mockData";
+import Link from "next/link";
 import Image from "next/image";
+import { ArrowRight, BadgeCheck, ShieldCheck, Zap } from "lucide-react";
 
 const HeroSection = () => {
-  const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<typeof products>([]);
-  const [isFocused, setIsFocused] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Filter products based on search input
-  useEffect(() => {
-    if (query.trim() === "") {
-      setSuggestions([]);
-      return;
-    }
-
-    const filtered = products.filter((product) =>
-      product.name.toLowerCase().includes(query.toLowerCase()) ||
-      product.brand.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 5);
-
-    setSuggestions(filtered);
-  }, [query]);
-
-  // Close suggestion dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsFocused(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSelect = (productId: number | string) => {
-    router.push(`/products/${productId}`);
-  };
-
   return (
-    <section className="relative overflow-hidden py-16 lg:py-24 bg-slate-950 text-white rounded-[40px] px-6 md:px-12 lg:px-20 mb-12 shadow-2xl">
+    <section className="relative overflow-hidden bg-slate-900 rounded-[32px] md:rounded-[40px] shadow-2xl mb-12">
       {/* Background Gradients */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/10 via-slate-950 to-slate-950" />
-      <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_bottom,transparent_0%,rgba(15,23,42,0.4)_100%)] pointer-events-none" />
-
-      <div className="relative z-10 grid lg:grid-cols-12 gap-12 items-center">
-        {/* Left Content Column */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-            <Sparkles size={12} />
-            UAE&apos;s Top Rated Buyback Platform
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-emerald-600/20 via-slate-900 to-slate-950" />
+      
+      <div className="relative z-10 grid lg:grid-cols-2 items-center min-h-[400px] lg:min-h-[480px]">
+        {/* Left Content */}
+        <div className="p-8 md:p-12 lg:p-16 space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <BadgeCheck size={14} />
+            UAE&apos;s #1 Buyback Platform
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-            Sell Your Used Phone for <span className="text-emerald-500 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Instant Cash</span>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white" style={{ fontFamily: "var(--font-poppins)" }}>
+            Get <span className="text-emerald-400">Top Value</span> for Your Used Devices
           </h1>
 
-          <p className="text-base md:text-lg text-slate-400 max-w-xl leading-relaxed">
-            Get an instant price quote for your iPhone, Samsung Galaxy, or Pixel. We pick up from your doorstep in Dubai, Abu Dhabi, & UAE, and pay you instantly!
+          <p className="text-sm md:text-base text-slate-400 max-w-md leading-relaxed">
+            Upgrade your tech or get instant cash. We offer the best market rates with free doorstep pickup across Dubai, Abu Dhabi, and the UAE.
           </p>
 
-          {/* Autocomplete Search Bar */}
-          <div ref={containerRef} className="relative max-w-lg w-full">
-            <div className="relative flex items-center bg-slate-900 border border-slate-800 focus-within:border-emerald-500 rounded-2xl p-2 transition shadow-xl">
-              <Search className="w-5 h-5 text-slate-500 ml-3" />
-              <input
-                type="text"
-                placeholder="Search your device model (e.g. iPhone 15 Pro Max)..."
-                className="w-full bg-transparent border-none outline-none py-3 px-4 text-sm md:text-base text-white placeholder-slate-500 focus:ring-0"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-              />
-              {query && (
-                <button
-                  onClick={() => setQuery("")}
-                  className="px-3 py-1 text-xs bg-slate-800 text-slate-400 hover:text-white rounded-lg transition mr-2"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {/* Suggestions Dropdown */}
-            {isFocused && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                {suggestions.map((product) => (
-                  <button
-                    key={product.id}
-                    onClick={() => handleSelect(product.id)}
-                    className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-800 transition border-b border-slate-800/50 last:border-0 cursor-pointer"
-                  >
-                    <div>
-                      <h4 className="font-semibold text-sm text-white">{product.name}</h4>
-                      <p className="text-xs text-slate-500">{product.brand} • {product.category}</p>
-                    </div>
-                    <span className="text-xs font-semibold text-emerald-400">
-                      Get up to AED {product.basePrice}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-            
-            {isFocused && query.trim() !== "" && suggestions.length === 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-5 text-center text-slate-500 text-sm z-50">
-                No matching devices found. Try searching by brand or model name.
-              </div>
-            )}
+          <div className="flex flex-wrap items-center gap-4 pt-2">
+            <Link
+              href="/services"
+              className="inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 px-8 rounded-xl transition duration-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+            >
+              Get Instant Quote
+              <ArrowRight size={18} />
+            </Link>
           </div>
 
-          {/* Quick Features */}
-          <div className="grid grid-cols-3 gap-4 pt-4 text-slate-400 text-xs md:text-sm">
-            <div className="flex items-center gap-2">
-              <Zap className="text-emerald-500 w-5 h-5 flex-shrink-0" />
-              <span>Instant Payouts</span>
+          {/* Trust indicators */}
+          <div className="flex items-center gap-6 pt-6 border-t border-slate-800">
+            <div className="flex items-center gap-2 text-slate-300 text-xs font-medium">
+              <Zap className="text-emerald-500" size={16} /> Instant Payout
             </div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="text-emerald-500 w-5 h-5 flex-shrink-0" />
-              <span>Free Doorstep Pickup</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="text-emerald-500 w-5 h-5 flex-shrink-0" />
-              <span>Depreciation Lock</span>
+            <div className="flex items-center gap-2 text-slate-300 text-xs font-medium">
+              <ShieldCheck className="text-emerald-500" size={16} /> Secure Data Wipe
             </div>
           </div>
         </div>
 
-        {/* Right Product Spotlight Image */}
-        <div className="lg:col-span-5 relative flex justify-center lg:justify-end">
-          <div className="relative w-[320px] h-[320px] sm:w-[380px] sm:h-[380px] rounded-full bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 flex items-center justify-center p-8 shadow-inner border border-emerald-500/10">
-            <div className="relative w-full h-full animate-bounce duration-[4000ms]">
+        {/* Right Image/Graphic Area */}
+        <div className="relative h-full hidden lg:flex items-center justify-center p-12 overflow-hidden bg-gradient-to-l from-emerald-900/10 to-transparent">
+          <div className="relative w-full aspect-square max-w-md">
+            {/* Main Phone Image */}
+            <div className="absolute inset-0 z-20 hover:scale-105 transition-transform duration-700 ease-out">
               <Image
                 src="/products/iphone 17 pro max 💖.jpg"
-                alt="Featured Smartphone Spotlight"
+                alt="Premium Smartphone Trade-in"
                 fill
                 priority
-                className="object-contain drop-shadow-[0_20px_50px_rgba(16,185,129,0.3)]"
+                className="object-contain drop-shadow-[0_0_60px_rgba(16,185,129,0.4)]"
               />
             </div>
-
-            {/* Floating Trust Badge */}
-            <div className="absolute -left-4 bottom-12 bg-slate-900/90 backdrop-blur border border-slate-800 p-4 rounded-2xl shadow-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center text-emerald-400 font-bold text-sm">
-                4.9
-              </div>
-              <div>
-                <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Trustpilot Rating</p>
-                <h4 className="font-bold text-xs text-white">5,000+ Reviews</h4>
-              </div>
-            </div>
-
-            {/* Floating Speed Badge */}
-            <div className="absolute -right-4 top-12 bg-slate-900/90 backdrop-blur border border-slate-800 p-4 rounded-2xl shadow-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-slate-950 font-bold text-sm">
-                ⏱️
-              </div>
-              <div>
-                <p className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider">Fast Pickup</p>
-                <h4 className="font-bold text-xs text-white">Under 24 Hours</h4>
-              </div>
-            </div>
+            
+            {/* Decorative background circle */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] rounded-full border border-emerald-500/20 bg-emerald-500/5 animate-[spin_60s_linear_infinite]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] rounded-full border border-emerald-500/10 animate-[spin_40s_linear_infinite_reverse]" />
           </div>
         </div>
       </div>
