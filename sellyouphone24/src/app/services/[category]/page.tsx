@@ -1,7 +1,8 @@
 import { api } from "@/lib/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Zap } from "lucide-react";
+import { ArrowLeft, Zap } from "lucide-react";
+import ProductCatalog from "@/components/ProductCatalog";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ category: string }> }) => {
   const categorySlug = (await params).category;
@@ -26,6 +27,7 @@ const CategoryPage = async ({ params }: { params: Promise<{ category: string }> 
   }
 
   const categoryBrands = await api.getBrands({ category: categorySlug });
+  const categoryProducts = await api.getProducts({ category: categorySlug });
 
   return (
     <div className="space-y-12 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -50,27 +52,12 @@ const CategoryPage = async ({ params }: { params: Promise<{ category: string }> 
         </p>
       </div>
 
-      {/* Grid container of brands */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-        {categoryBrands.map((brand) => (
-          <Link
-            key={brand.id}
-            href={`/services/${categorySlug}/${brand.slug}`}
-            className="bg-white border border-slate-100 hover:border-emerald-500/20 hover:shadow-xl rounded-3xl p-8 flex flex-col items-center text-center justify-center transition-all duration-300 group cursor-pointer"
-          >
-            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-4xl mb-4 group-hover:bg-emerald-50 transition-colors">
-              {brand.logo}
-            </div>
-            <h2 className="text-lg font-bold text-slate-800 group-hover:text-emerald-500 transition-colors">
-              {brand.name}
-            </h2>
-            <p className="text-[10px] text-slate-400 mt-2 font-semibold uppercase tracking-wider flex items-center gap-1">
-              Select Brand
-              <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
-            </p>
-          </Link>
-        ))}
-      </div>
+      {/* Product Catalog with Sidebar Filters */}
+      <ProductCatalog 
+        initialProducts={categoryProducts} 
+        brands={categoryBrands} 
+        categoryName={category.name} 
+      />
 
       {/* Valuation Tip */}
       <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 flex items-start gap-4 shadow-sm max-w-3xl">
