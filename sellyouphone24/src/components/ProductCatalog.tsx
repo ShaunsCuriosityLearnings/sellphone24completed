@@ -5,6 +5,7 @@ import { ProductType, BrandType } from "@/types";
 import ProductCard from "./ProductCard";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 
 interface ProductCatalogProps {
   initialProducts: ProductType[];
@@ -149,15 +150,34 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
           {/* Brands Filter */}
           <div className="space-y-3">
             <h4 className="font-bold text-slate-800 text-sm">Brands</h4>
-            <div className="space-y-2">
-              {brands.map(brand => (
-                <label key={brand.id} className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedBrands.includes(brand.name.toLowerCase()) ? "bg-emerald-500 border-emerald-500" : "bg-white border-slate-300 group-hover:border-emerald-400"}`}>
-                    {selectedBrands.includes(brand.name.toLowerCase()) && <X size={10} className="text-white" />}
-                  </div>
-                  <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900">{brand.name}</span>
-                </label>
-              ))}
+            <div className="grid grid-cols-2 gap-2">
+              {brands.map(brand => {
+                const isSelected = selectedBrands.includes(brand.name.toLowerCase());
+                return (
+                  <button
+                    key={brand.id}
+                    onClick={() => toggleBrand(brand.name)}
+                    className={`flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all duration-300 ${
+                      isSelected 
+                        ? "border-emerald-500 bg-emerald-50/50 shadow-sm shadow-emerald-500/10" 
+                        : "border-slate-100 bg-white hover:border-emerald-200 hover:bg-slate-50"
+                    }`}
+                  >
+                    <div className="w-8 h-8 flex items-center justify-center text-2xl">
+                      {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
+                        <div className="relative w-full h-full">
+                          <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
+                        </div>
+                      ) : (
+                        <span>{brand.logo || "📱"}</span>
+                      )}
+                    </div>
+                    <span className={`text-xs font-bold ${isSelected ? "text-emerald-700" : "text-slate-600"}`}>
+                      {brand.name}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
