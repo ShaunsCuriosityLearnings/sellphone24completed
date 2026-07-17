@@ -3,12 +3,24 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Menu, X, ChevronRight, BadgePercent } from "lucide-react";
-import { categories } from "@/data/mockData";
+import { categories as mockCategories } from "@/data/mockData";
+import { CategoryType, BrandType } from "@/types";
+import { api } from "@/lib/api";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  const [categoriesList, setCategoriesList] = useState<CategoryType[]>(mockCategories);
+  const [brandsList, setBrandsList] = useState<BrandType[]>([]);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.getCategories().then(setCategoriesList).catch(() => {});
+    api.getBrands().then(setBrandsList).catch(() => {});
+  }, []);
 
   // Close mobile menu on page change
   useEffect(() => {
@@ -59,17 +71,54 @@ const Navbar = () => {
             
             {/* Services Links (Left) */}
             <div className="flex items-center gap-8">
-              <Link href="/services" className="text-sm font-semibold text-slate-700 hover:text-emerald-500 transition flex items-center gap-1">
+              <Link href="/services" className="text-sm font-semibold text-slate-700 hover:text-emerald-500 transition flex items-center gap-1 py-3">
                 All Services <ChevronRight size={14} />
               </Link>
-              {categories.map((category) => (
-                <Link
+              {categoriesList.map((category) => (
+                <div 
                   key={category.id}
-                  href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-                  className="text-sm font-medium text-slate-600 hover:text-emerald-500 transition"
+                  className="relative group h-full flex items-center"
+                  onMouseEnter={() => setActiveDropdown(category.slug)}
+                  onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  Sell {category.name}
-                </Link>
+                  <Link
+                    href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                    className="text-sm font-medium text-slate-600 hover:text-emerald-500 transition py-3"
+                  >
+                    Sell {category.name}
+                  </Link>
+
+                  {/* Brand Dropdown */}
+                  {activeDropdown === category.slug && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-64 bg-white border border-slate-100 shadow-xl rounded-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2">
+                      <div className="grid grid-cols-2 gap-3">
+                        {brandsList
+                          .filter(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id))
+                          .map((brand) => (
+                          <Link 
+                            key={brand.id} 
+                            href={`/services/${category.slug}?brand=${brand.slug}`}
+                            className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
+                          >
+                            <div className="w-8 h-8 flex items-center justify-center text-xl">
+                              {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
+                                <div className="relative w-full h-full">
+                                  <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
+                                </div>
+                              ) : (
+                                <span>{brand.logo || "📱"}</span>
+                              )}
+                            </div>
+                            <span className="text-xs font-bold text-slate-700">{brand.name}</span>
+                          </Link>
+                        ))}
+                        {brandsList.filter(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id)).length === 0 && (
+                          <p className="col-span-2 text-xs text-slate-400 text-center py-2">No brands available yet.</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
@@ -104,7 +153,7 @@ const Navbar = () => {
                 All Services
                 <ChevronRight size={14} className="text-slate-400" />
               </Link>
-              {categories.map((category) => (
+              {categoriesList.map((category) => (
                 <Link
                   key={category.id}
                   href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
