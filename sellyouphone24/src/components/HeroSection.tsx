@@ -17,8 +17,7 @@ const HeroSection = () => {
         {/* Text Content */}
         <div className="space-y-8 relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-emerald-100 shadow-sm text-emerald-600 text-xs font-bold tracking-wide uppercase">
-            <Sparkles size={14} className="text-emerald-500" />
-            Highest Payouts Guaranteed
+            Precise Evaluation Guaranteed
           </div>
 
           <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] tracking-tight">
@@ -37,14 +36,14 @@ const HeroSection = () => {
               Get Instant Quote
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-            
+
             <div className="flex items-center gap-4 px-4 text-sm font-medium text-slate-500">
               <div className="flex -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-slate-200" />
                 ))}
               </div>
-              <p>Trusted by 10k+<br/>happy customers</p>
+              <p>Trusted by 10k+<br />happy customers</p>
             </div>
           </div>
 
@@ -64,7 +63,7 @@ const HeroSection = () => {
             {/* Glassmorphism Card Behind */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[40px] shadow-2xl rotate-6 animate-pulse" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] h-[85%] bg-white/60 backdrop-blur-2xl border border-white shadow-xl rounded-[40px] -rotate-3" />
-            
+
             {/* Main Image */}
             <div className="absolute inset-0 z-20 flex items-center justify-center group">
               <div className="relative w-[80%] h-[80%] group-hover:scale-105 transition-transform duration-500 ease-out">
@@ -77,7 +76,7 @@ const HeroSection = () => {
                 />
               </div>
             </div>
-            
+
             {/* Floating Price Tag */}
             <div className="absolute top-8 right-0 z-30 bg-white p-4 rounded-2xl shadow-xl border border-emerald-50 animate-bounce">
               <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Up to</p>
