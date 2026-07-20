@@ -25,8 +25,8 @@ export const metadata: Metadata = {
     icon: "/favicon.webp",
   },
   robots: {
-    index: false,
-    follow: false,
+    index: true,
+    follow: true,
   },
   description:
     "Sell your used smartphones, tablets, and smartwatches for the best price in Dubai, Abu Dhabi, and the wider UAE. Instant online valuation, free doorstep pickup, and instant payouts.",
