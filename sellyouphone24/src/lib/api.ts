@@ -1,7 +1,8 @@
 import { CategoryType, BrandType, ProductType, BlogType, CartItemType } from "@/types";
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL 
+  || (typeof window !== "undefined" ? "/api" : "http://localhost:5000/api");
 
 // Helper to handle API requests and fall back to mock data on failure
 async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): Promise<T> {
