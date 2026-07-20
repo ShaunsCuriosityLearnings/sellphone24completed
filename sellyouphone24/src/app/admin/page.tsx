@@ -138,6 +138,11 @@ export default function AdminPage() {
     author: "Team SellYourPhone24",
   });
 
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedBrandIds, setSelectedBrandIds] = useState<string[]>([]);
+  const [selectedBlogIds, setSelectedBlogIds] = useState<string[]>([]);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -524,6 +529,50 @@ export default function AdminPage() {
     setNewBrand({ ...newBrand, categories: updatedCats });
   };
 
+  const handleBulkDeleteProducts = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedProductIds.length} products?`)) return;
+    try {
+      const token = await getToken();
+      await Promise.all(selectedProductIds.map(id => api.deleteProduct(id, token || undefined)));
+      toast.success("Products deleted successfully");
+      setSelectedProductIds([]);
+      loadData();
+    } catch (error) { toast.error("Failed to delete some products"); }
+  };
+
+  const handleBulkDeleteCategories = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedCategoryIds.length} categories?`)) return;
+    try {
+      const token = await getToken();
+      await Promise.all(selectedCategoryIds.map(id => api.deleteCategory(id, token || undefined)));
+      toast.success("Categories deleted successfully");
+      setSelectedCategoryIds([]);
+      loadData();
+    } catch (error) { toast.error("Failed to delete some categories"); }
+  };
+
+  const handleBulkDeleteBrands = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedBrandIds.length} brands?`)) return;
+    try {
+      const token = await getToken();
+      await Promise.all(selectedBrandIds.map(id => api.deleteBrand(id, token || undefined)));
+      toast.success("Brands deleted successfully");
+      setSelectedBrandIds([]);
+      loadData();
+    } catch (error) { toast.error("Failed to delete some brands"); }
+  };
+
+  const handleBulkDeleteBlogs = async () => {
+    if (!confirm(`Are you sure you want to delete ${selectedBlogIds.length} blogs?`)) return;
+    try {
+      const token = await getToken();
+      await Promise.all(selectedBlogIds.map(id => api.deleteBlog(id, token || undefined)));
+      toast.success("Blogs deleted successfully");
+      setSelectedBlogIds([]);
+      loadData();
+    } catch (error) { toast.error("Failed to delete some blogs"); }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12 space-y-8">
       {/* Title Header */}
@@ -771,7 +820,14 @@ export default function AdminPage() {
               {/* Product Catalog List */}
               <div className="lg:col-span-8 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <h2 className="text-xl font-bold text-white">Buyback Catalog ({filteredProducts.length})</h2>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-bold text-white">Buyback Catalog ({filteredProducts.length})</h2>
+                    {selectedProductIds.length > 0 && (
+                      <button onClick={handleBulkDeleteProducts} className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                        <Trash2 size={12} /> Delete Selected ({selectedProductIds.length})
+                      </button>
+                    )}
+                  </div>
                   
                   {/* Search Bar */}
                   <div className="relative max-w-xs w-full">
@@ -804,9 +860,19 @@ export default function AdminPage() {
                     {filteredProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-4 flex gap-4 hover:border-slate-800 transition"
+                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-4 flex gap-4 hover:border-slate-800 transition relative"
                     >
-                      <div className="relative w-16 h-20 bg-slate-950 rounded-xl flex-shrink-0 flex items-center justify-center p-2 border border-slate-900">
+                      <input
+                        type="checkbox"
+                        checked={selectedProductIds.includes((product.id || product._id || "").toString())}
+                        onChange={(e) => {
+                          const id = (product.id || product._id || "").toString();
+                          if (e.target.checked) setSelectedProductIds([...selectedProductIds, id]);
+                          else setSelectedProductIds(selectedProductIds.filter(i => i !== id));
+                        }}
+                        className="absolute top-4 left-4 z-10 w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 cursor-pointer"
+                      />
+                      <div className="relative w-16 h-20 bg-slate-950 rounded-xl flex-shrink-0 flex items-center justify-center p-2 border border-slate-900 ml-6">
                         <Image
                           src={product.images.frontView}
                           alt={product.name}
@@ -1058,14 +1124,31 @@ export default function AdminPage() {
               
               {/* Brand List */}
               <div className="lg:col-span-8 space-y-4">
-                <h2 className="text-xl font-bold text-white">Buyback Brands</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <h2 className="text-xl font-bold text-white">Buyback Brands</h2>
+                  {selectedBrandIds.length > 0 && (
+                    <button onClick={handleBulkDeleteBrands} className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                      <Trash2 size={12} /> Delete Selected ({selectedBrandIds.length})
+                    </button>
+                  )}
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   {brands.map((brand) => (
                     <div
                       key={brand.id || brand._id}
-                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-5 flex flex-col items-center text-center justify-between gap-4"
+                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-5 flex flex-col items-center text-center justify-between gap-4 relative"
                     >
+                      <input
+                        type="checkbox"
+                        checked={selectedBrandIds.includes((brand.id || brand._id || "").toString())}
+                        onChange={(e) => {
+                          const id = (brand.id || brand._id || "").toString();
+                          if (e.target.checked) setSelectedBrandIds([...selectedBrandIds, id]);
+                          else setSelectedBrandIds(selectedBrandIds.filter(i => i !== id));
+                        }}
+                        className="absolute top-4 left-4 z-10 w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 cursor-pointer"
+                      />
                       <div className="w-16 h-16 bg-slate-950 rounded-full flex-shrink-0 flex items-center justify-center text-3xl border border-slate-900">
                         {brand.logo.startsWith("/") || brand.logo.startsWith("http") ? (
                           <div className="relative w-10 h-10">
@@ -1189,14 +1272,31 @@ export default function AdminPage() {
               
               {/* Category list */}
               <div className="lg:col-span-8 space-y-4">
-                <h2 className="text-xl font-bold text-white">Buyback Categories</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <h2 className="text-xl font-bold text-white">Buyback Categories</h2>
+                  {selectedCategoryIds.length > 0 && (
+                    <button onClick={handleBulkDeleteCategories} className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                      <Trash2 size={12} /> Delete Selected ({selectedCategoryIds.length})
+                    </button>
+                  )}
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
                   {categories.map((category) => (
                     <div
                       key={category.slug}
-                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-5 flex flex-col items-center text-center justify-between gap-4"
+                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-5 flex flex-col items-center text-center justify-between gap-4 relative"
                     >
+                      <input
+                        type="checkbox"
+                        checked={selectedCategoryIds.includes((category.id || category._id || category.slug).toString())}
+                        onChange={(e) => {
+                          const id = (category.id || category._id || category.slug).toString();
+                          if (e.target.checked) setSelectedCategoryIds([...selectedCategoryIds, id]);
+                          else setSelectedCategoryIds(selectedCategoryIds.filter(i => i !== id));
+                        }}
+                        className="absolute top-4 left-4 z-10 w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 cursor-pointer"
+                      />
                       <div className="relative w-16 h-16 bg-slate-950 rounded-full flex-shrink-0 flex items-center justify-center p-2 border border-slate-900">
                         <Image
                           src={category.image}
@@ -1298,15 +1398,32 @@ export default function AdminPage() {
               
               {/* Blog posts list */}
               <div className="lg:col-span-8 space-y-4">
-                <h2 className="text-xl font-bold text-white">Tech & Recycling Blogs Feed</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <h2 className="text-xl font-bold text-white">Tech & Recycling Blogs Feed</h2>
+                  {selectedBlogIds.length > 0 && (
+                    <button onClick={handleBulkDeleteBlogs} className="bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer">
+                      <Trash2 size={12} /> Delete Selected ({selectedBlogIds.length})
+                    </button>
+                  )}
+                </div>
 
                 <div className="grid gap-4">
                   {blogs.map((blog) => (
                     <div
                       key={blog.slug}
-                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative"
                     >
-                      <div className="flex items-start gap-4">
+                      <div className="flex items-start gap-4 sm:pl-8">
+                        <input
+                          type="checkbox"
+                          checked={selectedBlogIds.includes((blog.id || blog._id || "").toString())}
+                          onChange={(e) => {
+                            const id = (blog.id || blog._id || "").toString();
+                            if (e.target.checked) setSelectedBlogIds([...selectedBlogIds, id]);
+                            else setSelectedBlogIds(selectedBlogIds.filter(i => i !== id));
+                          }}
+                          className="absolute top-5 left-5 z-10 w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 cursor-pointer sm:top-auto sm:left-4"
+                        />
                         <div className="relative w-16 h-16 bg-slate-950 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-900">
                           {blog.img ? (
                             <Image
