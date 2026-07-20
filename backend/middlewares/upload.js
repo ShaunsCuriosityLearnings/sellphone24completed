@@ -7,6 +7,10 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'sellyourphone24', // Cloudinary folder name
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation: [
+      { width: 1000, crop: 'limit' },
+      { quality: 'auto' }
+    ],
   },
 });
 
