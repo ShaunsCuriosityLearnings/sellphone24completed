@@ -16,6 +16,9 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700
 const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" });
 const lato = Lato({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-lato" });
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellyourphone24.ae";
+const isBeta = baseUrl.includes("beta");
+
 export const metadata: Metadata = {
   title: {
     default: "SellYourPhone24 | Sell Used Mobile Devices for Instant Cash in UAE",
@@ -25,8 +28,8 @@ export const metadata: Metadata = {
     icon: "/favicon.webp",
   },
   robots: {
-    index: true,
-    follow: true,
+    index: !isBeta,
+    follow: !isBeta,
   },
   description:
     "Sell your used smartphones, tablets, and smartwatches for the best price in Dubai, Abu Dhabi, and the wider UAE. Instant online valuation, free doorstep pickup, and instant payouts.",
