@@ -30,8 +30,10 @@ const CartCheckoutContent = () => {
   const router = useRouter();
 
   const [shippingForm, setShippingForm] = useState<ShippingFormInputs | null>(null);
+  const [completedOrder, setCompletedOrder] = useState<any>(null);
+  
   const activeStep = parseInt(searchParams.get("step") || "1");
-  const { cart } = useCartStore();
+  const { cart, clearCart } = useCartStore();
 
   const activeItem = cart[0] || null;
 
@@ -45,6 +47,13 @@ const CartCheckoutContent = () => {
   };
 
   const handleOrderCompletion = () => {
+    // Capture the final details before the cart is cleared
+    setCompletedOrder({
+      item: activeItem,
+      totalPayout,
+      shippingForm
+    });
+    clearCart(); // Clear the cart now that we saved the details for the success page
     handleStepChange(3);
   };
 
@@ -63,28 +72,55 @@ const CartCheckoutContent = () => {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-100 rounded-3xl p-6 text-left space-y-4 max-w-xl mx-auto shadow-sm">
+        <div className="bg-white border border-slate-100 rounded-3xl p-6 text-left space-y-6 max-w-xl mx-auto shadow-sm">
           <h3 className="font-bold text-slate-800 text-sm border-b pb-3">Request Summary</h3>
           
-          {shippingForm && (
-            <div className="space-y-3 text-xs text-slate-600">
-              <div className="flex items-center gap-2">
-                <MapPin size={14} className="text-emerald-500" />
-                <span><strong>Pickup Location:</strong> {shippingForm.address}, {shippingForm.city}, UAE</span>
+          {completedOrder && (
+            <>
+              {/* Product Details Section */}
+              {completedOrder.item && (
+                <div className="flex gap-4 items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+                  <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white border border-slate-100 flex-shrink-0 flex items-center justify-center p-2">
+                    <Image
+                      src={completedOrder.item.images.frontView}
+                      alt={completedOrder.item.name}
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-bold text-slate-800 text-sm">{completedOrder.item.name}</h3>
+                    <div className="flex flex-wrap gap-x-2.5 gap-y-0.5 text-[9px] text-slate-400 font-bold uppercase">
+                      <span>{completedOrder.item.selectedStorage}</span>
+                      <span>•</span>
+                      <span>{completedOrder.item.selectedColor}</span>
+                      <span>•</span>
+                      <span className="text-emerald-600">{completedOrder.item.selectedCondition}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Shipping and Total Section */}
+              <div className="space-y-3 text-xs text-slate-600">
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} className="text-emerald-500" />
+                  <span><strong>Pickup Location:</strong> {completedOrder.shippingForm.address}, {completedOrder.shippingForm.city}, UAE</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar size={14} className="text-emerald-500" />
+                  <span><strong>Date:</strong> {completedOrder.shippingForm.pickupDate}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={14} className="text-emerald-500" />
+                  <span><strong>Time Slot:</strong> {completedOrder.shippingForm.pickupTime}</span>
+                </div>
+                <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
+                  <span className="font-bold text-sm text-slate-800">Total Valuation:</span>
+                  <strong className="text-emerald-600 text-xl font-black">AED {completedOrder.totalPayout.toLocaleString()}</strong>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Calendar size={14} className="text-emerald-500" />
-                <span><strong>Date:</strong> {shippingForm.pickupDate}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock size={14} className="text-emerald-500" />
-                <span><strong>Time Slot:</strong> {shippingForm.pickupTime}</span>
-              </div>
-              <div className="flex items-center gap-2 pt-2 border-t">
-                <Banknote size={14} className="text-emerald-500" />
-                <span><strong>Estimated Payout:</strong> <strong className="text-emerald-600 text-sm">AED {totalPayout.toLocaleString()}</strong></span>
-              </div>
-            </div>
+            </>
           )}
         </div>
 

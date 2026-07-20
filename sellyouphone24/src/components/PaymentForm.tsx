@@ -83,7 +83,6 @@ const PaymentForm = ({
 
       if (res.success) {
         toast.success("Sell order created successfully!");
-        clearCart();
         onSubmitSuccess();
       } else {
         toast.error(res.message || "Failed to create valuation request.");
