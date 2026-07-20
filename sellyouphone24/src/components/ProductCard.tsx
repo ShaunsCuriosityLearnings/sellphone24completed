@@ -9,30 +9,32 @@ const ProductCard = ({ product }: { product: ProductType }) => {
   return (
     <article className="group bg-white rounded-xl overflow-hidden border border-slate-100 hover:shadow-lg transition-all duration-300 flex flex-col h-full">
       {/* Product Image Cover */}
-      <Link href={`/products/${product.id}`} className="block relative aspect-square overflow-hidden bg-slate-50 border-b border-slate-50">
-        {/* Secondary Image (Back View) */}
-        {product.images.backView && (
-          <div className="absolute top-4 right-4 bottom-4 w-1/2 z-0 opacity-60 group-hover:opacity-100 group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-500">
-            <Image
-              src={product.images.backView}
-              alt={`${product.name} Back`}
-              fill
-              sizes="(max-width:768px) 15vw, 10vw"
-              className="object-contain drop-shadow-md"
-            />
-          </div>
-        )}
-
+      <Link href={`/products/${product.id}`} className="block relative aspect-square overflow-hidden bg-slate-50 border-b border-slate-50 p-4">
+        
         {/* Primary Image (Front View) */}
-        <div className="absolute top-4 left-4 bottom-4 w-[60%] z-10 group-hover:-translate-x-1 transition-all duration-500">
+        <div className={`absolute inset-4 transition-opacity duration-500 z-10 ${product.images.backView ? 'group-hover:opacity-0' : ''}`}>
           <Image
             src={product.images.frontView}
             alt={product.name}
             fill
             sizes="(max-width:768px) 33vw, (max-width:1200px) 25vw, 20vw"
-            className="object-contain drop-shadow-xl"
+            className="object-contain transition-transform duration-500 group-hover:scale-105"
           />
         </div>
+
+        {/* Secondary Image (Back View) */}
+        {product.images.backView && (
+          <div className="absolute inset-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
+            <Image
+              src={product.images.backView}
+              alt={`${product.name} Back`}
+              fill
+              sizes="(max-width:768px) 33vw, (max-width:1200px) 25vw, 20vw"
+              className="object-contain transition-transform duration-500 group-hover:scale-105"
+            />
+          </div>
+        )}
+
         {/* Floating Quick Tag */}
         <div className="absolute top-2 left-2 bg-emerald-500 text-slate-950 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
           <Zap size={8} />
