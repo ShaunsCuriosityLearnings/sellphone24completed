@@ -58,8 +58,8 @@ const ProductCard = ({ product }: { product: ProductType }) => {
           {/* Quick Specifications Badges */}
           <div className="flex flex-wrap gap-1 pt-1">
             {product.storages.slice(0, 2).map((st) => (
-              <span key={st} className="text-[9px] font-medium bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
-                {st}
+              <span key={st.size} className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-bold">
+                {st.size}
               </span>
             ))}
             {product.storages.length > 2 && (

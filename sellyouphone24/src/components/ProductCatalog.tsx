@@ -32,7 +32,7 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
   // Dynamically extract available storages and colors from the products list
   const availableStorages = useMemo(() => {
     const storages = new Set<string>();
-    initialProducts.forEach(p => p.storages?.forEach(s => storages.add(s)));
+    initialProducts.forEach(p => p.storages?.forEach(s => storages.add(s.size)));
     return Array.from(storages).sort();
   }, [initialProducts]);
 
@@ -66,7 +66,7 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
       }
       // Storage filter (product must have AT LEAST ONE of the selected storages)
       if (selectedStorages.length > 0) {
-        const hasStorage = product.storages?.some(s => selectedStorages.includes(s));
+        const hasStorage = product.storages?.some(s => selectedStorages.includes(s.size));
         if (!hasStorage) return false;
       }
       // Color filter (product must have AT LEAST ONE of the selected colors)

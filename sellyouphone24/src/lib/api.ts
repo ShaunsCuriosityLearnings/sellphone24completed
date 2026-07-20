@@ -100,9 +100,7 @@ export const api = {
     return dbProducts.map((p) => ({
       ...p,
       id: p._id || p.id,
-      storages: Array.isArray(p.storages) && p.storages.length > 0 && typeof p.storages[0] === "object"
-        ? p.storages.map((s: any) => s.size)
-        : p.storages,
+      storages: p.storages,
     })) as ProductType[];
   },
 
@@ -115,9 +113,7 @@ export const api = {
       return {
         ...p,
         id: p._id || p.id,
-        storages: Array.isArray(p.storages) && p.storages.length > 0 && typeof p.storages[0] === "object"
-          ? p.storages.map((s: any) => s.size)
-          : p.storages,
+        storages: p.storages,
       } as ProductType;
     } catch (err) {
       if (mockProduct) {
@@ -136,21 +132,10 @@ export const api = {
       });
     }
     
-    const storagePriceBoosts: Record<string, number> = {
-      "16GB": 0, "64GB": 0, "128GB": 0, "256GB": 150, "512GB": 350, "1TB": 700,
-    };
-    const formattedStorages = product.storages.map((st: any) => ({
-      size: st,
-      priceBoost: storagePriceBoosts[st] || 0,
-    }));
-
     return safeFetch<any>(`${API_BASE}/products`, {
       method: "POST",
       headers: token ? { "Authorization": `Bearer ${token}` } : {},
-      body: JSON.stringify({
-        ...product,
-        storages: formattedStorages,
-      }),
+      body: JSON.stringify(product),
     });
   },
 
@@ -170,25 +155,10 @@ export const api = {
       });
     }
 
-    const storagePriceBoosts: Record<string, number> = {
-      "16GB": 0, "64GB": 0, "128GB": 0, "256GB": 150, "512GB": 350, "1TB": 700,
-    };
-    
-    let formattedStorages;
-    if (product.storages) {
-      formattedStorages = product.storages.map((st: any) => ({
-        size: st,
-        priceBoost: storagePriceBoosts[st] || 0,
-      }));
-    }
-
     return safeFetch<any>(`${API_BASE}/products/${id}`, {
       method: "PUT",
       headers: token ? { "Authorization": `Bearer ${token}` } : {},
-      body: JSON.stringify({
-        ...product,
-        ...(formattedStorages ? { storages: formattedStorages } : {}),
-      }),
+      body: JSON.stringify(product),
     });
   },
 

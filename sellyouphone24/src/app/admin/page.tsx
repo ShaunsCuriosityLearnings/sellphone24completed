@@ -97,7 +97,7 @@ export default function AdminPage() {
     brand: "", // Will hold Brand ID
     category: "",
     basePrice: 0,
-    storages: "128GB, 256GB, 512GB",
+    storages: [{ size: "128GB", priceBoost: 0 }, { size: "256GB", priceBoost: 150 }, { size: "512GB", priceBoost: 350 }],
     colors: "Black, Silver, Gold",
     description: "",
     shortDescription: "",
@@ -246,7 +246,7 @@ export default function AdminPage() {
       brand: brandDoc ? (brandDoc._id || brandDoc.id || "").toString() : "",
       category: product.category,
       basePrice: product.basePrice,
-      storages: product.storages.join(", "),
+      storages: product.storages.length > 0 ? product.storages : [{ size: "128GB", priceBoost: 0 }],
       colors: product.colors.join(", "),
       description: product.description,
       shortDescription: product.shortDescription,
@@ -263,7 +263,7 @@ export default function AdminPage() {
       brand: "",
       category: "",
       basePrice: 0,
-      storages: "128GB, 256GB, 512GB",
+      storages: [{ size: "128GB", priceBoost: 0 }, { size: "256GB", priceBoost: 150 }, { size: "512GB", priceBoost: 350 }],
       colors: "Black, Silver, Gold",
       description: "",
       shortDescription: "",
@@ -289,7 +289,7 @@ export default function AdminPage() {
       fd.append("brand", newProduct.brand);
       fd.append("category", newProduct.category);
       fd.append("basePrice", newProduct.basePrice.toString());
-      fd.append("storages", JSON.stringify(newProduct.storages.split(",").map((s) => s.trim())));
+      fd.append("storages", JSON.stringify(newProduct.storages.filter(s => s.size.trim() !== "")));
       fd.append("colors", JSON.stringify(newProduct.colors.split(",").map((c) => c.trim())));
       fd.append("description", newProduct.description);
       fd.append("shortDescription", newProduct.shortDescription);
@@ -317,7 +317,7 @@ export default function AdminPage() {
         brand: "",
         category: "",
         basePrice: 0,
-        storages: "128GB, 256GB, 512GB",
+        storages: [{ size: "128GB", priceBoost: 0 }, { size: "256GB", priceBoost: 150 }, { size: "512GB", priceBoost: 350 }],
         colors: "Black, Silver, Gold",
         description: "",
         shortDescription: "",
@@ -997,15 +997,56 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="font-semibold text-slate-400">Storage Capacities (Comma-separated)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 128GB, 256GB, 512GB"
-                      value={newProduct.storages}
-                      onChange={(e) => setNewProduct({ ...newProduct, storages: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 outline-none focus:border-emerald-500 text-slate-200"
-                    />
+                  <div className="flex flex-col gap-2">
+                    <label className="font-semibold text-slate-400">Storage Options & Price Boosts</label>
+                    {newProduct.storages.map((storage, idx) => (
+                      <div key={idx} className="flex gap-2 items-center">
+                        <input
+                          type="text"
+                          placeholder="Size (e.g. 128GB)"
+                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 outline-none focus:border-emerald-500 text-slate-200"
+                          value={storage.size}
+                          onChange={(e) => {
+                            const newStorages = [...newProduct.storages];
+                            newStorages[idx].size = e.target.value;
+                            setNewProduct({ ...newProduct, storages: newStorages });
+                          }}
+                        />
+                        <input
+                          type="number"
+                          placeholder="Boost (AED)"
+                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 outline-none focus:border-emerald-500 text-slate-200"
+                          value={storage.priceBoost === 0 ? "" : storage.priceBoost}
+                          onChange={(e) => {
+                            const newStorages = [...newProduct.storages];
+                            newStorages[idx].priceBoost = Number(e.target.value);
+                            setNewProduct({ ...newProduct, storages: newStorages });
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newStorages = newProduct.storages.filter((_, i) => i !== idx);
+                            setNewProduct({ ...newProduct, storages: newStorages });
+                          }}
+                          className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition"
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewProduct({
+                          ...newProduct,
+                          storages: [...newProduct.storages, { size: "", priceBoost: 0 }]
+                        });
+                      }}
+                      className="text-emerald-500 text-sm font-semibold text-left mt-1 hover:text-emerald-400"
+                    >
+                      + Add another storage option
+                    </button>
                   </div>
 
                   <div className="flex flex-col gap-1">

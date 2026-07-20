@@ -6,6 +6,11 @@ export type ProductImagesType = {
   backView: string;
 };
 
+export type StorageType = {
+  size: string;
+  priceBoost: number;
+};
+
 export type ProductType = {
   id: number | string;
   _id?: string;
@@ -13,7 +18,7 @@ export type ProductType = {
   brand: string;
   category: string; // e.g. 'smartphones', 'tablets', 'watches'
   basePrice: number;
-  storages: string[]; // e.g. ["128GB", "256GB", "512GB", "1TB"]
+  storages: StorageType[];
   colors: string[]; // e.g. ["Black Titanium", "Natural Titanium", "White Titanium"]
   description: string;
   shortDescription: string;

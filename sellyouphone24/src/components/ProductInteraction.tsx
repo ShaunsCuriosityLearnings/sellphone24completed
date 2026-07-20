@@ -12,7 +12,7 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
   const router = useRouter();
   const { addToCart } = useCartStore();
 
-  const [selectedStorage, setSelectedStorage] = useState(product.storages[0]);
+  const [selectedStorage, setSelectedStorage] = useState(product.storages[0]?.size || "");
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [selectedCondition, setSelectedCondition] = useState(conditions[0].slug);
   const [quantity, setQuantity] = useState(1);
@@ -23,7 +23,7 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
 
   // Calculate live expected payout quote
   const basePrice = product.basePrice;
-  const storageBoost = storagePriceBoosts[selectedStorage] || 0;
+  const storageBoost = product.storages.find(s => s.size === selectedStorage)?.priceBoost || 0;
   const unitPrice = Math.round((basePrice + storageBoost) * conditionMultiplier);
   const totalPrice = unitPrice * quantity;
 
@@ -70,8 +70,9 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
       <div>
         <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">1. Select Storage</h3>
         <div className="flex flex-wrap gap-2.5">
-          {product.storages.map((storage) => {
-            const boost = storagePriceBoosts[storage] || 0;
+          {product.storages.map((storageObj) => {
+            const storage = storageObj.size;
+            const boost = storageObj.priceBoost || 0;
             return (
               <button
                 key={storage}
