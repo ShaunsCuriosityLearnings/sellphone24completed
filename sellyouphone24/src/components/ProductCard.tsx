@@ -18,7 +18,7 @@ const ProductCard = ({ product }: { product: ProductType }) => {
             alt={product.name}
             fill
             sizes="(max-width:768px) 33vw, (max-width:1200px) 25vw, 20vw"
-            className="object-contain transition-transform duration-500 group-hover:scale-105"
+            className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply"
           />
         </div>
 
@@ -30,13 +30,13 @@ const ProductCard = ({ product }: { product: ProductType }) => {
               alt={`${product.name} Back`}
               fill
               sizes="(max-width:768px) 33vw, (max-width:1200px) 25vw, 20vw"
-              className="object-contain transition-transform duration-500 group-hover:scale-105"
+              className="object-contain transition-transform duration-500 group-hover:scale-105 mix-blend-multiply"
             />
           </div>
         )}
 
         {/* Floating Quick Tag */}
-        <div className="absolute top-2 left-2 bg-emerald-500 text-slate-950 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
+        <div className="absolute top-2 left-2 z-30 bg-emerald-500 text-slate-950 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
           <Zap size={8} />
           Top Value
         </div>
