@@ -16,7 +16,6 @@ import {
   MapPin, 
   User, 
   Sliders, 
-  CheckCircle,
   FolderOpen,
   Pencil,
   XCircle,
@@ -60,11 +59,11 @@ type OrderType = {
 };
 
 const statusColors = {
-  pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  pickup_assigned: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  inspected: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  cancelled: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  pending: "bg-amber-50 text-amber-700 border-amber-200",
+  pickup_assigned: "bg-blue-50 text-blue-700 border-blue-200",
+  inspected: "bg-purple-50 text-purple-700 border-purple-200",
+  completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  cancelled: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
 const STANDARD_STORAGES = [
@@ -93,10 +92,8 @@ export default function AdminPage() {
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>("all");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
 
-  // Expandable row state for order details
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
-  // Pagination for compact product table
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
@@ -197,19 +194,19 @@ export default function AdminPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center flex-col gap-3">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center flex-col gap-3">
         <RefreshCw className="animate-spin text-emerald-500 w-6 h-6" />
-        <p className="text-xs font-semibold text-slate-400">Loading session...</p>
+        <p className="text-xs font-semibold text-slate-500">Loading session...</p>
       </div>
     );
   }
 
   if (!isSignedIn) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-4 text-center mb-4">
-          <h1 className="text-xl font-bold text-white tracking-tight">SellYourPhone24 Admin</h1>
-          <p className="text-xs text-slate-400">Sign in to manage catalog, orders & brands.</p>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">SellYourPhone24 Admin</h1>
+          <p className="text-xs text-slate-500">Sign in to manage catalog, orders & brands.</p>
         </div>
         <SignIn routing="hash" />
       </div>
@@ -220,14 +217,14 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col items-center justify-center p-6 text-center">
-        <div className="border border-rose-500/20 bg-rose-500/5 rounded-2xl p-6 max-w-sm space-y-4">
-          <h2 className="text-lg font-bold text-white">Access Restricted</h2>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Account (<span className="text-emerald-400">{user?.primaryEmailAddress?.emailAddress}</span>) is not an administrator.
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-6 text-center">
+        <div className="border border-rose-200 bg-white rounded-2xl p-6 max-w-sm space-y-4 shadow-sm">
+          <h2 className="text-lg font-bold text-slate-900">Access Restricted</h2>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Account (<span className="text-emerald-600 font-semibold">{user?.primaryEmailAddress?.emailAddress}</span>) is not an administrator.
           </p>
           <SignOutButton>
-            <button className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition">
+            <button className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition">
               Sign Out
             </button>
           </SignOutButton>
@@ -516,18 +513,18 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-slate-200 font-sans text-xs pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans text-xs pb-16">
       
       {/* Top Header Bar */}
-      <header className="bg-[#111827] border-b border-slate-800/80 sticky top-0 z-30 px-4 py-3">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 px-4 py-3 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
-            <h1 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <Sliders size={16} className="text-emerald-500" />
               <span>SellYourPhone24 Admin</span>
             </h1>
-            <span className="hidden sm:inline-block text-[10px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+            <span className="hidden sm:inline-block text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-medium">
               {user?.primaryEmailAddress?.emailAddress}
             </span>
           </div>
@@ -549,7 +546,7 @@ export default function AdminPage() {
                 });
                 setActiveTab("add-product");
               }}
-              className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg text-xs transition cursor-pointer"
+              className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
             >
               <Plus size={14} />
               <span>Add Product</span>
@@ -557,14 +554,14 @@ export default function AdminPage() {
 
             <button
               onClick={() => loadData(true)}
-              className="p-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-400 hover:text-white transition"
+              className="p-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 transition"
               title="Refresh Data"
             >
-              <RefreshCw size={14} className={loading ? "animate-spin text-emerald-400" : ""} />
+              <RefreshCw size={14} className={loading ? "animate-spin text-emerald-500" : ""} />
             </button>
 
             <SignOutButton>
-              <button className="p-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-400 hover:text-rose-400 transition" title="Sign Out">
+              <button className="p-1.5 bg-slate-100 border border-slate-200 rounded-lg text-slate-600 hover:text-rose-600 transition" title="Sign Out">
                 <LogOut size={14} />
               </button>
             </SignOutButton>
@@ -575,12 +572,12 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 space-y-4">
         
         {/* Compact Navigation Bar */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto bg-[#111827] p-1 rounded-xl border border-slate-800/80">
+        <div className="flex items-center justify-between gap-2 overflow-x-auto bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex items-center gap-1">
             <button
               onClick={() => { setActiveTab("products"); setCurrentPage(1); }}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeTab === "products" ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-white"
+                activeTab === "products" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               <Smartphone size={13} /> Products <span className="text-[10px] opacity-75">({products.length})</span>
@@ -589,7 +586,7 @@ export default function AdminPage() {
             <button
               onClick={() => setActiveTab("add-product")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeTab === "add-product" ? "bg-emerald-500 text-slate-950 shadow" : "text-emerald-400 hover:text-emerald-300"
+                activeTab === "add-product" ? "bg-slate-900 text-white shadow-sm" : "text-emerald-600 hover:bg-emerald-50 font-bold"
               }`}
             >
               <Plus size={13} /> {editingProductId !== null ? "Edit Product" : "New Product"}
@@ -598,7 +595,7 @@ export default function AdminPage() {
             <button
               onClick={() => setActiveTab("orders")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeTab === "orders" ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-white"
+                activeTab === "orders" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               <ClipboardList size={13} /> Orders <span className="text-[10px] opacity-75">({orders.length})</span>
@@ -607,7 +604,7 @@ export default function AdminPage() {
             <button
               onClick={() => setActiveTab("brands")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeTab === "brands" ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-white"
+                activeTab === "brands" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               <FolderOpen size={13} /> Brands <span className="text-[10px] opacity-75">({brands.length})</span>
@@ -616,7 +613,7 @@ export default function AdminPage() {
             <button
               onClick={() => setActiveTab("categories")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeTab === "categories" ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-white"
+                activeTab === "categories" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               <Layers size={13} /> Categories <span className="text-[10px] opacity-75">({categories.length})</span>
@@ -625,7 +622,7 @@ export default function AdminPage() {
             <button
               onClick={() => setActiveTab("blogs")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeTab === "blogs" ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-white"
+                activeTab === "blogs" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
               <BookOpen size={13} /> Blogs <span className="text-[10px] opacity-75">({blogs.length})</span>
@@ -647,15 +644,15 @@ export default function AdminPage() {
               <div className="space-y-3">
                 
                 {/* Search & Filter Bar */}
-                <div className="bg-[#111827] border border-slate-800/80 rounded-xl p-2.5 flex flex-wrap items-center justify-between gap-3">
+                <div className="bg-white border border-slate-200 rounded-xl p-2.5 flex flex-wrap items-center justify-between gap-3 shadow-sm">
                   <div className="relative flex-1 min-w-[200px] max-w-sm">
-                    <Search size={14} className="absolute left-2.5 top-2 text-slate-500" />
+                    <Search size={14} className="absolute left-2.5 top-2 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Search product by name, brand..."
                       value={productSearch}
                       onChange={(e) => { setProductSearch(e.target.value); setCurrentPage(1); }}
-                      className="w-full bg-[#0b0f17] border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:bg-white transition"
                     />
                   </div>
 
@@ -663,7 +660,7 @@ export default function AdminPage() {
                     <select
                       value={selectedBrandFilter}
                       onChange={(e) => { setSelectedBrandFilter(e.target.value); setCurrentPage(1); }}
-                      className="bg-[#0b0f17] border border-slate-800 text-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none cursor-pointer"
+                      className="bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-2.5 py-1.5 text-xs outline-none cursor-pointer focus:bg-white"
                     >
                       <option value="all">All Brands ({brands.length})</option>
                       {brands.map((b) => (
@@ -674,7 +671,7 @@ export default function AdminPage() {
                     <select
                       value={selectedCategoryFilter}
                       onChange={(e) => { setSelectedCategoryFilter(e.target.value); setCurrentPage(1); }}
-                      className="bg-[#0b0f17] border border-slate-800 text-slate-300 rounded-lg px-2.5 py-1.5 text-xs outline-none cursor-pointer"
+                      className="bg-slate-50 border border-slate-200 text-slate-700 rounded-lg px-2.5 py-1.5 text-xs outline-none cursor-pointer focus:bg-white"
                     >
                       <option value="all">All Categories ({categories.length})</option>
                       {categories.map((c) => (
@@ -686,17 +683,17 @@ export default function AdminPage() {
 
                 {/* Table Data */}
                 {filteredProducts.length === 0 ? (
-                  <div className="bg-[#111827] border border-slate-800/80 rounded-xl p-8 text-center text-slate-500 font-medium">
+                  <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 font-medium shadow-sm">
                     No products match your filters.
                   </div>
                 ) : (
-                  <div className="bg-[#111827] border border-slate-800/80 rounded-xl overflow-hidden shadow-sm">
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     
                     {/* Desktop Table View */}
                     <div className="hidden sm:block overflow-x-auto">
                       <table className="w-full text-left border-collapse">
                         <thead>
-                          <tr className="border-b border-slate-800/80 bg-slate-900/60 text-[11px] text-slate-400 font-bold uppercase tracking-wider">
+                          <tr className="border-b border-slate-200 bg-slate-50 text-[11px] text-slate-600 font-bold uppercase tracking-wider">
                             <th className="py-2.5 px-4 w-12 text-center">Image</th>
                             <th className="py-2.5 px-4">Device Product</th>
                             <th className="py-2.5 px-4">Brand</th>
@@ -706,41 +703,41 @@ export default function AdminPage() {
                             <th className="py-2.5 px-4 text-right">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-800/50">
+                        <tbody className="divide-y divide-slate-100">
                           {paginatedProducts.map((product) => (
-                            <tr key={product.id || product._id} className="hover:bg-slate-900/40 transition">
+                            <tr key={product.id || product._id} className="hover:bg-slate-50/80 transition">
                               <td className="py-2 px-4 text-center">
-                                <div className="w-9 h-9 bg-slate-950 border border-slate-800 rounded-lg relative overflow-hidden mx-auto flex items-center justify-center">
+                                <div className="w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg relative overflow-hidden mx-auto flex items-center justify-center">
                                   {product.images?.frontView ? (
                                     <Image src={product.images.frontView} alt={product.name} fill className="object-contain p-0.5" />
                                   ) : (
-                                    <Smartphone size={16} className="text-slate-600" />
+                                    <Smartphone size={16} className="text-slate-400" />
                                   )}
                                 </div>
                               </td>
-                              <td className="py-2 px-4 font-semibold text-white">
+                              <td className="py-2 px-4 font-semibold text-slate-900">
                                 <div>
-                                  <p className="text-xs font-bold">{product.name}</p>
+                                  <p className="text-xs font-bold text-slate-900">{product.name}</p>
                                   {product.shortDescription && (
-                                    <p className="text-[10px] text-slate-400 line-clamp-1 font-normal">{product.shortDescription}</p>
+                                    <p className="text-[10px] text-slate-500 line-clamp-1 font-normal">{product.shortDescription}</p>
                                   )}
                                 </div>
                               </td>
                               <td className="py-2 px-4">
-                                <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium text-[11px] border border-slate-700">
+                                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px] border border-slate-200">
                                   {product.brand}
                                 </span>
                               </td>
-                              <td className="py-2 px-4 text-slate-400 font-mono text-[11px]">
+                              <td className="py-2 px-4 text-slate-600 font-mono text-[11px]">
                                 {product.category}
                               </td>
-                              <td className="py-2 px-4 font-bold text-emerald-400">
+                              <td className="py-2 px-4 font-bold text-emerald-600">
                                 AED {product.basePrice.toLocaleString()}
                               </td>
                               <td className="py-2 px-4">
                                 <div className="flex flex-wrap gap-1">
                                   {product.storages?.map((s, idx) => (
-                                    <span key={idx} className="text-[9px] bg-slate-950 text-slate-300 px-1.5 py-0.5 rounded border border-slate-800">
+                                    <span key={idx} className="text-[9px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
                                       {s.size}
                                     </span>
                                   ))}
@@ -749,14 +746,14 @@ export default function AdminPage() {
                               <td className="py-2 px-4 text-right space-x-1">
                                 <button
                                   onClick={() => handleEditProductClick(product)}
-                                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 transition"
+                                  className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded border border-slate-200 transition"
                                   title="Edit"
                                 >
                                   <Pencil size={12} />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteProduct(product.id || product._id || "")}
-                                  className="px-2 py-1 bg-rose-950/30 hover:bg-rose-950/60 text-rose-400 rounded border border-rose-900/50 transition"
+                                  className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded border border-rose-200 transition"
                                   title="Delete"
                                 >
                                   <Trash2 size={12} />
@@ -769,24 +766,24 @@ export default function AdminPage() {
                     </div>
 
                     {/* Mobile Compact Row View */}
-                    <div className="sm:hidden divide-y divide-slate-800/60">
+                    <div className="sm:hidden divide-y divide-slate-100">
                       {paginatedProducts.map((product) => (
                         <div key={product.id || product._id} className="p-3 flex items-center justify-between gap-3">
-                          <div className="w-10 h-10 bg-slate-950 border border-slate-800 rounded-lg relative overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          <div className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-lg relative overflow-hidden flex-shrink-0 flex items-center justify-center">
                             {product.images?.frontView ? (
                               <Image src={product.images.frontView} alt={product.name} fill className="object-contain p-0.5" />
                             ) : (
-                              <Smartphone size={16} className="text-slate-600" />
+                              <Smartphone size={16} className="text-slate-400" />
                             )}
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[9px] font-bold text-slate-400 uppercase bg-slate-800 px-1 rounded">{product.brand}</span>
-                              <h4 className="font-bold text-white text-xs truncate">{product.name}</h4>
+                              <span className="text-[9px] font-bold text-slate-600 bg-slate-100 border border-slate-200 px-1 rounded">{product.brand}</span>
+                              <h4 className="font-bold text-slate-900 text-xs truncate">{product.name}</h4>
                             </div>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="font-extrabold text-emerald-400 text-xs">AED {product.basePrice}</span>
+                              <span className="font-extrabold text-emerald-600 text-xs">AED {product.basePrice}</span>
                               <span className="text-[10px] text-slate-500 font-mono">({product.category})</span>
                             </div>
                           </div>
@@ -794,13 +791,13 @@ export default function AdminPage() {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleEditProductClick(product)}
-                              className="p-1.5 bg-slate-800 text-slate-200 rounded border border-slate-700"
+                              className="p-1.5 bg-slate-100 text-slate-700 rounded border border-slate-200"
                             >
                               <Pencil size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteProduct(product.id || product._id || "")}
-                              className="p-1.5 bg-rose-950/30 text-rose-400 rounded border border-rose-900/50"
+                              className="p-1.5 bg-rose-50 text-rose-600 rounded border border-rose-200"
                             >
                               <Trash2 size={12} />
                             </button>
@@ -811,21 +808,21 @@ export default function AdminPage() {
 
                     {/* Pagination Bar */}
                     {totalPages > 1 && (
-                      <div className="border-t border-slate-800/80 p-2.5 bg-slate-900/40 flex justify-between items-center text-xs text-slate-400">
+                      <div className="border-t border-slate-200 p-2.5 bg-slate-50 flex justify-between items-center text-xs text-slate-600">
                         <span>Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length}</span>
                         <div className="flex items-center gap-1">
                           <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => p - 1)}
-                            className="px-2.5 py-1 bg-slate-800 disabled:opacity-40 rounded text-white font-semibold"
+                            className="px-2.5 py-1 bg-white border border-slate-200 disabled:opacity-40 rounded font-semibold text-slate-700 shadow-sm"
                           >
                             Prev
                           </button>
-                          <span className="px-2 font-bold text-white">{currentPage} / {totalPages}</span>
+                          <span className="px-2 font-bold text-slate-800">{currentPage} / {totalPages}</span>
                           <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(p => p + 1)}
-                            className="px-2.5 py-1 bg-slate-800 disabled:opacity-40 rounded text-white font-semibold"
+                            className="px-2.5 py-1 bg-white border border-slate-200 disabled:opacity-40 rounded font-semibold text-slate-700 shadow-sm"
                           >
                             Next
                           </button>
@@ -840,18 +837,18 @@ export default function AdminPage() {
 
             {/* ADD / EDIT PRODUCT TAB */}
             {activeTab === "add-product" && (
-              <div className="bg-[#111827] border border-slate-800/80 rounded-xl p-4 sm:p-6 space-y-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 space-y-6 shadow-sm">
                 
-                <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    {editingProductId !== null ? <Pencil size={15} className="text-emerald-400" /> : <Plus size={15} className="text-emerald-400" />}
+                <div className="flex justify-between items-center border-b border-slate-200 pb-3">
+                  <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    {editingProductId !== null ? <Pencil size={15} className="text-emerald-500" /> : <Plus size={15} className="text-emerald-500" />}
                     <span>{editingProductId !== null ? "Edit Device Product" : "Add New Buyback Product"}</span>
                   </h2>
 
                   <button
                     type="button"
                     onClick={handleCancelProductEdit}
-                    className="text-xs text-slate-400 hover:text-white flex items-center gap-1"
+                    className="text-xs text-slate-500 hover:text-slate-900 flex items-center gap-1"
                   >
                     <XCircle size={14} /> Cancel
                   </button>
@@ -861,24 +858,24 @@ export default function AdminPage() {
                   
                   <div className="grid sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Product Name *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Product Name *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. iPhone 15 Pro"
                         value={newProduct.name}
                         onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded-lg p-2 text-white outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Brand *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Brand *</label>
                       <select
                         required
                         value={newProduct.brand}
                         onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded-lg p-2 text-white outline-none focus:border-emerald-500 cursor-pointer"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 cursor-pointer focus:bg-white"
                       >
                         <option value="">Select Brand</option>
                         {brands.map((b) => (
@@ -888,12 +885,12 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Category *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Category *</label>
                       <select
                         required
                         value={newProduct.category}
                         onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded-lg p-2 text-white outline-none focus:border-emerald-500 cursor-pointer"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 cursor-pointer focus:bg-white"
                       >
                         {categories.map((c) => (
                           <option key={c.slug} value={c.slug}>{c.name}</option>
@@ -904,7 +901,7 @@ export default function AdminPage() {
 
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Base Price (AED) *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Base Price (AED) *</label>
                       <input
                         type="number"
                         required
@@ -912,33 +909,33 @@ export default function AdminPage() {
                         placeholder="e.g. 1800"
                         value={newProduct.basePrice}
                         onChange={(e) => setNewProduct({ ...newProduct, basePrice: Number(e.target.value) })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded-lg p-2 text-emerald-400 font-bold outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-emerald-600 font-bold outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Color Options (Comma-separated)</label>
+                      <label className="font-bold text-slate-700 block mb-1">Color Options (Comma-separated)</label>
                       <input
                         type="text"
                         placeholder="e.g. Black, Silver, Gold"
                         value={newProduct.colors}
                         onChange={(e) => setNewProduct({ ...newProduct, colors: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded-lg p-2 text-white outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
                   </div>
 
                   {/* Compact Storage Section */}
-                  <div className="bg-[#0b0f17] border border-slate-800 rounded-lg p-3 space-y-2">
+                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className="font-bold text-white">Storage Capacity & Boosts</span>
+                      <span className="font-bold text-slate-800">Storage Capacity & Boosts</span>
                       <div className="flex flex-wrap gap-1">
                         {STANDARD_STORAGES.map((preset) => (
                           <button
                             key={preset.size}
                             type="button"
                             onClick={() => handleAddStoragePreset(preset)}
-                            className="px-2 py-0.5 bg-slate-800 text-[10px] font-semibold text-slate-300 hover:text-emerald-400 rounded border border-slate-700"
+                            className="px-2 py-0.5 bg-white text-[10px] font-semibold text-slate-700 hover:text-emerald-600 rounded border border-slate-200 shadow-sm"
                           >
                             + {preset.size}
                           </button>
@@ -958,7 +955,7 @@ export default function AdminPage() {
                               updated[idx].size = e.target.value;
                               setNewProduct({ ...newProduct, storages: updated });
                             }}
-                            className="w-1/3 bg-[#111827] border border-slate-800 rounded p-1.5 text-white"
+                            className="w-1/3 bg-white border border-slate-200 rounded p-1.5 text-slate-900"
                           />
                           <input
                             type="number"
@@ -969,7 +966,7 @@ export default function AdminPage() {
                               updated[idx].priceBoost = Number(e.target.value);
                               setNewProduct({ ...newProduct, storages: updated });
                             }}
-                            className="w-1/3 bg-[#111827] border border-slate-800 rounded p-1.5 text-emerald-400 font-bold"
+                            className="w-1/3 bg-white border border-slate-200 rounded p-1.5 text-emerald-600 font-bold"
                           />
                           <button
                             type="button"
@@ -977,7 +974,7 @@ export default function AdminPage() {
                               const updated = newProduct.storages.filter((_, i) => i !== idx);
                               setNewProduct({ ...newProduct, storages: updated });
                             }}
-                            className="p-1 text-rose-400 hover:bg-rose-950/30 rounded"
+                            className="p-1 text-rose-600 hover:bg-rose-50 rounded"
                           >
                             <Trash2 size={12} />
                           </button>
@@ -987,48 +984,48 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <label className="font-bold text-slate-300 block mb-1">Short Description</label>
+                    <label className="font-bold text-slate-700 block mb-1">Short Description</label>
                     <input
                       type="text"
                       placeholder="e.g. Titanium design, A17 Pro chip..."
                       value={newProduct.shortDescription}
                       onChange={(e) => setNewProduct({ ...newProduct, shortDescription: e.target.value })}
-                      className="w-full bg-[#0b0f17] border border-slate-800 rounded-lg p-2 text-white outline-none"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                     />
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="font-bold text-slate-400 block mb-1">Front Image *</label>
+                      <label className="font-bold text-slate-600 block mb-1">Front Image *</label>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
                           if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, frontView: e.target.files[0] } });
                         }}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-300"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
                       />
                     </div>
                     <div>
-                      <label className="font-bold text-slate-400 block mb-1">Side Image</label>
+                      <label className="font-bold text-slate-600 block mb-1">Side Image</label>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
                           if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, sideView: e.target.files[0] } });
                         }}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-300"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
                       />
                     </div>
                     <div>
-                      <label className="font-bold text-slate-400 block mb-1">Back Image</label>
+                      <label className="font-bold text-slate-600 block mb-1">Back Image</label>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => {
                           if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, backView: e.target.files[0] } });
                         }}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-300"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
                       />
                     </div>
                   </div>
@@ -1037,7 +1034,7 @@ export default function AdminPage() {
                     <button
                       type="button"
                       onClick={handleCancelProductEdit}
-                      className="px-4 py-2 bg-slate-900 border border-slate-800 text-slate-400 rounded-lg font-bold hover:text-white"
+                      className="px-4 py-2 bg-slate-100 border border-slate-200 text-slate-700 rounded-lg font-bold hover:bg-slate-200"
                     >
                       Cancel
                     </button>
@@ -1045,7 +1042,7 @@ export default function AdminPage() {
                     <button
                       type="submit"
                       disabled={submittingProduct}
-                      className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg transition cursor-pointer"
+                      className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition shadow-sm cursor-pointer"
                     >
                       {submittingProduct ? "Saving..." : (editingProductId !== null ? "Update Product" : "Publish Product")}
                     </button>
@@ -1058,8 +1055,8 @@ export default function AdminPage() {
             {/* ORDERS TAB */}
             {activeTab === "orders" && (
               <div className="space-y-3">
-                <div className="bg-[#111827] border border-slate-800/80 rounded-xl p-2.5 flex items-center justify-between gap-3">
-                  <span className="font-bold text-white text-xs">Buyback Orders ({filteredOrders.length})</span>
+                <div className="bg-white border border-slate-200 rounded-xl p-2.5 flex items-center justify-between gap-3 shadow-sm">
+                  <span className="font-bold text-slate-900 text-xs">Buyback Orders ({filteredOrders.length})</span>
                   
                   <div className="flex gap-1 overflow-x-auto">
                     {["all", "pending", "pickup_assigned", "inspected", "completed", "cancelled"].map((st) => (
@@ -1067,7 +1064,7 @@ export default function AdminPage() {
                         key={st}
                         onClick={() => setSelectedStatusFilter(st)}
                         className={`px-2.5 py-1 rounded text-[11px] font-bold capitalize transition ${
-                          selectedStatusFilter === st ? "bg-slate-800 text-emerald-400 border border-slate-700" : "text-slate-400 hover:text-white"
+                          selectedStatusFilter === st ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
                         }`}
                       >
                         {st.replace("_", " ")}
@@ -1077,11 +1074,11 @@ export default function AdminPage() {
                 </div>
 
                 {filteredOrders.length === 0 ? (
-                  <div className="bg-[#111827] border border-slate-800/80 rounded-xl p-8 text-center text-slate-500 font-medium">
+                  <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-slate-500 font-medium shadow-sm">
                     No orders match status filter.
                   </div>
                 ) : (
-                  <div className="bg-[#111827] border border-slate-800/80 rounded-xl overflow-hidden divide-y divide-slate-800/60">
+                  <div className="bg-white border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-100 shadow-sm">
                     {filteredOrders.map((order) => {
                       const isExpanded = expandedOrderId === order._id;
                       return (
@@ -1089,26 +1086,26 @@ export default function AdminPage() {
                           
                           <div 
                             onClick={() => setExpandedOrderId(isExpanded ? null : order._id)}
-                            className="p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-900/40"
+                            className="p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50/80"
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <button className="text-slate-500">
+                              <button className="text-slate-400">
                                 {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                               </button>
                               <div>
-                                <p className="font-bold text-white text-xs">{order.customerDetails.name} <span className="text-slate-500 text-[10px] font-normal">({order.customerDetails.phone})</span></p>
+                                <p className="font-bold text-slate-900 text-xs">{order.customerDetails.name} <span className="text-slate-500 text-[10px] font-normal">({order.customerDetails.phone})</span></p>
                                 <p className="text-[10px] text-slate-500 font-mono">{order._id} • {new Date(order.createdAt).toLocaleDateString()}</p>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-3">
-                              <span className="font-extrabold text-emerald-400 text-xs">AED {order.totalPayout.toLocaleString()}</span>
+                              <span className="font-extrabold text-emerald-600 text-xs">AED {order.totalPayout.toLocaleString()}</span>
                               
                               <select
                                 value={order.status}
                                 onClick={(e) => e.stopPropagation()}
                                 onChange={(e) => handleUpdateOrderStatus(order._id, e.target.value)}
-                                className={`text-[10px] font-bold px-2 py-1 rounded border bg-[#0b0f17] outline-none cursor-pointer ${statusColors[order.status]}`}
+                                className={`text-[10px] font-bold px-2 py-1 rounded border outline-none cursor-pointer ${statusColors[order.status]}`}
                               >
                                 <option value="pending">Pending</option>
                                 <option value="pickup_assigned">Assigned</option>
@@ -1120,33 +1117,33 @@ export default function AdminPage() {
                           </div>
 
                           {isExpanded && (
-                            <div className="p-4 bg-[#0b0f17] border-t border-slate-800/60 space-y-3 text-xs text-slate-300">
+                            <div className="p-4 bg-slate-50 border-t border-slate-200 space-y-3 text-xs text-slate-700">
                               <div className="grid sm:grid-cols-3 gap-3">
                                 <div>
-                                  <p className="text-[10px] font-bold text-slate-500 uppercase">Customer Details</p>
-                                  <p className="font-semibold text-white">{order.customerDetails.name}</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Customer Details</p>
+                                  <p className="font-semibold text-slate-900">{order.customerDetails.name}</p>
                                   <p>{order.customerDetails.phone}</p>
-                                  <p className="text-slate-400">{order.customerDetails.email}</p>
+                                  <p className="text-slate-500">{order.customerDetails.email}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] font-bold text-slate-500 uppercase">Doorstep Pickup</p>
-                                  <p className="font-semibold text-white">{order.pickupSchedule.pickupDate}</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Doorstep Pickup</p>
+                                  <p className="font-semibold text-slate-900">{order.pickupSchedule.pickupDate}</p>
                                   <p>{order.pickupSchedule.pickupTime}</p>
-                                  <p className="text-slate-400">{order.customerDetails.address}, {order.customerDetails.city}</p>
+                                  <p className="text-slate-500">{order.customerDetails.address}, {order.customerDetails.city}</p>
                                 </div>
                                 <div>
-                                  <p className="text-[10px] font-bold text-slate-500 uppercase">Payment</p>
-                                  <p className="font-bold text-emerald-400 capitalize">{order.paymentMethod} Payout</p>
+                                  <p className="text-[10px] font-bold text-slate-400 uppercase">Payment</p>
+                                  <p className="font-bold text-emerald-600 capitalize">{order.paymentMethod} Payout</p>
                                 </div>
                               </div>
 
                               <div>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">Devices</p>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Devices</p>
                                 <div className="space-y-1">
                                   {order.devices.map((d, i) => (
-                                    <div key={i} className="flex justify-between items-center bg-[#111827] p-2 rounded border border-slate-800">
-                                      <span><strong>{d.name}</strong> ({d.brand} • {d.selectedStorage} • {d.selectedColor} • {d.selectedCondition})</span>
-                                      <span className="font-bold text-emerald-400">AED {d.calculatedPrice}</span>
+                                    <div key={i} className="flex justify-between items-center bg-white p-2 rounded border border-slate-200">
+                                      <span><strong className="text-slate-900">{d.name}</strong> ({d.brand} • {d.selectedStorage} • {d.selectedColor} • {d.selectedCondition})</span>
+                                      <span className="font-bold text-emerald-600">AED {d.calculatedPrice}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -1165,24 +1162,24 @@ export default function AdminPage() {
             {/* BRANDS TAB */}
             {activeTab === "brands" && (
               <div className="grid sm:grid-cols-12 gap-4">
-                <div className="sm:col-span-7 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-white text-xs">Brands ({brands.length})</h3>
+                <div className="sm:col-span-7 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                  <h3 className="font-bold text-slate-900 text-xs">Brands ({brands.length})</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {brands.map((b) => (
-                      <div key={b.id || b._id} className="bg-[#0b0f17] border border-slate-800 p-2.5 rounded-lg flex flex-col justify-between gap-2">
+                      <div key={b.id || b._id} className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex flex-col justify-between gap-2">
                         <div className="flex items-center justify-between gap-2">
                           <div className="min-w-0">
-                            <p className="font-bold text-white text-xs truncate">{b.name}</p>
+                            <p className="font-bold text-slate-900 text-xs truncate">{b.name}</p>
                             <p className="text-[10px] text-slate-500 font-mono truncate">{b.slug}</p>
                           </div>
-                          <button onClick={() => handleDeleteBrand(b.id || b._id || "")} className="text-rose-400 p-1 hover:bg-rose-950/30 rounded">
+                          <button onClick={() => handleDeleteBrand(b.id || b._id || "")} className="text-rose-600 p-1 hover:bg-rose-50 rounded">
                             <Trash2 size={12} />
                           </button>
                         </div>
                         {b.categories && b.categories.length > 0 && (
-                          <div className="flex flex-wrap gap-1 border-t border-slate-800/60 pt-1.5">
+                          <div className="flex flex-wrap gap-1 border-t border-slate-200 pt-1.5">
                             {b.categories.map((c: any, idx) => (
-                              <span key={idx} className="text-[8px] bg-slate-800 text-slate-300 px-1 py-0.5 rounded">
+                              <span key={idx} className="text-[8px] bg-white text-slate-700 px-1 py-0.5 rounded border border-slate-200 font-medium">
                                 {typeof c === "object" ? c.name : c}
                               </span>
                             ))}
@@ -1193,55 +1190,55 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="sm:col-span-5 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-white text-xs">Add New Brand</h3>
+                <div className="sm:col-span-5 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                  <h3 className="font-bold text-slate-900 text-xs">Add New Brand</h3>
                   <form onSubmit={handleCreateBrand} className="space-y-3 text-xs">
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Brand Name *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Brand Name *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Apple, Samsung, Google"
                         value={newBrand.name}
                         onChange={(e) => setNewBrand({ ...newBrand, name: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Brand Slug</label>
+                      <label className="font-bold text-slate-700 block mb-1">Brand Slug</label>
                       <input
                         type="text"
                         placeholder="Leave blank to auto-generate"
                         value={newBrand.slug}
                         onChange={(e) => setNewBrand({ ...newBrand, slug: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Logo File or Emoji</label>
+                      <label className="font-bold text-slate-700 block mb-1">Logo File or Emoji</label>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => { if (e.target.files?.[0]) setNewBrand({ ...newBrand, logo: e.target.files[0] }); }}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Tag Categories</label>
-                      <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto border border-slate-800 p-2.5 rounded bg-[#0b0f17]">
+                      <label className="font-bold text-slate-700 block mb-1">Tag Categories</label>
+                      <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto border border-slate-200 p-2.5 rounded bg-slate-50">
                         {categories.map((cat) => {
                           const catId = (cat._id || cat.id || "").toString();
                           const isChecked = newBrand.categories.includes(catId);
                           return (
-                            <label key={catId} className="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer select-none">
+                            <label key={catId} className="flex items-center gap-1.5 text-[10px] text-slate-700 cursor-pointer select-none">
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => handleToggleBrandCategory(catId)}
-                                className="rounded border-slate-800 bg-slate-900 text-emerald-500"
+                                className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                               />
                               {cat.name}
                             </label>
@@ -1250,7 +1247,7 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded transition cursor-pointer">
+                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer">
                       Add Brand
                     </button>
                   </form>
@@ -1261,16 +1258,16 @@ export default function AdminPage() {
             {/* CATEGORIES TAB */}
             {activeTab === "categories" && (
               <div className="grid sm:grid-cols-12 gap-4">
-                <div className="sm:col-span-7 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-white text-xs">Categories ({categories.length})</h3>
+                <div className="sm:col-span-7 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                  <h3 className="font-bold text-slate-900 text-xs">Categories ({categories.length})</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {categories.map((c) => (
-                      <div key={c.slug} className="bg-[#0b0f17] border border-slate-800 p-2.5 rounded-lg flex items-center justify-between gap-2">
+                      <div key={c.slug} className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="font-bold text-white text-xs truncate">{c.name}</p>
+                          <p className="font-bold text-slate-900 text-xs truncate">{c.name}</p>
                           <p className="text-[10px] text-slate-500 font-mono truncate">{c.slug}</p>
                         </div>
-                        <button onClick={() => handleDeleteCategory(c.id || c._id || c.slug)} className="text-rose-400 p-1 hover:bg-rose-950/30 rounded">
+                        <button onClick={() => handleDeleteCategory(c.id || c._id || c.slug)} className="text-rose-600 p-1 hover:bg-rose-50 rounded">
                           <Trash2 size={12} />
                         </button>
                       </div>
@@ -1278,56 +1275,56 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="sm:col-span-5 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-white text-xs">Add New Category</h3>
+                <div className="sm:col-span-5 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                  <h3 className="font-bold text-slate-900 text-xs">Add New Category</h3>
                   <form onSubmit={handleCreateCategory} className="space-y-3 text-xs">
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Category Name *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Category Name *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Laptops"
                         value={newCategory.name}
                         onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Slug *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Slug *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. laptops"
                         value={newCategory.slug}
                         onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Category Image *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Category Image *</label>
                       <input
                         type="file"
                         required
                         accept="image/*"
                         onChange={(e) => { if (e.target.files?.[0]) setNewCategory({ ...newCategory, image: e.target.files[0] }); }}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Description</label>
+                      <label className="font-bold text-slate-700 block mb-1">Description</label>
                       <textarea
                         rows={2}
                         placeholder="Overview..."
                         value={newCategory.description}
                         onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none resize-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
-                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded transition cursor-pointer">
+                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer">
                       Add Category
                     </button>
                   </form>
@@ -1335,35 +1332,35 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* BLOGS TAB (Full 2-Column Split: List + Add/Edit Form) */}
+            {/* BLOGS TAB */}
             {activeTab === "blogs" && (
               <div className="grid sm:grid-cols-12 gap-4">
                 
                 {/* Blog Post List */}
-                <div className="sm:col-span-7 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-white text-xs">Blogs & Articles ({blogs.length})</h3>
+                <div className="sm:col-span-7 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                  <h3 className="font-bold text-slate-900 text-xs">Blogs & Articles ({blogs.length})</h3>
                   {blogs.length === 0 ? (
                     <p className="text-slate-500 text-[11px] text-center py-6">No blog articles published yet.</p>
                   ) : (
-                    <div className="divide-y divide-slate-800/60">
+                    <div className="divide-y divide-slate-100">
                       {blogs.map((b) => (
                         <div key={b.slug} className="py-2.5 flex items-center justify-between gap-3">
                           <div className="min-w-0 flex-1">
-                            <h4 className="font-bold text-white text-xs truncate">{b.title}</h4>
-                            <p className="text-[10px] text-emerald-400 font-semibold">{b.category} <span className="text-slate-500 font-mono">({b.slug})</span></p>
+                            <h4 className="font-bold text-slate-900 text-xs truncate">{b.title}</h4>
+                            <p className="text-[10px] text-emerald-600 font-semibold">{b.category} <span className="text-slate-400 font-mono">({b.slug})</span></p>
                           </div>
                           
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleEditBlogClick(b)}
-                              className="p-1.5 text-slate-300 hover:text-white bg-slate-800 rounded border border-slate-700"
+                              className="p-1.5 text-slate-700 hover:bg-slate-100 rounded border border-slate-200"
                               title="Edit Article"
                             >
                               <Pencil size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteBlog(b.id || b._id || "")}
-                              className="p-1.5 text-rose-400 hover:bg-rose-950/30 rounded border border-rose-900/50"
+                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded border border-rose-200"
                               title="Delete Article"
                             >
                               <Trash2 size={12} />
@@ -1376,13 +1373,13 @@ export default function AdminPage() {
                 </div>
 
                 {/* Add / Edit Blog Form */}
-                <div className="sm:col-span-5 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
+                <div className="sm:col-span-5 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-white text-xs">
+                    <h3 className="font-bold text-slate-900 text-xs">
                       {editingBlogId !== null ? "Edit Blog Post" : "Add New Blog Article"}
                     </h3>
                     {editingBlogId !== null && (
-                      <button onClick={handleCancelBlogEdit} className="text-[10px] text-rose-400 hover:underline">
+                      <button onClick={handleCancelBlogEdit} className="text-[10px] text-rose-600 hover:underline">
                         Cancel
                       </button>
                     )}
@@ -1390,7 +1387,7 @@ export default function AdminPage() {
 
                   <form onSubmit={handleCreateBlog} className="space-y-3 text-xs">
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Title *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Title *</label>
                       <input
                         type="text"
                         required
@@ -1405,28 +1402,28 @@ export default function AdminPage() {
                             slug: editingBlogId !== null ? newBlog.slug : slugVal,
                           });
                         }}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">URL Slug *</label>
+                      <label className="font-bold text-slate-700 block mb-1">URL Slug *</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. how-to-sell-phone"
                         value={newBlog.slug}
                         onChange={(e) => setNewBlog({ ...newBlog, slug: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none font-mono"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none font-mono focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Category</label>
+                      <label className="font-bold text-slate-700 block mb-1">Category</label>
                       <select
                         value={newBlog.category}
                         onChange={(e) => setNewBlog({ ...newBlog, category: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none cursor-pointer"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none cursor-pointer focus:bg-white"
                       >
                         <option value="Buying Guides">Buying Guides</option>
                         <option value="Recycling Tips">Recycling Tips</option>
@@ -1435,40 +1432,40 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Cover Image</label>
+                      <label className="font-bold text-slate-700 block mb-1">Cover Image</label>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => { if (e.target.files?.[0]) setNewBlog({ ...newBlog, img: e.target.files[0] }); }}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Short Excerpt / Snippet *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Short Excerpt / Snippet *</label>
                       <textarea
                         rows={2}
                         required
                         placeholder="Brief summary..."
                         value={newBlog.desc}
                         onChange={(e) => setNewBlog({ ...newBlog, desc: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none resize-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-300 block mb-1">Full Content (Markdown) *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Full Content (Markdown) *</label>
                       <textarea
                         rows={5}
                         required
                         placeholder="Markdown content..."
                         value={newBlog.content}
                         onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
-                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none resize-none font-mono text-[11px]"
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none font-mono text-[11px] focus:border-emerald-500 focus:bg-white"
                       />
                     </div>
 
-                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded transition cursor-pointer">
+                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer">
                       {editingBlogId !== null ? "Update Blog Post" : "Publish Article"}
                     </button>
                   </form>
