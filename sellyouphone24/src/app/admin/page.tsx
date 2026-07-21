@@ -24,9 +24,7 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  SlidersHorizontal,
-  LogOut,
-  ExternalLink
+  LogOut
 } from "lucide-react";
 import Image from "next/image";
 
@@ -103,7 +101,7 @@ export default function AdminPage() {
   const itemsPerPage = 12;
 
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+    return (products || []).filter((p) => {
       if (!p) return false;
       const query = (productSearch || "").toLowerCase();
       const pName = (p.name || "").toLowerCase();
@@ -132,7 +130,7 @@ export default function AdminPage() {
       : orders.filter((o) => o.status === selectedStatusFilter);
   }, [orders, selectedStatusFilter]);
 
-  // Form state
+  // Form states
   const [editingProductId, setEditingProductId] = useState<string | number | null>(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -156,8 +154,17 @@ export default function AdminPage() {
 
   const [newCategory, setNewCategory] = useState({ name: "", slug: "", description: "", image: "" as string | File });
   const [newBrand, setNewBrand] = useState<{ name: string; slug: string; logo: string | File; categories: string[] }>({ name: "", slug: "", logo: "", categories: [] });
+  
   const [editingBlogId, setEditingBlogId] = useState<string | number | null>(null);
-  const [newBlog, setNewBlog] = useState({ title: "", slug: "", desc: "", content: "", img: "" as string | File, category: "Buying Guides", author: "Team SellYourPhone24" });
+  const [newBlog, setNewBlog] = useState({
+    title: "",
+    slug: "",
+    desc: "",
+    content: "",
+    img: "" as string | File,
+    category: "Buying Guides",
+    author: "Team SellYourPhone24",
+  });
 
   const loadData = async (showSpinner = false) => {
     if (showSpinner) setLoading(true);
@@ -374,6 +381,13 @@ export default function AdminPage() {
     }
   };
 
+  const handleToggleBrandCategory = (catId: string) => {
+    const updatedCats = newBrand.categories.includes(catId)
+      ? newBrand.categories.filter((id) => id !== catId)
+      : [...newBrand.categories, catId];
+    setNewBrand({ ...newBrand, categories: updatedCats });
+  };
+
   const handleCreateBrand = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newBrand.name) return;
@@ -404,6 +418,78 @@ export default function AdminPage() {
       await loadData(false);
     } catch (error) {
       toast.error("Failed to delete brand");
+    }
+  };
+
+  const handleEditBlogClick = (blog: BlogType) => {
+    setEditingBlogId(blog.id || blog._id || "");
+    setNewBlog({
+      title: blog.title,
+      slug: blog.slug,
+      desc: blog.desc,
+      content: blog.content,
+      img: blog.img,
+      category: blog.category,
+      author: blog.author || "Team SellYourPhone24",
+    });
+  };
+
+  const handleCancelBlogEdit = () => {
+    setEditingBlogId(null);
+    setNewBlog({
+      title: "",
+      slug: "",
+      desc: "",
+      content: "",
+      img: "",
+      category: "Buying Guides",
+      author: "Team SellYourPhone24",
+    });
+  };
+
+  const handleCreateBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBlog.title || !newBlog.slug || !newBlog.desc || !newBlog.content) {
+      toast.error("Required: Title, Slug, Description, Content");
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      const fd = new FormData();
+      fd.append("title", newBlog.title);
+      fd.append("slug", newBlog.slug);
+      fd.append("desc", newBlog.desc);
+      fd.append("content", newBlog.content);
+      fd.append("category", newBlog.category);
+      fd.append("author", newBlog.author);
+      if (newBlog.img instanceof File) {
+        fd.append("img", newBlog.img);
+      } else if (newBlog.img) {
+        fd.append("img", newBlog.img);
+      }
+
+      if (editingBlogId !== null) {
+        await api.updateBlog(editingBlogId, fd, token || undefined);
+        toast.success("Blog post updated");
+        setEditingBlogId(null);
+      } else {
+        await api.createBlog(fd, token || undefined);
+        toast.success("Blog post created");
+      }
+
+      setNewBlog({
+        title: "",
+        slug: "",
+        desc: "",
+        content: "",
+        img: "",
+        category: "Buying Guides",
+        author: "Team SellYourPhone24",
+      });
+      await loadData(false);
+    } catch (error) {
+      toast.error(editingBlogId !== null ? "Failed to update blog" : "Failed to create blog");
     }
   };
 
@@ -556,7 +642,7 @@ export default function AdminPage() {
         ) : (
           <div>
             
-            {/* PRODUCTS TAB (Compact Table View) */}
+            {/* PRODUCTS TAB */}
             {activeTab === "products" && (
               <div className="space-y-3">
                 
@@ -900,7 +986,6 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Short Description */}
                   <div>
                     <label className="font-bold text-slate-300 block mb-1">Short Description</label>
                     <input
@@ -912,7 +997,6 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  {/* Image Upload Row */}
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="font-bold text-slate-400 block mb-1">Front Image *</label>
@@ -971,7 +1055,7 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* ORDERS TAB (Expandable Compact Table) */}
+            {/* ORDERS TAB */}
             {activeTab === "orders" && (
               <div className="space-y-3">
                 <div className="bg-[#111827] border border-slate-800/80 rounded-xl p-2.5 flex items-center justify-between gap-3">
@@ -1003,7 +1087,6 @@ export default function AdminPage() {
                       return (
                         <div key={order._id} className="transition">
                           
-                          {/* Order Header Row */}
                           <div 
                             onClick={() => setExpandedOrderId(isExpanded ? null : order._id)}
                             className="p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-900/40"
@@ -1036,7 +1119,6 @@ export default function AdminPage() {
                             </div>
                           </div>
 
-                          {/* Expanded Order Details */}
                           {isExpanded && (
                             <div className="p-4 bg-[#0b0f17] border-t border-slate-800/60 space-y-3 text-xs text-slate-300">
                               <div className="grid sm:grid-cols-3 gap-3">
@@ -1083,41 +1165,92 @@ export default function AdminPage() {
             {/* BRANDS TAB */}
             {activeTab === "brands" && (
               <div className="grid sm:grid-cols-12 gap-4">
-                <div className="sm:col-span-8 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
+                <div className="sm:col-span-7 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
                   <h3 className="font-bold text-white text-xs">Brands ({brands.length})</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {brands.map((b) => (
-                      <div key={b.id || b._id} className="bg-[#0b0f17] border border-slate-800 p-2.5 rounded-lg flex items-center justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-bold text-white text-xs truncate">{b.name}</p>
-                          <p className="text-[10px] text-slate-500 font-mono truncate">{b.slug}</p>
+                      <div key={b.id || b._id} className="bg-[#0b0f17] border border-slate-800 p-2.5 rounded-lg flex flex-col justify-between gap-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="font-bold text-white text-xs truncate">{b.name}</p>
+                            <p className="text-[10px] text-slate-500 font-mono truncate">{b.slug}</p>
+                          </div>
+                          <button onClick={() => handleDeleteBrand(b.id || b._id || "")} className="text-rose-400 p-1 hover:bg-rose-950/30 rounded">
+                            <Trash2 size={12} />
+                          </button>
                         </div>
-                        <button onClick={() => handleDeleteBrand(b.id || b._id || "")} className="text-rose-400 p-1 hover:bg-rose-950/30 rounded">
-                          <Trash2 size={12} />
-                        </button>
+                        {b.categories && b.categories.length > 0 && (
+                          <div className="flex flex-wrap gap-1 border-t border-slate-800/60 pt-1.5">
+                            {b.categories.map((c: any, idx) => (
+                              <span key={idx} className="text-[8px] bg-slate-800 text-slate-300 px-1 py-0.5 rounded">
+                                {typeof c === "object" ? c.name : c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="sm:col-span-4 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-white text-xs">Add Brand</h3>
+                <div className="sm:col-span-5 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
+                  <h3 className="font-bold text-white text-xs">Add New Brand</h3>
                   <form onSubmit={handleCreateBrand} className="space-y-3 text-xs">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Brand name"
-                      value={newBrand.name}
-                      onChange={(e) => setNewBrand({ ...newBrand, name: e.target.value })}
-                      className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
-                    />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => { if (e.target.files?.[0]) setNewBrand({ ...newBrand, logo: e.target.files[0] }); }}
-                      className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
-                    />
-                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2 rounded">
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Brand Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Apple, Samsung, Google"
+                        value={newBrand.name}
+                        onChange={(e) => setNewBrand({ ...newBrand, name: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Brand Slug</label>
+                      <input
+                        type="text"
+                        placeholder="Leave blank to auto-generate"
+                        value={newBrand.slug}
+                        onChange={(e) => setNewBrand({ ...newBrand, slug: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Logo File or Emoji</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => { if (e.target.files?.[0]) setNewBrand({ ...newBrand, logo: e.target.files[0] }); }}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Tag Categories</label>
+                      <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto border border-slate-800 p-2.5 rounded bg-[#0b0f17]">
+                        {categories.map((cat) => {
+                          const catId = (cat._id || cat.id || "").toString();
+                          const isChecked = newBrand.categories.includes(catId);
+                          return (
+                            <label key={catId} className="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => handleToggleBrandCategory(catId)}
+                                className="rounded border-slate-800 bg-slate-900 text-emerald-500"
+                              />
+                              {cat.name}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded transition cursor-pointer">
                       Add Brand
                     </button>
                   </form>
@@ -1128,7 +1261,7 @@ export default function AdminPage() {
             {/* CATEGORIES TAB */}
             {activeTab === "categories" && (
               <div className="grid sm:grid-cols-12 gap-4">
-                <div className="sm:col-span-8 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
+                <div className="sm:col-span-7 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
                   <h3 className="font-bold text-white text-xs">Categories ({categories.length})</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {categories.map((c) => (
@@ -1145,33 +1278,56 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="sm:col-span-4 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                  <h3 className="font-bold text-white text-xs">Add Category</h3>
+                <div className="sm:col-span-5 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
+                  <h3 className="font-bold text-white text-xs">Add New Category</h3>
                   <form onSubmit={handleCreateCategory} className="space-y-3 text-xs">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Category name"
-                      value={newCategory.name}
-                      onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
-                    />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Slug (e.g. laptops)"
-                      value={newCategory.slug}
-                      onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value })}
-                      className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
-                    />
-                    <input
-                      type="file"
-                      required
-                      accept="image/*"
-                      onChange={(e) => { if (e.target.files?.[0]) setNewCategory({ ...newCategory, image: e.target.files[0] }); }}
-                      className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
-                    />
-                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2 rounded">
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Category Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Laptops"
+                        value={newCategory.name}
+                        onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Slug *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. laptops"
+                        value={newCategory.slug}
+                        onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Category Image *</label>
+                      <input
+                        type="file"
+                        required
+                        accept="image/*"
+                        onChange={(e) => { if (e.target.files?.[0]) setNewCategory({ ...newCategory, image: e.target.files[0] }); }}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Description</label>
+                      <textarea
+                        rows={2}
+                        placeholder="Overview..."
+                        value={newCategory.description}
+                        onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none resize-none"
+                      />
+                    </div>
+
+                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded transition cursor-pointer">
                       Add Category
                     </button>
                   </form>
@@ -1179,25 +1335,145 @@ export default function AdminPage() {
               </div>
             )}
 
-            {/* BLOGS TAB */}
+            {/* BLOGS TAB (Full 2-Column Split: List + Add/Edit Form) */}
             {activeTab === "blogs" && (
-              <div className="bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
-                <h3 className="font-bold text-white text-xs">Blogs ({blogs.length})</h3>
-                <div className="divide-y divide-slate-800/60">
-                  {blogs.map((b) => (
-                    <div key={b.slug} className="py-2 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-bold text-white text-xs truncate">{b.title}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">{b.category} • {b.slug}</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => handleDeleteBlog(b.id || b._id || "")} className="text-rose-400 p-1 hover:bg-rose-950/30 rounded">
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
+              <div className="grid sm:grid-cols-12 gap-4">
+                
+                {/* Blog Post List */}
+                <div className="sm:col-span-7 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
+                  <h3 className="font-bold text-white text-xs">Blogs & Articles ({blogs.length})</h3>
+                  {blogs.length === 0 ? (
+                    <p className="text-slate-500 text-[11px] text-center py-6">No blog articles published yet.</p>
+                  ) : (
+                    <div className="divide-y divide-slate-800/60">
+                      {blogs.map((b) => (
+                        <div key={b.slug} className="py-2.5 flex items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-bold text-white text-xs truncate">{b.title}</h4>
+                            <p className="text-[10px] text-emerald-400 font-semibold">{b.category} <span className="text-slate-500 font-mono">({b.slug})</span></p>
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleEditBlogClick(b)}
+                              className="p-1.5 text-slate-300 hover:text-white bg-slate-800 rounded border border-slate-700"
+                              title="Edit Article"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBlog(b.id || b._id || "")}
+                              className="p-1.5 text-rose-400 hover:bg-rose-950/30 rounded border border-rose-900/50"
+                              title="Delete Article"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {/* Add / Edit Blog Form */}
+                <div className="sm:col-span-5 bg-[#111827] border border-slate-800/80 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-white text-xs">
+                      {editingBlogId !== null ? "Edit Blog Post" : "Add New Blog Article"}
+                    </h3>
+                    {editingBlogId !== null && (
+                      <button onClick={handleCancelBlogEdit} className="text-[10px] text-rose-400 hover:underline">
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+
+                  <form onSubmit={handleCreateBlog} className="space-y-3 text-xs">
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Title *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. How to sell your phone safely"
+                        value={newBlog.title}
+                        onChange={(e) => {
+                          const titleVal = e.target.value;
+                          const slugVal = titleVal.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+                          setNewBlog({
+                            ...newBlog,
+                            title: titleVal,
+                            slug: editingBlogId !== null ? newBlog.slug : slugVal,
+                          });
+                        }}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">URL Slug *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. how-to-sell-phone"
+                        value={newBlog.slug}
+                        onChange={(e) => setNewBlog({ ...newBlog, slug: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Category</label>
+                      <select
+                        value={newBlog.category}
+                        onChange={(e) => setNewBlog({ ...newBlog, category: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none cursor-pointer"
+                      >
+                        <option value="Buying Guides">Buying Guides</option>
+                        <option value="Recycling Tips">Recycling Tips</option>
+                        <option value="Price Analysis">Price Analysis</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Cover Image</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => { if (e.target.files?.[0]) setNewBlog({ ...newBlog, img: e.target.files[0] }); }}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-1 text-[10px] text-slate-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Short Excerpt / Snippet *</label>
+                      <textarea
+                        rows={2}
+                        required
+                        placeholder="Brief summary..."
+                        value={newBlog.desc}
+                        onChange={(e) => setNewBlog({ ...newBlog, desc: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none resize-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-300 block mb-1">Full Content (Markdown) *</label>
+                      <textarea
+                        rows={5}
+                        required
+                        placeholder="Markdown content..."
+                        value={newBlog.content}
+                        onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
+                        className="w-full bg-[#0b0f17] border border-slate-800 rounded p-2 text-white outline-none resize-none font-mono text-[11px]"
+                      />
+                    </div>
+
+                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 rounded transition cursor-pointer">
+                      {editingBlogId !== null ? "Update Blog Post" : "Publish Article"}
+                    </button>
+                  </form>
+                </div>
+
               </div>
             )}
 
