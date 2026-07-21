@@ -7,6 +7,8 @@ import Link from "next/link";
 import { ShieldCheck, ArrowRight, Smartphone, BadgePercent, CheckCircle2, Eye, Calendar } from "lucide-react";
 import { api } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+
 const Homepage = async () => {
   const blogs = await api.getBlogs();
   const latestBlogs = blogs.slice(0, 2);

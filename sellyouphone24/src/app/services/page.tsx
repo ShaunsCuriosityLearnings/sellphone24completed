@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, CheckCircle } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Our Buyback Services | SellYourPhone24",
   description: "Explore the electronic devices we buy. Sell your used mobile phones, iPads, Android tablets, Apple Watches, and Galaxy Watches for top value.",
