@@ -104,14 +104,17 @@ export default function AdminPage() {
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      const query = productSearch.toLowerCase();
-      const matchesSearch = (
-        p.name.toLowerCase().includes(query) ||
-        p.brand.toLowerCase().includes(query) ||
-        (p.shortDescription || "").toLowerCase().includes(query)
-      );
-      const matchesBrand = selectedBrandFilter === "all" || p.brand.toLowerCase() === selectedBrandFilter.toLowerCase();
-      const matchesCategory = selectedCategoryFilter === "all" || p.category.toLowerCase() === selectedCategoryFilter.toLowerCase();
+      if (!p) return false;
+      const query = (productSearch || "").toLowerCase();
+      const pName = (p.name || "").toLowerCase();
+      const pBrand = (p.brand || "").toLowerCase();
+      const pCategory = (p.category || "").toLowerCase();
+      const pDesc = (p.shortDescription || "").toLowerCase();
+
+      const matchesSearch = pName.includes(query) || pBrand.includes(query) || pDesc.includes(query);
+      const matchesBrand = selectedBrandFilter === "all" || pBrand === (selectedBrandFilter || "").toLowerCase();
+      const matchesCategory = selectedCategoryFilter === "all" || pCategory === (selectedCategoryFilter || "").toLowerCase();
+      
       return matchesSearch && matchesBrand && matchesCategory;
     });
   }, [products, productSearch, selectedBrandFilter, selectedCategoryFilter]);
@@ -241,7 +244,7 @@ export default function AdminPage() {
 
   const handleEditProductClick = (product: ProductType) => {
     setEditingProductId(product.id || product._id || "");
-    const brandDoc = brands.find((b) => b.name.toLowerCase() === product.brand.toLowerCase());
+    const brandDoc = brands.find((b) => (b.name || "").toLowerCase() === (product.brand || "").toLowerCase());
     
     setNewProduct({
       name: product.name,

@@ -55,25 +55,29 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
 
   // Filter products based on selected states
   const filteredProducts = useMemo(() => {
-    return initialProducts.filter(product => {
+    return (initialProducts || []).filter(product => {
+      if (!product) return false;
+      const pName = (product.name || "").toLowerCase();
+      const pBrand = (product.brand || "").toLowerCase();
+
       // Search filter
-      if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      if (searchQuery && !pName.includes((searchQuery || "").toLowerCase())) {
         return false;
       }
       // Brand filter
-      if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand.toLowerCase())) {
+      if (selectedBrands.length > 0 && !selectedBrands.includes(pBrand)) {
         return false;
       }
       // Storage filter (product must have AT LEAST ONE of the selected storages)
       if (selectedStorages.length > 0) {
-        const selectedStoragesLower = selectedStorages.map(s => s.toLowerCase());
-        const hasStorage = product.storages?.some(s => selectedStoragesLower.includes(s.size.toLowerCase()));
+        const selectedStoragesLower = selectedStorages.map(s => (s || "").toLowerCase());
+        const hasStorage = product.storages?.some(s => s?.size && selectedStoragesLower.includes(s.size.toLowerCase()));
         if (!hasStorage) return false;
       }
       // Color filter (product must have AT LEAST ONE of the selected colors)
       if (selectedColors.length > 0) {
-        const selectedColorsLower = selectedColors.map(c => c.toLowerCase());
-        const hasColor = product.colors?.some(c => selectedColorsLower.includes(c.toLowerCase()));
+        const selectedColorsLower = selectedColors.map(c => (c || "").toLowerCase());
+        const hasColor = product.colors?.some(c => c && selectedColorsLower.includes(c.toLowerCase()));
         if (!hasColor) return false;
       }
       return true;
@@ -81,7 +85,7 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
   }, [initialProducts, searchQuery, selectedBrands, selectedStorages, selectedColors]);
 
   const toggleBrand = (brandName: string) => {
-    const name = brandName.toLowerCase();
+    const name = (brandName || "").toLowerCase();
     setSelectedBrands(prev => 
       prev.includes(name) ? prev.filter(b => b !== name) : [...prev, name]
     );
@@ -154,7 +158,7 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
             <h4 className="font-bold text-slate-800 text-sm">Brands</h4>
             <div className="grid grid-cols-2 gap-2">
               {brands.map(brand => {
-                const isSelected = selectedBrands.includes(brand.name.toLowerCase());
+                const isSelected = brand?.name ? selectedBrands.includes(brand.name.toLowerCase()) : false;
                 return (
                   <button
                     key={brand.id}
