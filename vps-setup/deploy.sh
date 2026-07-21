@@ -64,7 +64,7 @@ if [ ! -f .env ]; then
     read -p "Press enter to continue once you have created the .env file..."
 fi
 
-pm2 start server.js --name "sellphone-backend" || pm2 restart "sellphone-backend"
+pm2 restart "sellphone-backend" || pm2 start server.js --name "sellphone-backend"
 pm2 save
 
 # 6. Set up Frontend
@@ -82,7 +82,7 @@ if [ ! -f .env.local ]; then
 fi
 
 npm run build
-pm2 start npm --name "sellphone-frontend" -- start || pm2 restart "sellphone-frontend"
+pm2 restart "sellphone-frontend" || pm2 start npm --name "sellphone-frontend" -- start
 pm2 save
 
 # PM2 Startup Script
