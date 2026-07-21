@@ -17,28 +17,28 @@ export const storagePriceBoosts = {
 
 export const conditions = [
   {
-    id: "flawless",
-    label: "Flawless",
-    desc: "Like new, no scratches",
-    priceMultiplier: 1,
+    slug: "flawless",
+    name: "Flawless",
+    description: "Like new, no scratches",
+    multiplier: 1,
   },
   {
-    id: "good",
-    label: "Good",
-    desc: "Light scratches, fully working",
-    priceMultiplier: 0.8,
+    slug: "good",
+    name: "Good",
+    description: "Light scratches, fully working",
+    multiplier: 0.8,
   },
   {
-    id: "average",
-    label: "Average",
-    desc: "Visible wear, fully working",
-    priceMultiplier: 0.6,
+    slug: "average",
+    name: "Average",
+    description: "Visible wear, fully working",
+    multiplier: 0.6,
   },
   {
-    id: "broken",
-    label: "Broken",
-    desc: "Cracked screen/back, functional issues",
-    priceMultiplier: 0.3,
+    slug: "broken",
+    name: "Broken",
+    description: "Cracked screen/back, functional issues",
+    multiplier: 0.3,
   },
 ];
 
