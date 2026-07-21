@@ -49,7 +49,7 @@ fi
 # 5. Set up Backend
 echo "Setting up backend..."
 cd $DEST_DIR/backend
-npm install
+npm install --legacy-peer-deps
 
 # Wait for user to create .env if it doesn't exist
 if [ ! -f .env ]; then
@@ -70,7 +70,7 @@ pm2 save
 # 6. Set up Frontend
 echo "Setting up frontend..."
 cd $DEST_DIR/sellyouphone24
-npm install
+npm install --legacy-peer-deps
 
 if [ ! -f .env.local ]; then
     echo "Please create $DEST_DIR/sellyouphone24/.env.local with your production variables!"
