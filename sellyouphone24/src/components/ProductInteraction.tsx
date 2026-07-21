@@ -2,7 +2,7 @@
 
 import useCartStore from "@/app/stores/cartStore";
 import { ProductType } from "@/types";
-import { conditions, storagePriceBoosts } from "@/data/mockData";
+import { conditions } from "@/data/mockData";
 import { BadgeCheck, Info, Scale, ShoppingBag, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
