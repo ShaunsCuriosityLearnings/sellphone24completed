@@ -861,11 +861,11 @@ export default function AdminPage() {
                     <p className="text-sm text-slate-500 font-semibold">No products found matching your search.</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
                     {filteredProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-4 flex gap-4 hover:border-slate-800 transition relative"
+                      className="border border-slate-900 bg-slate-900/30 rounded-2xl p-4 flex flex-col xl:flex-row gap-4 hover:border-slate-800 transition relative overflow-hidden"
                     >
                       <input
                         type="checkbox"
@@ -877,7 +877,7 @@ export default function AdminPage() {
                         }}
                         className="absolute top-4 left-4 z-10 w-4 h-4 rounded border-slate-700 bg-slate-900 text-emerald-500 cursor-pointer"
                       />
-                      <div className="relative w-16 h-20 bg-slate-950 rounded-xl flex-shrink-0 flex items-center justify-center p-2 border border-slate-900 ml-6">
+                      <div className="relative w-full xl:w-20 h-24 bg-slate-950 rounded-xl flex-shrink-0 flex items-center justify-center p-2 border border-slate-900 mt-6 xl:mt-0 xl:ml-6">
                         <Image
                           src={product.images.frontView}
                           alt={product.name}
@@ -889,12 +889,12 @@ export default function AdminPage() {
                         <div className="space-y-0.5">
                           <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">{product.brand}</p>
                           <h3 className="font-bold text-slate-200 text-sm truncate">{product.name}</h3>
-                          <p className="text-[10px] text-slate-500 line-clamp-1">{product.shortDescription}</p>
+                          <p className="text-[10px] text-slate-500 truncate">{product.shortDescription}</p>
                         </div>
-                        <div className="flex justify-between items-center pt-2">
+                        <div className="flex justify-between items-center pt-3 mt-auto border-t border-slate-800/50 xl:border-none xl:pt-2">
                           <p className="text-xs font-extrabold text-emerald-400">AED {product.basePrice}</p>
                           
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             <button
                               onClick={() => handleEditProductClick(product)}
                               className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-emerald-500/20 transition cursor-pointer"
@@ -1008,8 +1008,8 @@ export default function AdminPage() {
                       <div key={idx} className="flex gap-2 items-center">
                         <input
                           type="text"
-                          placeholder="Size (e.g. 128GB)"
-                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 outline-none focus:border-emerald-500 text-slate-200"
+                          placeholder="Size"
+                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 outline-none focus:border-emerald-500 text-slate-200 w-full min-w-0"
                           value={storage.size}
                           onChange={(e) => {
                             const newStorages = [...newProduct.storages];
@@ -1019,8 +1019,8 @@ export default function AdminPage() {
                         />
                         <input
                           type="number"
-                          placeholder="Boost (AED)"
-                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 outline-none focus:border-emerald-500 text-slate-200"
+                          placeholder="Boost"
+                          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2.5 outline-none focus:border-emerald-500 text-slate-200 w-full min-w-0"
                           value={storage.priceBoost === 0 ? "" : storage.priceBoost}
                           onChange={(e) => {
                             const newStorages = [...newProduct.storages];
@@ -1034,7 +1034,7 @@ export default function AdminPage() {
                             const newStorages = newProduct.storages.filter((_, i) => i !== idx);
                             setNewProduct({ ...newProduct, storages: newStorages });
                           }}
-                          className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition"
+                          className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition flex-shrink-0"
                         >
                           X
                         </button>
@@ -1089,7 +1089,7 @@ export default function AdminPage() {
 
                   <div className="grid grid-cols-3 gap-3">
                     <div className="flex flex-col gap-1">
-                      <label className="font-semibold text-slate-400">Front View</label>
+                      <label className="font-semibold text-slate-400 truncate">Front View</label>
                       <input
                         type="file"
                         accept="image/*"
@@ -1102,7 +1102,7 @@ export default function AdminPage() {
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="font-semibold text-slate-400">Side View</label>
+                      <label className="font-semibold text-slate-400 truncate">Side View</label>
                       <input
                         type="file"
                         accept="image/*"
@@ -1115,7 +1115,7 @@ export default function AdminPage() {
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="font-semibold text-slate-400">Back View</label>
+                      <label className="font-semibold text-slate-400 truncate">Back View</label>
                       <input
                         type="file"
                         accept="image/*"
@@ -1139,7 +1139,7 @@ export default function AdminPage() {
                         rel="noopener noreferrer"
                         className="text-[9px] text-emerald-400 hover:underline flex items-center gap-1 font-bold cursor-pointer"
                       >
-                        🔍 Test on Google SEO Validator
+                        🔍 Test SEO
                       </a>
                     </div>
                     <div className="bg-white p-3 rounded-lg border border-slate-200 text-slate-950 font-sans text-xs space-y-1">
@@ -1179,7 +1179,7 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {brands.map((brand) => (
                     <div
                       key={brand.id || brand._id}
@@ -1327,7 +1327,7 @@ export default function AdminPage() {
                   )}
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {categories.map((category) => (
                     <div
                       key={category.slug}
