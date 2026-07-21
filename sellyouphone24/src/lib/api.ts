@@ -15,6 +15,7 @@ async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): P
   try {
     const isFormData = options?.body instanceof FormData;
     const res = await fetch(url, {
+      cache: "no-store",
       ...options,
       headers: {
         ...(!isFormData ? { "Content-Type": "application/json" } : {}),
