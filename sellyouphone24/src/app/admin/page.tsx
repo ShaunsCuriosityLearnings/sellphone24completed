@@ -373,8 +373,13 @@ export default function AdminPage() {
         image: "",
       });
       loadData();
-    } catch (error) {
-      toast.error("Failed to create category");
+    } catch (error: any) {
+      const errMsg = error?.message || "";
+      if (errMsg.includes("already exists")) {
+        toast.error("That slug is already in use. Please choose a unique slug.");
+      } else {
+        toast.error("Failed to create category");
+      }
     }
   };
 

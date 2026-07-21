@@ -21,9 +21,19 @@ export const createCategory = async (req, res) => {
     if (req.file) {
       image = req.file.path;
     }
+    
+    // Check for duplicate slug manually to provide a clear error message
+    const existing = await Category.findOne({ slug });
+    if (existing) {
+      return res.status(400).json({ message: `A category with the slug "${slug}" already exists. Please use a unique slug.` });
+    }
+
     const newCategory = await Category.create({ name, slug, description, image });
     res.status(201).json(newCategory);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: `A category with this slug already exists. Please use a unique slug.` });
+    }
     res.status(400).json({ message: error.message });
   }
 };
@@ -49,6 +59,9 @@ export const updateCategory = async (req, res) => {
     }
     res.status(200).json(updatedCategory);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: `A category with this slug already exists. Please use a unique slug.` });
+    }
     res.status(400).json({ message: error.message });
   }
 };
