@@ -1,5 +1,6 @@
 import Brand from "../models/Brand.js";
 import Category from "../models/Category.js";
+import Product from "../models/Product.js";
 
 // @desc    Get all brands (with optional category filtering)
 // @route   GET /api/brands
@@ -13,7 +14,15 @@ export const getBrands = async (req, res) => {
       // Find category by slug
       const categoryDoc = await Category.findOne({ slug: category.toLowerCase() });
       if (categoryDoc) {
-        filter.categories = categoryDoc._id;
+        // Find brand IDs that have products in this category
+        const brandIdsWithProducts = await Product.distinct("brand", {
+          category: { $regex: new RegExp(`^${category}$`, "i") }
+        });
+
+        filter.$or = [
+          { categories: categoryDoc._id },
+          { _id: { $in: brandIdsWithProducts } }
+        ];
       } else {
         // If category is not found, return empty brands
         return res.status(200).json([]);

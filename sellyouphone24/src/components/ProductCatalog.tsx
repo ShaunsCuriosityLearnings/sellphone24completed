@@ -66,12 +66,14 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
       }
       // Storage filter (product must have AT LEAST ONE of the selected storages)
       if (selectedStorages.length > 0) {
-        const hasStorage = product.storages?.some(s => selectedStorages.includes(s.size));
+        const selectedStoragesLower = selectedStorages.map(s => s.toLowerCase());
+        const hasStorage = product.storages?.some(s => selectedStoragesLower.includes(s.size.toLowerCase()));
         if (!hasStorage) return false;
       }
       // Color filter (product must have AT LEAST ONE of the selected colors)
       if (selectedColors.length > 0) {
-        const hasColor = product.colors?.some(c => selectedColors.includes(c));
+        const selectedColorsLower = selectedColors.map(c => c.toLowerCase());
+        const hasColor = product.colors?.some(c => selectedColorsLower.includes(c.toLowerCase()));
         if (!hasColor) return false;
       }
       return true;

@@ -1,5 +1,6 @@
 import Product from "../models/Product.js";
 import Brand from "../models/Brand.js";
+import Category from "../models/Category.js";
 
 // Helper to format product populated brand back to string for frontend compatibility
 const formatProduct = (p) => {
@@ -9,6 +10,19 @@ const formatProduct = (p) => {
     obj.brand = obj.brand.name; // Keep brand string for backward compatibility
   }
   return obj;
+};
+
+// Helper to auto-link Brand to Category in Mongoose
+const autoLinkBrandToCategory = async (brandId, categorySlug) => {
+  if (!brandId || !categorySlug) return;
+  try {
+    const categoryDoc = await Category.findOne({ slug: categorySlug.toLowerCase() });
+    if (categoryDoc) {
+      await Brand.findByIdAndUpdate(brandId, { $addToSet: { categories: categoryDoc._id } });
+    }
+  } catch (e) {
+    console.warn("Could not auto-link brand to category:", e.message);
+  }
 };
 
 // @desc    Get all products (with optional filtering by category, brand, or search query)
@@ -99,6 +113,8 @@ export const createProduct = async (req, res) => {
     }
 
     const newProduct = await Product.create(data);
+    await autoLinkBrandToCategory(data.brand, data.category);
+
     const populated = await Product.findById(newProduct._id).populate("brand");
     res.status(201).json(formatProduct(populated));
   } catch (error) {
@@ -135,6 +151,9 @@ export const updateProduct = async (req, res) => {
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    await autoLinkBrandToCategory(updatedProduct.brand?._id || dataToUpdate.brand, updatedProduct.category || dataToUpdate.category);
+
     res.status(200).json(formatProduct(updatedProduct));
   } catch (error) {
     res.status(400).json({ message: error.message });
