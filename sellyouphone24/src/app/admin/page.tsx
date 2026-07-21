@@ -1400,6 +1400,7 @@ export default function AdminPage() {
                     <label className="font-semibold text-slate-400">Category Image</label>
                     <input
                       type="file"
+                      required
                       accept="image/*"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {

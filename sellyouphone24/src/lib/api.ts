@@ -38,7 +38,11 @@ async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): P
 export const api = {
   // --- CATEGORIES ---
   async getCategories(): Promise<CategoryType[]> {
-    return safeFetch<CategoryType[]>(`${API_BASE}/categories`, { method: "GET" }, mockCategories);
+    const dbCategories = await safeFetch<any[]>(`${API_BASE}/categories`, { method: "GET" }, mockCategories);
+    return dbCategories.map((c) => ({
+      ...c,
+      id: c._id || c.id,
+    })) as CategoryType[];
   },
 
   async createCategory(category: any, token?: string): Promise<CategoryType> {
@@ -63,7 +67,11 @@ export const api = {
       const url = params?.category
         ? `${API_BASE}/brands?category=${params.category}`
         : `${API_BASE}/brands`;
-      return await safeFetch<BrandType[]>(url, { method: "GET" });
+      const dbBrands = await safeFetch<any[]>(url, { method: "GET" }, mockBrands);
+      return dbBrands.map((b) => ({
+        ...b,
+        id: b._id || b.id,
+      })) as BrandType[];
     } catch (err) {
       return fallback;
     }
