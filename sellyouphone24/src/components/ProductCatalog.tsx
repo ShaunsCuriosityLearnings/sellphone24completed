@@ -29,18 +29,39 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
-  // Dynamically extract available storages and colors from the products list
+  // Filter products by selected brands first to compute dynamic storage & color options
+  const brandFilteredProducts = useMemo(() => {
+    if (!selectedBrands || selectedBrands.length === 0) return initialProducts || [];
+    const selectedLower = selectedBrands.map(b => (b || "").toLowerCase());
+    return (initialProducts || []).filter(p => {
+      if (!p) return false;
+      const pBrand = (p.brand || "").toLowerCase();
+      return selectedLower.some(sb => pBrand.includes(sb) || sb.includes(pBrand));
+    });
+  }, [initialProducts, selectedBrands]);
+
+  // Dynamically extract available storages and colors based on selected brand(s)
   const availableStorages = useMemo(() => {
     const storages = new Set<string>();
-    initialProducts.forEach(p => p.storages?.forEach(s => storages.add(s.size)));
+    brandFilteredProducts.forEach(p => p.storages?.forEach(s => {
+      if (s?.size) storages.add(s.size);
+    }));
     return Array.from(storages).sort();
-  }, [initialProducts]);
+  }, [brandFilteredProducts]);
 
   const availableColors = useMemo(() => {
     const colors = new Set<string>();
-    initialProducts.forEach(p => p.colors?.forEach(c => colors.add(c)));
+    brandFilteredProducts.forEach(p => p.colors?.forEach(c => {
+      if (c) colors.add(c);
+    }));
     return Array.from(colors).sort();
-  }, [initialProducts]);
+  }, [brandFilteredProducts]);
+
+  // Clean up active filter selections if they are not in the new brand options
+  useEffect(() => {
+    setSelectedStorages(prev => prev.filter(s => availableStorages.includes(s)));
+    setSelectedColors(prev => prev.filter(c => availableColors.includes(c)));
+  }, [availableStorages, availableColors]);
 
   // Sync URL with selected brands (optional but good for sharing links)
   useEffect(() => {
