@@ -4,16 +4,74 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Zap } from "lucide-react";
 import ProductCatalog from "@/components/ProductCatalog";
 
+const resolveCanonicalCategory = (categories: any[], requestedSlug: string) => {
+  const reqLower = requestedSlug.toLowerCase().trim();
+
+  // 1. Check exact match in DB
+  let matched = categories.find((c) => c.slug?.toLowerCase() === reqLower);
+  if (matched) return matched;
+
+  // 2. Check alias match in DB
+  const aliasMap: Record<string, string[]> = {
+    smartphones: ["mobile", "smartphones", "phones"],
+    mobile: ["mobile", "smartphones", "phones"],
+    laptops: ["laptops", "macbooks"],
+    macbooks: ["laptops", "macbooks"],
+    smartwatches: ["smartwatches", "watches"],
+    watches: ["smartwatches", "watches"],
+    tablets: ["tablets", "ipads"],
+    ipads: ["tablets", "ipads"],
+  };
+
+  const possibleAliases = aliasMap[reqLower] || [reqLower];
+  matched = categories.find((c) => possibleAliases.includes(c.slug?.toLowerCase()));
+  if (matched) return matched;
+
+  // 3. Fallback: Default to standard database category names
+  if (reqLower === "smartphones" || reqLower === "phones") {
+    return {
+      id: "mobile",
+      _id: "mobile",
+      name: "Mobile",
+      slug: "mobile",
+      description: "Sell your used mobile phones for top value instantly in UAE.",
+      image: "/products/apple logo.jpg"
+    };
+  }
+
+  if (reqLower === "macbooks") {
+    return {
+      id: "laptops",
+      _id: "laptops",
+      name: "Laptops",
+      slug: "laptops",
+      description: "Sell your used MacBooks and laptops for top value instantly.",
+      image: "/products/apple logo.jpg"
+    };
+  }
+
+  const formattedName = requestedSlug
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return {
+    id: requestedSlug,
+    _id: requestedSlug,
+    name: formattedName,
+    slug: requestedSlug,
+    description: `Sell your used ${formattedName} for instant cash in UAE.`,
+    image: "/products/apple logo.jpg"
+  };
+};
+
 export const generateMetadata = async ({ params }: { params: Promise<{ category: string }> }) => {
   const categorySlug = (await params).category;
   const categories = await api.getCategories();
-  const category = categories.find((c) => c.slug?.toLowerCase() === categorySlug.toLowerCase());
-  
-  const titleName = category ? category.name : categorySlug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  const category = resolveCanonicalCategory(categories, categorySlug);
 
   return {
-    title: `Sell ${titleName} | SellYourPhone24`,
-    description: `Sell your used ${titleName.toLowerCase()} in Dubai & UAE. Get instant valuations for Apple, Samsung, Google, and more.`,
+    title: `Sell ${category.name} | SellYourPhone24`,
+    description: `Sell your used ${category.name.toLowerCase()} in Dubai & UAE. Get instant valuations for Apple, Samsung, Google, and more.`,
   };
 };
 
@@ -21,28 +79,14 @@ const CategoryPage = async ({ params }: { params: Promise<{ category: string }> 
   const categorySlug = (await params).category;
   const categories = await api.getCategories();
   
-  let category = categories.find((c) => c.slug?.toLowerCase() === categorySlug.toLowerCase());
+  const category = resolveCanonicalCategory(categories, categorySlug);
 
-  if (!category) {
-    const formattedName = categorySlug
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
-    category = {
-      id: categorySlug,
-      _id: categorySlug,
-      name: formattedName,
-      slug: categorySlug,
-      description: `Sell your used ${formattedName} for instant cash in UAE.`,
-      image: "/products/apple logo.jpg"
-    };
-  }
-
-  let categoryBrands = await api.getBrands({ category: categorySlug });
+  let categoryBrands = await api.getBrands({ category: category.slug });
   if (!categoryBrands || categoryBrands.length === 0) {
     categoryBrands = await api.getBrands();
   }
 
-  let categoryProducts = await api.getProducts({ category: categorySlug });
+  let categoryProducts = await api.getProducts({ category: category.slug });
   if (!categoryProducts || categoryProducts.length === 0) {
     const aliasMap: Record<string, string> = {
       smartphones: "mobile",
