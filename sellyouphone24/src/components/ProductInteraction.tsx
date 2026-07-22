@@ -66,9 +66,9 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
   return (
     <div className="flex flex-col gap-6 text-slate-800">
       
-      {/* 1. SELECT STORAGE */}
+      {/* 1. SELECT SPECIFICATION */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">1. Select Storage</h3>
+        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">1. Select Variant / Specification</h3>
         <div className="flex flex-wrap gap-2.5">
           {product.storages.map((storageObj) => {
             const storage = storageObj.size;

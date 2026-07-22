@@ -23,7 +23,11 @@ import {
   BookOpen,
   ChevronDown,
   ChevronUp,
-  LogOut
+  LogOut,
+  Laptop,
+  Watch,
+  Tablet,
+  Cpu
 } from "lucide-react";
 import Image from "next/image";
 
@@ -66,7 +70,68 @@ const statusColors = {
   cancelled: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-const STANDARD_STORAGES = [
+// Device category spec presets for quick 1-click variant creation
+const CATEGORY_SPEC_PRESETS: Record<string, Array<{ size: string; defaultBoost: number }>> = {
+  smartphones: [
+    { size: "64GB", defaultBoost: 0 },
+    { size: "128GB", defaultBoost: 100 },
+    { size: "256GB", defaultBoost: 200 },
+    { size: "512GB", defaultBoost: 400 },
+    { size: "1TB", defaultBoost: 700 },
+    { size: "6GB RAM / 128GB", defaultBoost: 100 },
+    { size: "8GB RAM / 128GB", defaultBoost: 150 },
+    { size: "8GB RAM / 256GB", defaultBoost: 250 },
+    { size: "12GB RAM / 256GB", defaultBoost: 350 },
+    { size: "12GB RAM / 512GB", defaultBoost: 500 },
+    { size: "16GB RAM / 1TB", defaultBoost: 800 },
+  ],
+  mobile: [
+    { size: "64GB", defaultBoost: 0 },
+    { size: "128GB", defaultBoost: 100 },
+    { size: "256GB", defaultBoost: 200 },
+    { size: "8GB RAM / 128GB", defaultBoost: 150 },
+    { size: "8GB RAM / 256GB", defaultBoost: 250 },
+    { size: "12GB RAM / 256GB", defaultBoost: 350 },
+    { size: "12GB RAM / 512GB", defaultBoost: 500 },
+  ],
+  laptops: [
+    { size: "8GB RAM / 256GB SSD", defaultBoost: 0 },
+    { size: "16GB RAM / 512GB SSD", defaultBoost: 300 },
+    { size: "16GB RAM / 1TB SSD", defaultBoost: 550 },
+    { size: "32GB RAM / 1TB SSD", defaultBoost: 850 },
+    { size: "64GB RAM / 2TB SSD", defaultBoost: 1500 },
+  ],
+  macbooks: [
+    { size: "8GB RAM / 256GB SSD", defaultBoost: 0 },
+    { size: "16GB RAM / 512GB SSD", defaultBoost: 350 },
+    { size: "16GB RAM / 1TB SSD", defaultBoost: 600 },
+    { size: "32GB RAM / 1TB SSD", defaultBoost: 950 },
+    { size: "64GB RAM / 2TB SSD", defaultBoost: 1600 },
+  ],
+  smartwatches: [
+    { size: "40mm GPS", defaultBoost: 0 },
+    { size: "41mm GPS", defaultBoost: 50 },
+    { size: "44mm GPS", defaultBoost: 100 },
+    { size: "45mm GPS + Cellular", defaultBoost: 250 },
+    { size: "49mm Ultra Cellular", defaultBoost: 600 },
+  ],
+  watches: [
+    { size: "40mm GPS", defaultBoost: 0 },
+    { size: "41mm GPS", defaultBoost: 50 },
+    { size: "44mm GPS", defaultBoost: 100 },
+    { size: "45mm GPS + Cellular", defaultBoost: 250 },
+    { size: "49mm Ultra Cellular", defaultBoost: 600 },
+  ],
+  tablets: [
+    { size: "64GB Wi-Fi", defaultBoost: 0 },
+    { size: "128GB Wi-Fi", defaultBoost: 100 },
+    { size: "256GB Wi-Fi + Cellular", defaultBoost: 250 },
+    { size: "512GB Wi-Fi + Cellular", defaultBoost: 450 },
+    { size: "1TB Wi-Fi + Cellular", defaultBoost: 750 },
+  ],
+};
+
+const DEFAULT_PRESETS = [
   { size: "64GB", defaultBoost: 0 },
   { size: "128GB", defaultBoost: 100 },
   { size: "256GB", defaultBoost: 200 },
@@ -148,6 +213,11 @@ export default function AdminPage() {
       backView: "" as string | File,
     },
   });
+
+  // RAM & Custom Spec Builder state
+  const [customRam, setCustomRam] = useState<string>("");
+  const [customSize, setCustomSize] = useState<string>("");
+  const [customBoost, setCustomBoost] = useState<number>(0);
 
   const [newCategory, setNewCategory] = useState({ name: "", slug: "", description: "", image: "" as string | File });
   const [newBrand, setNewBrand] = useState<{ name: string; slug: string; logo: string | File; categories: string[] }>({ name: "", slug: "", logo: "", categories: [] });
@@ -512,6 +582,28 @@ export default function AdminPage() {
     }
   };
 
+  const handleAddCustomSpec = () => {
+    if (!customSize.trim() && !customRam) {
+      toast.error("Enter RAM or Size spec");
+      return;
+    }
+    const fullSpecStr = customRam ? (customSize.trim() ? `${customRam} / ${customSize.trim()}` : customRam) : customSize.trim();
+    const exists = newProduct.storages.some(s => s.size.toLowerCase() === fullSpecStr.toLowerCase());
+    if (exists) {
+      toast.error("Variant already exists in list");
+      return;
+    }
+    setNewProduct({
+      ...newProduct,
+      storages: [...newProduct.storages, { size: fullSpecStr, priceBoost: Number(customBoost) || 0 }]
+    });
+    setCustomSize("");
+    setCustomBoost(0);
+  };
+
+  // Dynamic category presets based on selected category
+  const activeCategoryPresets = CATEGORY_SPEC_PRESETS[newProduct.category.toLowerCase()] || DEFAULT_PRESETS;
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans text-xs pb-16">
       
@@ -699,7 +791,7 @@ export default function AdminPage() {
                             <th className="py-2.5 px-4">Brand</th>
                             <th className="py-2.5 px-4">Category</th>
                             <th className="py-2.5 px-4">Base Price</th>
-                            <th className="py-2.5 px-4">Storages</th>
+                            <th className="py-2.5 px-4">Specs & Variants</th>
                             <th className="py-2.5 px-4 text-right">Actions</th>
                           </tr>
                         </thead>
@@ -862,7 +954,7 @@ export default function AdminPage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. iPhone 15 Pro"
+                        placeholder="e.g. Galaxy S24 Ultra / MacBook Pro M3"
                         value={newProduct.name}
                         onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
@@ -890,7 +982,7 @@ export default function AdminPage() {
                         required
                         value={newProduct.category}
                         onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 cursor-pointer focus:bg-white"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 cursor-pointer focus:bg-white font-bold"
                       >
                         {categories.map((c) => (
                           <option key={c.slug} value={c.slug}>{c.name}</option>
@@ -901,7 +993,7 @@ export default function AdminPage() {
 
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Base Price (AED) *</label>
+                      <label className="font-bold text-slate-700 block mb-1">Base Valuation Price (AED) *</label>
                       <input
                         type="number"
                         required
@@ -914,10 +1006,10 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Color Options (Comma-separated)</label>
+                      <label className="font-bold text-slate-700 block mb-1">Color Variants (Comma-separated)</label>
                       <input
                         type="text"
-                        placeholder="e.g. Black, Silver, Gold"
+                        placeholder="e.g. Titanium Black, Titanium Violet"
                         value={newProduct.colors}
                         onChange={(e) => setNewProduct({ ...newProduct, colors: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
@@ -925,17 +1017,29 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Compact Storage Section */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
+                  {/* Flexible Specifications & RAM / Storage / UOM Customizer */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+                    
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <span className="font-bold text-slate-800">Storage Capacity & Boosts</span>
-                      <div className="flex flex-wrap gap-1">
-                        {STANDARD_STORAGES.map((preset) => (
+                      <div>
+                        <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                          <Cpu size={14} className="text-emerald-500" />
+                          <span>Specifications & Variants (RAM / Storage / Size)</span>
+                        </span>
+                        <p className="text-[10px] text-slate-500">Select quick presets or create custom RAM, SSD, or Watch Case specs below.</p>
+                      </div>
+                    </div>
+
+                    {/* Quick Category Presets */}
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Category Quick Presets ({newProduct.category})</span>
+                      <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto p-1 bg-white rounded-lg border border-slate-200">
+                        {activeCategoryPresets.map((preset) => (
                           <button
                             key={preset.size}
                             type="button"
                             onClick={() => handleAddStoragePreset(preset)}
-                            className="px-2 py-0.5 bg-white text-[10px] font-semibold text-slate-700 hover:text-emerald-600 rounded border border-slate-200 shadow-sm"
+                            className="px-2 py-1 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-[10px] font-semibold text-slate-700 rounded border border-slate-200 transition"
                           >
                             + {preset.size}
                           </button>
@@ -943,23 +1047,80 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-1.5">
+                    {/* Custom Spec Builder */}
+                    <div className="bg-white border border-slate-200 rounded-lg p-2.5 space-y-2">
+                      <span className="text-[10px] font-bold text-slate-700 block uppercase">Create Custom RAM & Storage / UOM Spec</span>
+                      <div className="grid sm:grid-cols-12 gap-2 items-center">
+                        
+                        <div className="sm:col-span-3">
+                          <select
+                            value={customRam}
+                            onChange={(e) => setCustomRam(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-xs text-slate-800 outline-none"
+                          >
+                            <option value="">RAM (Optional)</option>
+                            <option value="4GB RAM">4GB RAM</option>
+                            <option value="6GB RAM">6GB RAM</option>
+                            <option value="8GB RAM">8GB RAM</option>
+                            <option value="12GB RAM">12GB RAM</option>
+                            <option value="16GB RAM">16GB RAM</option>
+                            <option value="32GB RAM">32GB RAM</option>
+                            <option value="64GB RAM">64GB RAM</option>
+                          </select>
+                        </div>
+
+                        <div className="sm:col-span-4">
+                          <input
+                            type="text"
+                            placeholder="Storage / Size (e.g. 256GB / 512GB SSD / 45mm GPS)"
+                            value={customSize}
+                            onChange={(e) => setCustomSize(e.target.value)}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-xs text-slate-800 outline-none"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-3">
+                          <input
+                            type="number"
+                            placeholder="Price Boost (AED)"
+                            value={customBoost === 0 ? "" : customBoost}
+                            onChange={(e) => setCustomBoost(Number(e.target.value))}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1.5 text-xs text-emerald-600 font-bold outline-none"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <button
+                            type="button"
+                            onClick={handleAddCustomSpec}
+                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-1.5 px-2 rounded text-[11px] transition shadow-sm"
+                          >
+                            + Add Spec
+                          </button>
+                        </div>
+
+                      </div>
+                    </div>
+
+                    {/* Added Spec Variants List */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[10px] font-bold text-slate-600 block">Active Specification Variants ({newProduct.storages.length})</span>
                       {newProduct.storages.map((s, idx) => (
                         <div key={idx} className="flex items-center gap-2">
                           <input
                             type="text"
-                            placeholder="Size"
+                            placeholder="Spec / Variant Name"
                             value={s.size}
                             onChange={(e) => {
                               const updated = [...newProduct.storages];
                               updated[idx].size = e.target.value;
                               setNewProduct({ ...newProduct, storages: updated });
                             }}
-                            className="w-1/3 bg-white border border-slate-200 rounded p-1.5 text-slate-900"
+                            className="w-1/2 bg-white border border-slate-200 rounded p-1.5 text-slate-900 font-semibold"
                           />
                           <input
                             type="number"
-                            placeholder="Price Boost"
+                            placeholder="Price Boost (AED)"
                             value={s.priceBoost === 0 ? "" : s.priceBoost}
                             onChange={(e) => {
                               const updated = [...newProduct.storages];
@@ -974,20 +1135,22 @@ export default function AdminPage() {
                               const updated = newProduct.storages.filter((_, i) => i !== idx);
                               setNewProduct({ ...newProduct, storages: updated });
                             }}
-                            className="p-1 text-rose-600 hover:bg-rose-50 rounded"
+                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded border border-rose-200"
+                            title="Remove Variant"
                           >
                             <Trash2 size={12} />
                           </button>
                         </div>
                       ))}
                     </div>
+
                   </div>
 
                   <div>
                     <label className="font-bold text-slate-700 block mb-1">Short Description</label>
                     <input
                       type="text"
-                      placeholder="e.g. Titanium design, A17 Pro chip..."
+                      placeholder="e.g. Snapdragon 8 Gen 3, Dynamic LTPO AMOLED 2X, Titanium Frame..."
                       value={newProduct.shortDescription}
                       onChange={(e) => setNewProduct({ ...newProduct, shortDescription: e.target.value })}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
