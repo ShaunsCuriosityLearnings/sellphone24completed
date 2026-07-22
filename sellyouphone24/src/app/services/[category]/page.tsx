@@ -37,8 +37,30 @@ const CategoryPage = async ({ params }: { params: Promise<{ category: string }> 
     };
   }
 
-  const categoryBrands = await api.getBrands({ category: categorySlug });
-  const categoryProducts = await api.getProducts({ category: categorySlug });
+  let categoryBrands = await api.getBrands({ category: categorySlug });
+  if (!categoryBrands || categoryBrands.length === 0) {
+    categoryBrands = await api.getBrands();
+  }
+
+  let categoryProducts = await api.getProducts({ category: categorySlug });
+  if (!categoryProducts || categoryProducts.length === 0) {
+    const aliasMap: Record<string, string> = {
+      smartphones: "mobile",
+      mobile: "smartphones",
+      laptops: "macbooks",
+      macbooks: "laptops",
+      smartwatches: "watches",
+      tablets: "ipads"
+    };
+    const fallbackSlug = aliasMap[categorySlug.toLowerCase()];
+    if (fallbackSlug) {
+      categoryProducts = await api.getProducts({ category: fallbackSlug });
+    }
+  }
+
+  if (!categoryProducts || categoryProducts.length === 0) {
+    categoryProducts = await api.getProducts();
+  }
 
   return (
     <div className="space-y-12 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

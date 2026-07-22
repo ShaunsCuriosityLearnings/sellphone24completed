@@ -25,6 +25,24 @@ const autoLinkBrandToCategory = async (brandId, categorySlug) => {
   }
 };
 
+export const getCategoryAliases = (slug) => {
+  if (!slug) return [];
+  const s = slug.toLowerCase().trim();
+  if (s === "smartphones" || s === "mobile" || s === "phones" || s === "cell-phones") {
+    return ["smartphones", "mobile", "phones", "cell-phones"];
+  }
+  if (s === "laptops" || s === "macbooks" || s === "computers") {
+    return ["laptops", "macbooks", "computers"];
+  }
+  if (s === "smartwatches" || s === "watches") {
+    return ["smartwatches", "watches"];
+  }
+  if (s === "tablets" || s === "ipads") {
+    return ["tablets", "ipads"];
+  }
+  return [s];
+};
+
 // @desc    Get all products (with optional filtering by category, brand, or search query)
 // @route   GET /api/products
 // @access  Public
@@ -34,7 +52,8 @@ export const getProducts = async (req, res) => {
     const filter = {};
 
     if (category) {
-      filter.category = { $regex: new RegExp(`^${category}$`, "i") };
+      const aliases = getCategoryAliases(category);
+      filter.category = { $in: aliases.map((a) => new RegExp(`^${a}$`, "i")) };
     }
 
     if (brand) {

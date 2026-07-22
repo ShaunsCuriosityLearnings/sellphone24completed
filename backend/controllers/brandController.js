@@ -2,6 +2,24 @@ import Brand from "../models/Brand.js";
 import Category from "../models/Category.js";
 import Product from "../models/Product.js";
 
+const getCategoryAliases = (slug) => {
+  if (!slug) return [];
+  const s = slug.toLowerCase().trim();
+  if (s === "smartphones" || s === "mobile" || s === "phones" || s === "cell-phones") {
+    return ["smartphones", "mobile", "phones", "cell-phones"];
+  }
+  if (s === "laptops" || s === "macbooks" || s === "computers") {
+    return ["laptops", "macbooks", "computers"];
+  }
+  if (s === "smartwatches" || s === "watches") {
+    return ["smartwatches", "watches"];
+  }
+  if (s === "tablets" || s === "ipads") {
+    return ["tablets", "ipads"];
+  }
+  return [s];
+};
+
 // @desc    Get all brands (with optional category filtering)
 // @route   GET /api/brands
 // @access  Public
@@ -11,25 +29,30 @@ export const getBrands = async (req, res) => {
     const filter = {};
 
     if (category) {
-      // Find category by slug
-      const categoryDoc = await Category.findOne({ slug: category.toLowerCase() });
-      if (categoryDoc) {
-        // Find brand IDs that have products in this category
-        const brandIdsWithProducts = await Product.distinct("brand", {
-          category: { $regex: new RegExp(`^${category}$`, "i") }
-        });
+      const aliases = getCategoryAliases(category);
 
-        filter.$or = [
-          { categories: categoryDoc._id },
-          { _id: { $in: brandIdsWithProducts } }
-        ];
-      } else {
-        // If category is not found, return empty brands
-        return res.status(200).json([]);
-      }
+      const categoryDocs = await Category.find({
+        slug: { $in: aliases.map((a) => new RegExp(`^${a}$`, "i")) }
+      });
+      const categoryIds = categoryDocs.map((c) => c._id);
+
+      const brandIdsWithProducts = await Product.distinct("brand", {
+        category: { $in: aliases.map((a) => new RegExp(`^${a}$`, "i")) }
+      });
+
+      filter.$or = [
+        { categories: { $in: categoryIds } },
+        { _id: { $in: brandIdsWithProducts } }
+      ];
     }
 
-    const brands = await Brand.find(filter).populate("categories", "name slug");
+    let brands = await Brand.find(filter).populate("categories", "name slug");
+    
+    // Fallback: If category specific brand query produced empty list, return all active brands so sidebar is never empty
+    if (!brands || brands.length === 0) {
+      brands = await Brand.find({}).populate("categories", "name slug");
+    }
+
     res.status(200).json(brands);
   } catch (error) {
     res.status(500).json({ message: error.message });

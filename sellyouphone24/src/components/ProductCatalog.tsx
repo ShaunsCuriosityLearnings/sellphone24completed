@@ -64,9 +64,11 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
       if (searchQuery && !pName.includes((searchQuery || "").toLowerCase())) {
         return false;
       }
-      // Brand filter
-      if (selectedBrands.length > 0 && !selectedBrands.includes(pBrand)) {
-        return false;
+      // Brand filter (fuzzy & case-insensitive matching)
+      if (selectedBrands.length > 0) {
+        const selectedBrandsLower = selectedBrands.map(b => (b || "").toLowerCase());
+        const matchesBrand = selectedBrandsLower.some(sb => pBrand.includes(sb) || sb.includes(pBrand));
+        if (!matchesBrand) return false;
       }
       // Storage filter (product must have AT LEAST ONE of the selected storages)
       if (selectedStorages.length > 0) {
