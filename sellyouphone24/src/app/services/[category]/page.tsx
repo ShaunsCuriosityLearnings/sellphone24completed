@@ -7,23 +7,34 @@ import ProductCatalog from "@/components/ProductCatalog";
 export const generateMetadata = async ({ params }: { params: Promise<{ category: string }> }) => {
   const categorySlug = (await params).category;
   const categories = await api.getCategories();
-  const category = categories.find((c) => c.slug === categorySlug);
+  const category = categories.find((c) => c.slug?.toLowerCase() === categorySlug.toLowerCase());
   
-  if (!category) return { title: "Category Not Found" };
-  
+  const titleName = category ? category.name : categorySlug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
   return {
-    title: `Sell ${category.name} | SellYourPhone24`,
-    description: `Sell your used ${category.name.toLowerCase()} in Dubai & UAE. Get instant valuations for Apple, Samsung, Google, and more.`,
+    title: `Sell ${titleName} | SellYourPhone24`,
+    description: `Sell your used ${titleName.toLowerCase()} in Dubai & UAE. Get instant valuations for Apple, Samsung, Google, and more.`,
   };
 };
 
 const CategoryPage = async ({ params }: { params: Promise<{ category: string }> }) => {
   const categorySlug = (await params).category;
   const categories = await api.getCategories();
-  const category = categories.find((c) => c.slug === categorySlug);
+  
+  let category = categories.find((c) => c.slug?.toLowerCase() === categorySlug.toLowerCase());
 
   if (!category) {
-    notFound();
+    const formattedName = categorySlug
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+    category = {
+      id: categorySlug,
+      _id: categorySlug,
+      name: formattedName,
+      slug: categorySlug,
+      description: `Sell your used ${formattedName} for instant cash in UAE.`,
+      image: "/products/apple logo.jpg"
+    };
   }
 
   const categoryBrands = await api.getBrands({ category: categorySlug });
