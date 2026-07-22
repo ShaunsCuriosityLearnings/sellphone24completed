@@ -316,6 +316,23 @@ export default function AdminPage() {
     }
   };
 
+  const openAddProductForCategory = (catSlug: string) => {
+    setEditingProductId(null);
+    const presets = CATEGORY_SPEC_PRESETS[catSlug.toLowerCase()] || DEFAULT_PRESETS;
+    setNewProduct({
+      name: "",
+      brand: brands[0]?.id?.toString() || brands[0]?._id?.toString() || "",
+      category: catSlug,
+      basePrice: catSlug.includes("laptop") ? 3000 : 1500,
+      storages: presets.slice(0, 4).map(p => ({ size: p.size, priceBoost: p.defaultBoost })),
+      colors: "Black, Silver, Space Gray",
+      description: "",
+      shortDescription: "",
+      images: { frontView: "", sideView: "", backView: "" },
+    });
+    setActiveTab("add-product");
+  };
+
   const handleEditProductClick = (product: ProductType) => {
     setEditingProductId(product.id || product._id || "");
     const brandDoc = brands.find((b) => (b.name || "").toLowerCase() === (product.brand || "").toLowerCase());
@@ -621,23 +638,38 @@ export default function AdminPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            
+            {/* Quick Category Add Shortcuts */}
+            <div className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+              <button
+                onClick={() => openAddProductForCategory("smartphones")}
+                className="px-2 py-1 bg-white hover:bg-emerald-50 hover:text-emerald-600 rounded text-[11px] font-bold text-slate-700 transition flex items-center gap-1 shadow-sm"
+              >
+                <Smartphone size={12} className="text-emerald-500" /> + Mobile
+              </button>
+              <button
+                onClick={() => openAddProductForCategory("laptops")}
+                className="px-2 py-1 bg-white hover:bg-emerald-50 hover:text-emerald-600 rounded text-[11px] font-bold text-slate-700 transition flex items-center gap-1 shadow-sm"
+              >
+                <Laptop size={12} className="text-emerald-500" /> + Laptop
+              </button>
+              <button
+                onClick={() => openAddProductForCategory("tablets")}
+                className="px-2 py-1 bg-white hover:bg-emerald-50 hover:text-emerald-600 rounded text-[11px] font-bold text-slate-700 transition flex items-center gap-1 shadow-sm"
+              >
+                <Tablet size={12} className="text-emerald-500" /> + Tablet
+              </button>
+              <button
+                onClick={() => openAddProductForCategory("smartwatches")}
+                className="px-2 py-1 bg-white hover:bg-emerald-50 hover:text-emerald-600 rounded text-[11px] font-bold text-slate-700 transition flex items-center gap-1 shadow-sm"
+              >
+                <Watch size={12} className="text-emerald-500" /> + Watch
+              </button>
+            </div>
+
             <button
-              onClick={() => {
-                setEditingProductId(null);
-                setNewProduct({
-                  name: "",
-                  brand: brands[0]?.id?.toString() || brands[0]?._id?.toString() || "",
-                  category: categories[0]?.slug || "smartphones",
-                  basePrice: 1500,
-                  storages: [{ size: "128GB", priceBoost: 0 }, { size: "256GB", priceBoost: 200 }],
-                  colors: "Black, Silver, Gold",
-                  description: "",
-                  shortDescription: "",
-                  images: { frontView: "", sideView: "", backView: "" },
-                });
-                setActiveTab("add-product");
-              }}
+              onClick={() => openAddProductForCategory("smartphones")}
               className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
             >
               <Plus size={14} />
@@ -946,6 +978,68 @@ export default function AdminPage() {
                   </button>
                 </div>
 
+                {/* Device Category Section Selector Bar */}
+                <div className="bg-slate-100/90 border border-slate-200 p-2 rounded-xl flex items-center justify-between gap-3 flex-wrap">
+                  <span className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Layers size={13} className="text-emerald-500" />
+                    <span>Select Creation Category Section:</span>
+                  </span>
+                  
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => openAddProductForCategory("smartphones")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                        newProduct.category.toLowerCase().includes("phone") || newProduct.category.toLowerCase().includes("mobile")
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "bg-white text-slate-700 hover:bg-slate-200 border border-slate-200"
+                      }`}
+                    >
+                      <Smartphone size={13} className="text-emerald-500" />
+                      <span>📱 Mobile Section</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openAddProductForCategory("laptops")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                        newProduct.category.toLowerCase().includes("laptop") || newProduct.category.toLowerCase().includes("macbook")
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "bg-white text-slate-700 hover:bg-slate-200 border border-slate-200"
+                      }`}
+                    >
+                      <Laptop size={13} className="text-emerald-500" />
+                      <span>💻 Laptops Section</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openAddProductForCategory("tablets")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                        newProduct.category.toLowerCase().includes("tablet") || newProduct.category.toLowerCase().includes("ipad")
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "bg-white text-slate-700 hover:bg-slate-200 border border-slate-200"
+                      }`}
+                    >
+                      <Tablet size={13} className="text-emerald-500" />
+                      <span>📱 Tablets Section</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => openAddProductForCategory("smartwatches")}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                        newProduct.category.toLowerCase().includes("watch")
+                          ? "bg-slate-900 text-white shadow-sm"
+                          : "bg-white text-slate-700 hover:bg-slate-200 border border-slate-200"
+                      }`}
+                    >
+                      <Watch size={13} className="text-emerald-500" />
+                      <span>⌚ Smartwatches Section</span>
+                    </button>
+                  </div>
+                </div>
+
                 <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
                   
                   <div className="grid sm:grid-cols-3 gap-3">
@@ -954,7 +1048,12 @@ export default function AdminPage() {
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Galaxy S24 Ultra / MacBook Pro M3"
+                        placeholder={
+                          newProduct.category.includes("laptop") ? "e.g. MacBook Pro M3 / Dell XPS 15" :
+                          newProduct.category.includes("watch") ? "e.g. Apple Watch Ultra 2 / Galaxy Watch 6" :
+                          newProduct.category.includes("tablet") ? "e.g. iPad Pro 12.9 / Galaxy Tab S9" :
+                          "e.g. Galaxy S24 Ultra / iPhone 15 Pro"
+                        }
                         value={newProduct.name}
                         onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
@@ -981,7 +1080,15 @@ export default function AdminPage() {
                       <select
                         required
                         value={newProduct.category}
-                        onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+                        onChange={(e) => {
+                          const catSlug = e.target.value;
+                          const presets = CATEGORY_SPEC_PRESETS[catSlug.toLowerCase()] || DEFAULT_PRESETS;
+                          setNewProduct({
+                            ...newProduct,
+                            category: catSlug,
+                            storages: presets.slice(0, 4).map(p => ({ size: p.size, priceBoost: p.defaultBoost }))
+                          });
+                        }}
                         className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-900 outline-none focus:border-emerald-500 cursor-pointer focus:bg-white font-bold"
                       >
                         {categories.map((c) => (
