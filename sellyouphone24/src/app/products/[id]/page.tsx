@@ -2,7 +2,7 @@ import { api } from "@/lib/api";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import ProductInteraction from "@/components/ProductInteraction";
-import { Truck, ShieldCheck, RefreshCcw, ArrowLeft } from "lucide-react";
+import { Truck, ShieldCheck, RefreshCcw, ArrowLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 // Dynamic SEO metadata generator
@@ -84,17 +84,64 @@ const ProductPage = async ({
   const { view } = await searchParams;
   const selectedView = view === "sideView" || view === "backView" ? view : "frontView";
 
+  const categoryDisplayNames: Record<string, string> = {
+    mobile: "Mobile",
+    smartphones: "Mobile",
+    laptops: "Laptops",
+    macbooks: "Laptops",
+    smartwatches: "Smartwatches",
+    watches: "Smartwatches",
+    tablets: "Tablets",
+    ipads: "Tablets"
+  };
+
+  const rawCategory = (product.category || "mobile").toLowerCase();
+  const categoryName = categoryDisplayNames[rawCategory] || (rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1));
+  const brandSlug = (product.brand || "").toLowerCase().trim();
+
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 space-y-8">
-      {/* Back to listings */}
-      <div>
-        <Link
-          href={`/services/smartphones/${product.brand.toLowerCase()}`}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-emerald-500 transition"
-        >
-          <ArrowLeft size={14} />
-          Back to {product.brand} Models
-        </Link>
+    <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6">
+      {/* Interactive Breadcrumbs & Back button */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        {/* Breadcrumb Trail */}
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500 overflow-x-auto py-1">
+          <Link href="/" className="hover:text-emerald-600 transition">
+            Home
+          </Link>
+          <ChevronRight size={12} className="text-slate-400 flex-shrink-0" />
+          <Link href="/services" className="hover:text-emerald-600 transition">
+            Services
+          </Link>
+          <ChevronRight size={12} className="text-slate-400 flex-shrink-0" />
+          <Link 
+            href={`/services/${rawCategory}`} 
+            className="hover:text-emerald-600 transition font-semibold text-slate-700"
+          >
+            {categoryName}
+          </Link>
+          <ChevronRight size={12} className="text-slate-400 flex-shrink-0" />
+          <Link 
+            href={`/services/${rawCategory}?brand=${brandSlug}`} 
+            className="hover:text-emerald-600 transition font-semibold text-slate-700 capitalize"
+          >
+            {product.brand}
+          </Link>
+          <ChevronRight size={12} className="text-slate-400 flex-shrink-0" />
+          <span className="font-bold text-emerald-600 truncate max-w-[200px] sm:max-w-none">
+            {product.name}
+          </span>
+        </nav>
+
+        {/* Back Button */}
+        <div>
+          <Link
+            href={`/services/${rawCategory}?brand=${brandSlug}`}
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-emerald-600 hover:border-emerald-200 transition bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl shadow-xs"
+          >
+            <ArrowLeft size={14} />
+            Back to {product.brand} {categoryName}
+          </Link>
+        </div>
       </div>
 
       {/* Main product box */}
