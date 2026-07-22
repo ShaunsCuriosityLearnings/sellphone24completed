@@ -86,6 +86,14 @@ export const api = {
     });
   },
 
+  async updateBrand(id: string | number, brand: any, token?: string): Promise<BrandType> {
+    return safeFetch<BrandType>(`${API_BASE}/brands/${id}`, {
+      method: "PUT",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: brand instanceof FormData ? brand : JSON.stringify(brand),
+    });
+  },
+
   async deleteBrand(id: string | number, token?: string): Promise<{ message: string }> {
     return safeFetch<{ message: string }>(`${API_BASE}/brands/${id}`, {
       method: "DELETE",

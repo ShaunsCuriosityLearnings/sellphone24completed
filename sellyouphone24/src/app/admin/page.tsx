@@ -220,6 +220,7 @@ export default function AdminPage() {
   const [customBoost, setCustomBoost] = useState<number>(0);
 
   const [newCategory, setNewCategory] = useState({ name: "", slug: "", description: "", image: "" as string | File });
+  const [editingBrandId, setEditingBrandId] = useState<string | number | null>(null);
   const [newBrand, setNewBrand] = useState<{ name: string; slug: string; logo: string | File; categories: string[] }>({ name: "", slug: "", logo: "", categories: [] });
   
   const [editingBlogId, setEditingBlogId] = useState<string | number | null>(null);
@@ -472,6 +473,23 @@ export default function AdminPage() {
     setNewBrand({ ...newBrand, categories: updatedCats });
   };
 
+  const handleEditBrandClick = (brand: BrandType) => {
+    const brandId = brand.id || brand._id || "";
+    setEditingBrandId(brandId);
+    const catIds = (brand.categories || []).map((c: any) => typeof c === "object" ? (c._id || c.id || "").toString() : c.toString());
+    setNewBrand({
+      name: brand.name,
+      slug: brand.slug,
+      logo: brand.logo || "",
+      categories: catIds,
+    });
+  };
+
+  const handleCancelBrandEdit = () => {
+    setEditingBrandId(null);
+    setNewBrand({ name: "", slug: "", logo: "", categories: [] });
+  };
+
   const handleCreateBrand = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newBrand.name) return;
@@ -484,12 +502,18 @@ export default function AdminPage() {
       else if (newBrand.logo) fd.append("logo", newBrand.logo);
       fd.append("categories", JSON.stringify(newBrand.categories));
 
-      await api.createBrand(fd, token || undefined);
-      toast.success("Brand created");
-      setNewBrand({ name: "", slug: "", logo: "", categories: [] });
+      if (editingBrandId) {
+        await api.updateBrand(editingBrandId, fd, token || undefined);
+        toast.success("Brand updated & service categories allocated!");
+      } else {
+        await api.createBrand(fd, token || undefined);
+        toast.success("Brand created & service categories allocated!");
+      }
+
+      handleCancelBrandEdit();
       await loadData(false);
     } catch (error) {
-      toast.error("Failed to create brand");
+      toast.error(editingBrandId ? "Failed to update brand" : "Failed to create brand");
     }
   };
 
@@ -499,6 +523,7 @@ export default function AdminPage() {
       const token = await getToken();
       await api.deleteBrand(id, token || undefined);
       toast.success("Brand deleted");
+      if (editingBrandId === id) handleCancelBrandEdit();
       await loadData(false);
     } catch (error) {
       toast.error("Failed to delete brand");
@@ -1433,26 +1458,48 @@ export default function AdminPage() {
             {activeTab === "brands" && (
               <div className="grid sm:grid-cols-12 gap-4">
                 <div className="sm:col-span-7 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
-                  <h3 className="font-bold text-slate-900 text-xs">Brands ({brands.length})</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-slate-900 text-xs">Brands & Category Allocations ({brands.length})</h3>
+                    <p className="text-[10px] text-slate-400">Click Pencil icon to Edit & Allocate Categories</p>
+                  </div>
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {brands.map((b) => (
-                      <div key={b.id || b._id} className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex flex-col justify-between gap-2">
+                      <div key={b.id || b._id} className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex flex-col justify-between gap-2 hover:border-emerald-300 transition">
                         <div className="flex items-center justify-between gap-2">
                           <div className="min-w-0">
                             <p className="font-bold text-slate-900 text-xs truncate">{b.name}</p>
                             <p className="text-[10px] text-slate-500 font-mono truncate">{b.slug}</p>
                           </div>
-                          <button onClick={() => handleDeleteBrand(b.id || b._id || "")} className="text-rose-600 p-1 hover:bg-rose-50 rounded">
-                            <Trash2 size={12} />
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleEditBrandClick(b)}
+                              className="text-emerald-600 p-1 hover:bg-emerald-50 rounded cursor-pointer"
+                              title="Edit Brand & Allocate Categories"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBrand(b.id || b._id || "")}
+                              className="text-rose-600 p-1 hover:bg-rose-50 rounded cursor-pointer"
+                              title="Delete Brand"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
                         </div>
-                        {b.categories && b.categories.length > 0 && (
+
+                        {b.categories && b.categories.length > 0 ? (
                           <div className="flex flex-wrap gap-1 border-t border-slate-200 pt-1.5">
                             {b.categories.map((c: any, idx) => (
-                              <span key={idx} className="text-[8px] bg-white text-slate-700 px-1 py-0.5 rounded border border-slate-200 font-medium">
+                              <span key={idx} className="text-[8px] bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-200 font-bold">
                                 {typeof c === "object" ? c.name : c}
                               </span>
                             ))}
+                          </div>
+                        ) : (
+                          <div className="border-t border-slate-200 pt-1">
+                            <span className="text-[8px] text-amber-600 font-medium">⚠️ No categories allocated</span>
                           </div>
                         )}
                       </div>
@@ -1461,7 +1508,20 @@ export default function AdminPage() {
                 </div>
 
                 <div className="sm:col-span-5 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
-                  <h3 className="font-bold text-slate-900 text-xs">Add New Brand</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-slate-900 text-xs">
+                      {editingBrandId ? "Edit Brand & Allocations" : "Add New Brand"}
+                    </h3>
+                    {editingBrandId && (
+                      <button
+                        onClick={handleCancelBrandEdit}
+                        className="text-[10px] text-slate-500 hover:text-slate-800 underline font-semibold"
+                      >
+                        Cancel Edit
+                      </button>
+                    )}
+                  </div>
+
                   <form onSubmit={handleCreateBrand} className="space-y-3 text-xs">
                     <div>
                       <label className="font-bold text-slate-700 block mb-1">Brand Name *</label>
@@ -1497,18 +1557,19 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="font-bold text-slate-700 block mb-1">Tag Categories</label>
-                      <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto border border-slate-200 p-2.5 rounded bg-slate-50">
+                      <label className="font-bold text-slate-700 block mb-1">Allocate to Service Categories</label>
+                      <p className="text-[10px] text-slate-400 mb-1.5">Select which service categories this brand belongs to (e.g. Mobile, Laptops, Tablets, Smartwatches):</p>
+                      <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto border border-slate-200 p-2.5 rounded bg-slate-50">
                         {categories.map((cat) => {
                           const catId = (cat._id || cat.id || "").toString();
                           const isChecked = newBrand.categories.includes(catId);
                           return (
-                            <label key={catId} className="flex items-center gap-1.5 text-[10px] text-slate-700 cursor-pointer select-none">
+                            <label key={catId} className="flex items-center gap-1.5 text-[10px] text-slate-700 cursor-pointer select-none font-medium hover:text-emerald-600">
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => handleToggleBrandCategory(catId)}
-                                className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                                className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                               />
                               {cat.name}
                             </label>
@@ -1517,9 +1578,23 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer">
-                      Add Brand
-                    </button>
+                    <div className="flex gap-2 pt-1">
+                      {editingBrandId && (
+                        <button
+                          type="button"
+                          onClick={handleCancelBrandEdit}
+                          className="w-1/3 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded transition cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      <button
+                        type="submit"
+                        className={`${editingBrandId ? "w-2/3" : "w-full"} bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer`}
+                      >
+                        {editingBrandId ? "Save Allocations" : "Add Brand"}
+                      </button>
+                    </div>
                   </form>
                 </div>
               </div>
