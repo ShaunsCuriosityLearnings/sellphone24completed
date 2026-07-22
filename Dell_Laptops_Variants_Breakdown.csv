@@ -1,0 +1,71 @@
+﻿Product Model Name,Brand,Category,Base Price (AED),Variant Spec / Processor & RAM & SSD,Spec Boost (AED),Total Valuation (AED),Colors
+Dell XPS 16 9640 (2024),Dell,laptops,4800,16GB RAM / 512GB SSD / RTX 4050,0,4800,"Platinum, Graphite"
+Dell XPS 16 9640 (2024),Dell,laptops,4800,32GB RAM / 1TB SSD / RTX 4060,800,5600,"Platinum, Graphite"
+Dell XPS 16 9640 (2024),Dell,laptops,4800,64GB RAM / 2TB SSD / RTX 4070,1800,6600,"Platinum, Graphite"
+Dell XPS 14 9440 (2024),Dell,laptops,3900,16GB RAM / 512GB SSD / Intel Arc,0,3900,"Platinum, Graphite"
+Dell XPS 14 9440 (2024),Dell,laptops,3900,32GB RAM / 1TB SSD / RTX 4050,700,4600,"Platinum, Graphite"
+Dell XPS 14 9440 (2024),Dell,laptops,3900,64GB RAM / 2TB SSD / RTX 4050,1400,5300,"Platinum, Graphite"
+Dell XPS 15 9530 (2023),Dell,laptops,3400,16GB RAM / 512GB SSD / RTX 4050,0,3400,"Platinum Silver, Carbon Fiber Black"
+Dell XPS 15 9530 (2023),Dell,laptops,3400,32GB RAM / 1TB SSD / RTX 4060,600,4000,"Platinum Silver, Carbon Fiber Black"
+Dell XPS 15 9530 (2023),Dell,laptops,3400,64GB RAM / 2TB SSD / RTX 4070,1300,4700,"Platinum Silver, Carbon Fiber Black"
+Dell XPS 17 9730 (2023),Dell,laptops,4100,16GB RAM / 512GB SSD / RTX 4060,0,4100,Platinum Silver
+Dell XPS 17 9730 (2023),Dell,laptops,4100,32GB RAM / 1TB SSD / RTX 4070,750,4850,Platinum Silver
+Dell XPS 17 9730 (2023),Dell,laptops,4100,64GB RAM / 2TB SSD / RTX 4080,1700,5800,Platinum Silver
+Dell XPS 13 Plus 9320 (2022-2023),Dell,laptops,2800,16GB RAM / 512GB SSD,0,2800,"Platinum, Graphite"
+Dell XPS 13 Plus 9320 (2022-2023),Dell,laptops,2800,32GB RAM / 1TB SSD,500,3300,"Platinum, Graphite"
+Dell XPS 13 Plus 9320 (2022-2023),Dell,laptops,2800,32GB RAM / 2TB SSD,900,3700,"Platinum, Graphite"
+Dell XPS 15 9500 / 9510 / 9520 (2020-2022),Dell,laptops,2200,16GB RAM / 512GB SSD / GTX 1650 Ti,0,2200,"Platinum Silver, Frost White"
+Dell XPS 15 9500 / 9510 / 9520 (2020-2022),Dell,laptops,2200,16GB RAM / 1TB SSD / RTX 3050 Ti,400,2600,"Platinum Silver, Frost White"
+Dell XPS 15 9500 / 9510 / 9520 (2020-2022),Dell,laptops,2200,32GB RAM / 1TB SSD / RTX 3050 Ti,750,2950,"Platinum Silver, Frost White"
+Dell XPS 13 9300 / 9310 (2020-2021),Dell,laptops,1600,8GB RAM / 256GB SSD,0,1600,"Platinum Silver, Arctic White"
+Dell XPS 13 9300 / 9310 (2020-2021),Dell,laptops,1600,16GB RAM / 512GB SSD,300,1900,"Platinum Silver, Arctic White"
+Dell XPS 13 9300 / 9310 (2020-2021),Dell,laptops,1600,16GB RAM / 1TB SSD,500,2100,"Platinum Silver, Arctic White"
+Dell XPS 15 9560 / 9570 / 7590 (2017-2019),Dell,laptops,1400,16GB RAM / 512GB SSD / GTX 1050 Ti,0,1400,"Silver, Black Carbon"
+Dell XPS 15 9560 / 9570 / 7590 (2017-2019),Dell,laptops,1400,32GB RAM / 1TB SSD / GTX 1650,350,1750,"Silver, Black Carbon"
+Dell XPS 13 9343 / 9350 / 9360 / 9370 (2015-2018),Dell,laptops,950,8GB RAM / 256GB SSD,0,950,"Silver, Rose Gold"
+Dell XPS 13 9343 / 9350 / 9360 / 9370 (2015-2018),Dell,laptops,950,16GB RAM / 512GB SSD,200,1150,"Silver, Rose Gold"
+Dell XPS 15 L501X / L502X / 9530 (2010-2014),Dell,laptops,550,8GB RAM / 500GB HDD,0,550,Anodized Aluminum Silver
+Dell XPS 15 L501X / L502X / 9530 (2010-2014),Dell,laptops,550,16GB RAM / 256GB SSD,150,700,Anodized Aluminum Silver
+Dell Alienware m16 / m18 R2 (2024),Dell,laptops,5200,16GB RAM / 1TB SSD / RTX 4070,0,5200,Dark Metallic Moon
+Dell Alienware m16 / m18 R2 (2024),Dell,laptops,5200,32GB RAM / 1TB SSD / RTX 4080,1100,6300,Dark Metallic Moon
+Dell Alienware m16 / m18 R2 (2024),Dell,laptops,5200,64GB RAM / 2TB SSD / RTX 4090,2400,7600,Dark Metallic Moon
+Dell Alienware x16 / x14 R2 (2023),Dell,laptops,4200,16GB RAM / 1TB SSD / RTX 4060,0,4200,Lunar Light
+Dell Alienware x16 / x14 R2 (2023),Dell,laptops,4200,32GB RAM / 1TB SSD / RTX 4070,800,5000,Lunar Light
+Dell Alienware x16 / x14 R2 (2023),Dell,laptops,4200,32GB RAM / 2TB SSD / RTX 4080,1600,5800,Lunar Light
+Dell Alienware m15 R6 / R7 (2021-2022),Dell,laptops,2800,16GB RAM / 512GB SSD / RTX 3060,0,2800,"Dark Side of the Moon, Lunar Light"
+Dell Alienware m15 R6 / R7 (2021-2022),Dell,laptops,2800,16GB RAM / 1TB SSD / RTX 3070 Ti,500,3300,"Dark Side of the Moon, Lunar Light"
+Dell Alienware m15 R6 / R7 (2021-2022),Dell,laptops,2800,32GB RAM / 1TB SSD / RTX 3080,1000,3800,"Dark Side of the Moon, Lunar Light"
+Dell Alienware 17 R4 / R5 (2016-2018),Dell,laptops,1600,16GB RAM / 512GB SSD / GTX 1070,0,1600,Epic Silver
+Dell Alienware 17 R4 / R5 (2016-2018),Dell,laptops,1600,32GB RAM / 1TB SSD / GTX 1080,400,2000,Epic Silver
+Dell Alienware M17x R3 / R4 / 18 (2011-2015),Dell,laptops,850,12GB RAM / 750GB HDD / GTX 675M,0,850,"Stealth Black, Nebula Red"
+Dell Alienware M17x R3 / R4 / 18 (2011-2015),Dell,laptops,850,16GB RAM / 512GB SSD / GTX 880M SLI,300,1150,"Stealth Black, Nebula Red"
+Dell Latitude 7440 / 7430 (2022-2023),Dell,laptops,2400,16GB RAM / 512GB SSD,0,2400,"Titan Gray, Aluminum Silver"
+Dell Latitude 7440 / 7430 (2022-2023),Dell,laptops,2400,32GB RAM / 1TB SSD,450,2850,"Titan Gray, Aluminum Silver"
+Dell Latitude 5440 / 5430 (2022-2023),Dell,laptops,1800,8GB RAM / 256GB SSD,0,1800,Gray
+Dell Latitude 5440 / 5430 (2022-2023),Dell,laptops,1800,16GB RAM / 512GB SSD,250,2050,Gray
+Dell Latitude 5440 / 5430 (2022-2023),Dell,laptops,1800,32GB RAM / 1TB SSD,500,2300,Gray
+Dell Latitude 7400 / 7490 / 7480 (2017-2019),Dell,laptops,1100,8GB RAM / 256GB SSD,0,1100,Black Carbon Fiber
+Dell Latitude 7400 / 7490 / 7480 (2017-2019),Dell,laptops,1100,16GB RAM / 512GB SSD,200,1300,Black Carbon Fiber
+Dell Latitude E7470 / E7450 / E7440 (2014-2016),Dell,laptops,650,8GB RAM / 256GB SSD,0,650,Black
+Dell Latitude E7470 / E7450 / E7440 (2014-2016),Dell,laptops,650,16GB RAM / 512GB SSD,150,800,Black
+Dell Latitude E6430 / E6420 / E6410 (2010-2013),Dell,laptops,400,4GB RAM / 320GB HDD,0,400,Brushed Aluminum Gray
+Dell Latitude E6430 / E6420 / E6410 (2010-2013),Dell,laptops,400,8GB RAM / 256GB SSD,120,520,Brushed Aluminum Gray
+Dell G15 5530 / G16 7630 Gaming (2023-2024),Dell,laptops,2900,16GB RAM / 512GB SSD / RTX 4050,0,2900,"Dark Shadow Gray, Quantum White"
+Dell G15 5530 / G16 7630 Gaming (2023-2024),Dell,laptops,2900,16GB RAM / 1TB SSD / RTX 4060,450,3350,"Dark Shadow Gray, Quantum White"
+Dell G15 5530 / G16 7630 Gaming (2023-2024),Dell,laptops,2900,32GB RAM / 1TB SSD / RTX 4070,950,3850,"Dark Shadow Gray, Quantum White"
+Dell Inspiron 16 Plus 7630 / 7620 (2022-2023),Dell,laptops,2200,16GB RAM / 512GB SSD / RTX 3050,0,2200,"Dark Green, Ice Blue"
+Dell Inspiron 16 Plus 7630 / 7620 (2022-2023),Dell,laptops,2200,32GB RAM / 1TB SSD / RTX 4060,600,2800,"Dark Green, Ice Blue"
+Dell Inspiron 15 3511 / 5510 / 5502 (2020-2022),Dell,laptops,1200,8GB RAM / 256GB SSD,0,1200,"Carbon Black, Platinum Silver"
+Dell Inspiron 15 3511 / 5510 / 5502 (2020-2022),Dell,laptops,1200,16GB RAM / 512GB SSD,200,1400,"Carbon Black, Platinum Silver"
+Dell Inspiron 15 7000 Gaming 7567 / 7577 (2016-2018),Dell,laptops,950,8GB RAM / 128GB SSD + 1TB HDD / GTX 1050,0,950,"Matte Black, Beijing Red"
+Dell Inspiron 15 7000 Gaming 7567 / 7577 (2016-2018),Dell,laptops,950,16GB RAM / 512GB SSD / GTX 1060 Max-Q,250,1200,"Matte Black, Beijing Red"
+Dell Inspiron 15R 5520 / N5110 / N5010 (2010-2013),Dell,laptops,350,4GB RAM / 500GB HDD,0,350,"Switch Changeable Lids (Black, Red, Blue)"
+Dell Inspiron 15R 5520 / N5110 / N5010 (2010-2013),Dell,laptops,350,8GB RAM / 246GB SSD,100,450,"Switch Changeable Lids (Black, Red, Blue)"
+Dell Precision 5680 / 5570 Mobile Workstation (2022-2023),Dell,laptops,4200,32GB RAM / 512GB SSD / RTX A2000,0,4200,Titan Gray
+Dell Precision 5680 / 5570 Mobile Workstation (2022-2023),Dell,laptops,4200,32GB RAM / 1TB SSD / RTX A3500,800,5000,Titan Gray
+Dell Precision 5680 / 5570 Mobile Workstation (2022-2023),Dell,laptops,4200,64GB RAM / 2TB SSD / RTX 5000 Ada,2100,6300,Titan Gray
+Dell Precision 7550 / 7530 Workstation (2018-2020),Dell,laptops,2100,16GB RAM / 512GB SSD / Quadro T2000,0,2100,Aluminum Silver
+Dell Precision 7550 / 7530 Workstation (2018-2020),Dell,laptops,2100,32GB RAM / 1TB SSD / Quadro RTX 4000,650,2750,Aluminum Silver
+Dell Precision 7550 / 7530 Workstation (2018-2020),Dell,laptops,2100,64GB RAM / 2TB SSD / Quadro RTX 5000,1300,3400,Aluminum Silver
+Dell Precision M4800 / M4600 Workstation (2011-2014),Dell,laptops,750,8GB RAM / 500GB HDD / Quadro K1100M,0,750,Coventry Brown Metallic
+Dell Precision M4800 / M4600 Workstation (2011-2014),Dell,laptops,750,16GB RAM / 512GB SSD / Quadro K2100M,200,950,Coventry Brown Metallic
