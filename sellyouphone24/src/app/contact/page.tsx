@@ -1,8 +1,8 @@
 import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
 
 export const metadata = {
-  title: "Contact Us | SellYourPhone24",
-  description: "Get in touch with SellYourPhone24. We are based in Dubai Silicon Oasis. Contact our support team for bulk device quotes, pickup coordination, or general help.",
+  title: "Contact Us | SellPhoneCash",
+  description: "Get in touch with SellPhoneCash. We are based in Dubai Silicon Oasis. Contact our support team for bulk device quotes, pickup coordination, or general help.",
 };
 
 const ContactPage = () => {
@@ -47,7 +47,7 @@ const ContactPage = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Email Channels</h4>
-                  <p className="mt-1">support@sellyourphone24.com</p>
+                  <p className="mt-1">support@sellphonecash.com</p>
                   <p className="text-[10px] text-slate-400">Response within 2 hours</p>
                 </div>
               </div>

@@ -108,4 +108,3 @@ echo "Ensure your DNS A record points sellphonecash.com to this server's IP addr
 certbot --nginx -d sellphonecash.com -d www.sellphonecash.com --non-interactive --agree-tos -m admin@sellphonecash.com || echo "Certbot skipped. Run 'certbot --nginx -d sellphonecash.com -d www.sellphonecash.com' manually when DNS is ready."
 
 echo "Deployment Complete! Visit https://sellphonecash.com"
-
