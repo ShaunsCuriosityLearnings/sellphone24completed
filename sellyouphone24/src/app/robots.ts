@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellyourphone24.ae";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
   
   // If the app URL contains "beta" (or another test subdomain), block indexing
   const isBeta = baseUrl.includes("beta");

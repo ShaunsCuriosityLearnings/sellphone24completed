@@ -39,7 +39,7 @@ const Navbar = () => {
               S
             </div>
             <span className="font-bold text-xl tracking-tight text-slate-800">
-              SellYourPhone<span className="text-emerald-500">24</span>
+              SellPhone<span className="text-emerald-500">Cash</span>
             </span>
           </Link>
 

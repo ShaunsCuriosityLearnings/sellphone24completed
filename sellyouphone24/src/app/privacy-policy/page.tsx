@@ -1,6 +1,6 @@
 export const metadata = {
-  title: "Privacy Policy & Data Sanitization | SellYourPhone24",
-  description: "Read our privacy guidelines. SellYourPhone24 enforces strict personal data security and complete military-grade device data erasure on all bought mobiles.",
+  title: "Privacy Policy & Data Sanitization | SellPhoneCash",
+  description: "Read our privacy guidelines. SellPhoneCash enforces strict personal data security and complete military-grade device data erasure on all bought mobiles.",
 };
 
 const PrivacyPolicyPage = () => {
@@ -18,10 +18,10 @@ const PrivacyPolicyPage = () => {
       {/* Main Text Content */}
       <section className="space-y-4">
         <p>
-          At SellYourPhone24, we recognize the sensitivity of your personal information. This Privacy Policy outlines the types of data we collect, how we secure it, and our strict protocols for sanitizing user information on all mobile phones, tablets, and smartwatches purchased through our platform.
+          At SellPhoneCash, we recognize the sensitivity of your personal information. This Privacy Policy outlines the types of data we collect, how we secure it, and our strict protocols for sanitizing user information on all mobile phones, tablets, and smartwatches purchased through our platform.
         </p>
         <p>
-          By accessing SellYourPhone24, scheduling a doorstep pickup, or submitting device details, you consent to the collections and data practices outlined below in compliance with United Arab Emirates Federal Laws on Personal Data Protection.
+          By accessing SellPhoneCash, scheduling a doorstep pickup, or submitting device details, you consent to the collections and data practices outlined below in compliance with United Arab Emirates Federal Laws on Personal Data Protection.
         </p>
       </section>
 
@@ -87,7 +87,7 @@ const PrivacyPolicyPage = () => {
           For queries concerning device wipes, data protection compliance, or deleting your profile, please contact our Data Protection Officer:
         </p>
         <p className="font-bold text-slate-600">
-          Email: privacy@sellyourphone24.com | Address: Techno Hub 2, Dubai Silicon Oasis, UAE
+          Email: privacy@sellphonecash.com | Address: Techno Hub 2, Dubai Silicon Oasis, UAE
         </p>
       </section>
 

@@ -13,12 +13,12 @@ const Footer = () => {
                 S
               </div>
               <span className="font-bold text-xl tracking-tight">
-                SellYourPhone<span className="text-emerald-500">24</span>
+                SellPhone<span className="text-emerald-500">Cash</span>
               </span>
             </Link>
 
             <p className="text-sm leading-relaxed text-slate-400">
-              SellYourPhone24 is the UAE&apos;s premier platform for selling used smartphones, tablets, and smartwatches. We make it easy to get an instant valuation, enjoy free doorstep pickup, and receive immediate payouts, all while promoting environmental sustainability through device recycling.
+              SellPhoneCash is the UAE&apos;s premier platform for selling used smartphones, tablets, and smartwatches. We make it easy to get an instant valuation, enjoy free doorstep pickup, and receive immediate payouts, all while promoting environmental sustainability through device recycling.
             </p>
 
             <div className="flex items-center gap-2 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
@@ -108,7 +108,7 @@ const Footer = () => {
         {/* Bottom Panel */}
         <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
           <p className="text-slate-500">
-            © {new Date().getFullYear()} SellYourPhone24. All rights reserved. Registered under UAE Circular Economy Laws.
+            © {new Date().getFullYear()} SellPhoneCash. All rights reserved. Registered under UAE Circular Economy Laws.
           </p>
 
           <div className="flex items-center gap-6 text-slate-500">
