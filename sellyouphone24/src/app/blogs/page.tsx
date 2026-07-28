@@ -4,7 +4,7 @@ import { HelpCircle, RefreshCcw, Search, Sparkles, Filter } from "lucide-react";
 import { api } from "@/lib/api";
 
 export const metadata = {
-  title: "Tech & Recycling Blogs | SellYourPhone24",
+  title: "Tech & Recycling Blogs | SellPhoneCash",
   description: "Read the latest news, guides, and tips on device recycling, smartphone valuations, and tech comparisons in the UAE.",
 };
 

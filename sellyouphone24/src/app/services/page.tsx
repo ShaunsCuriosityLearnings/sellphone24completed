@@ -6,7 +6,7 @@ import { ArrowRight, CheckCircle } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Our Buyback Services | SellYourPhone24",
+  title: "Our Buyback Services | SellPhoneCash",
   description: "Explore the electronic devices we buy. Sell your used mobile phones, iPads, Android tablets, Apple Watches, and Galaxy Watches for top value.",
 };
 

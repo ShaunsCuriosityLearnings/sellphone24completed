@@ -8,11 +8,11 @@ import Link from "next/link";
 // Dynamic SEO metadata generator
 export const generateMetadata = async ({ params }: { params: Promise<{ id: string }> }) => {
   const productId = (await params).id;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellyourphone24.ae";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
   try {
     const product = await api.getProductById(productId);
     const title = `Sell Your ${product.brand} ${product.name} | Instant Cash Valuation UAE`;
-    const description = `Get an instant valuation up to ${product.basePrice} AED for your used ${product.brand} ${product.name} on SellYourPhone24. Free doorstep pickup & cash on the spot in Dubai & Abu Dhabi.`;
+    const description = `Get an instant valuation up to ${product.basePrice} AED for your used ${product.brand} ${product.name} on SellPhoneCash. Free doorstep pickup & cash on the spot in Dubai & Abu Dhabi.`;
     const pageUrl = `${baseUrl}/products/${productId}`;
     const imageUrl = product.images?.frontView 
       ? (product.images.frontView.startsWith("http") ? product.images.frontView : `${baseUrl}${product.images.frontView}`)
@@ -26,7 +26,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ id: strin
         `Used ${product.name} resale price`,
         `Sell ${product.brand} phone Dubai`,
         `Trade in ${product.name} UAE`,
-        "SellYourPhone24",
+        "SellPhoneCash",
         "Phone valuation Dubai",
       ],
       alternates: {
@@ -36,7 +36,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ id: strin
         title,
         description,
         url: pageUrl,
-        siteName: "SellYourPhone24",
+        siteName: "SellPhoneCash",
         type: "website",
         images: [
           {
@@ -55,7 +55,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ id: strin
       },
     };
   } catch (err) {
-    return { title: "Product Not Found | SellYourPhone24" };
+    return { title: "Product Not Found | SellPhoneCash" };
   }
 };
 

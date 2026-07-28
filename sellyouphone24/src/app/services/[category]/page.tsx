@@ -70,7 +70,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ category:
   const category = resolveCanonicalCategory(categories, categorySlug);
 
   return {
-    title: `Sell ${category.name} | SellYourPhone24`,
+    title: `Sell ${category.name} | SellPhoneCash`,
     description: `Sell your used ${category.name.toLowerCase()} in Dubai & UAE. Get instant valuations for Apple, Samsung, Google, and more.`,
   };
 };

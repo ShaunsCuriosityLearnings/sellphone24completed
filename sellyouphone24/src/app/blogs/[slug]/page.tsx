@@ -8,10 +8,10 @@ import CommentsSection from "./CommentsSection";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const blogSlug = (await params).slug;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellyourphone24.ae";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
   try {
     const blog = await api.getBlogBySlug(blogSlug);
-    const title = `${blog.title} | SellYourPhone24 Tech Blog`;
+    const title = `${blog.title} | SellPhoneCash Tech Blog`;
     const description = blog.desc;
     const pageUrl = `${baseUrl}/blogs/${blogSlug}`;
     const imageUrl = blog.img 
@@ -23,7 +23,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
       description,
       keywords: [
         blog.category,
-        "SellYourPhone24",
+        "SellPhoneCash",
         "UAE phone recycling",
         "Used mobile valuation Dubai",
         blog.title,
@@ -36,10 +36,10 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
         title,
         description,
         url: pageUrl,
-        siteName: "SellYourPhone24",
+        siteName: "SellPhoneCash",
         type: "article",
         publishedTime: blog.createdAt,
-        authors: [blog.author || "Team SellYourPhone24"],
+        authors: [blog.author || "Team SellPhoneCash"],
         images: [
           {
             url: imageUrl,
@@ -57,7 +57,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
       },
     };
   } catch (error) {
-    return { title: "Blog Not Found | SellYourPhone24" };
+    return { title: "Blog Not Found | SellPhoneCash" };
   }
 };
 
@@ -182,7 +182,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
               ✍️
             </div>
             <div className="space-y-1">
-              <h3 className="font-bold text-slate-800 text-sm">Team SellYourPhone24</h3>
+              <h3 className="font-bold text-slate-800 text-sm">Team SellPhoneCash</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Tech Recycling Division</p>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed text-justify">

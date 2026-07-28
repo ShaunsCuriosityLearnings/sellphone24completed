@@ -231,7 +231,7 @@ export default function AdminPage() {
     content: "",
     img: "" as string | File,
     category: "Buying Guides",
-    author: "Team SellYourPhone24",
+    author: "Team SellPhoneCash",
   });
 
   const loadData = async (showSpinner = false) => {
@@ -276,7 +276,7 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-sm space-y-4 text-center mb-4">
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">SellYourPhone24 Admin</h1>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">SellPhoneCash Admin</h1>
           <p className="text-xs text-slate-500">Sign in to manage catalog, orders & brands.</p>
         </div>
         <SignIn routing="hash" />
@@ -539,7 +539,7 @@ export default function AdminPage() {
       content: blog.content,
       img: blog.img,
       category: blog.category,
-      author: blog.author || "Team SellYourPhone24",
+      author: blog.author || "Team SellPhoneCash",
     });
   };
 
@@ -552,7 +552,7 @@ export default function AdminPage() {
       content: "",
       img: "",
       category: "Buying Guides",
-      author: "Team SellYourPhone24",
+      author: "Team SellPhoneCash",
     });
   };
 
@@ -594,7 +594,7 @@ export default function AdminPage() {
         content: "",
         img: "",
         category: "Buying Guides",
-        author: "Team SellYourPhone24",
+        author: "Team SellPhoneCash",
       });
       await loadData(false);
     } catch (error) {
@@ -656,7 +656,7 @@ export default function AdminPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
               <Sliders size={16} className="text-emerald-500" />
-              <span>SellYourPhone24 Admin</span>
+              <span>SellPhoneCash Admin</span>
             </h1>
             <span className="hidden sm:inline-block text-[10px] text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 font-medium">
               {user?.primaryEmailAddress?.emailAddress}

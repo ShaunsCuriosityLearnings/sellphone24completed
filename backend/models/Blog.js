@@ -35,7 +35,7 @@ const blogSchema = new mongoose.Schema(
     },
     author: {
       type: String,
-      default: "Team SellYourPhone24",
+      default: "Team SellPhoneCash",
       trim: true,
     },
     views: {

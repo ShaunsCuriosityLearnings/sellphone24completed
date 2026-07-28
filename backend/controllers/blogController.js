@@ -80,7 +80,7 @@ export const createBlog = async (req, res) => {
       content,
       img,
       category,
-      author: author || "Team SellYourPhone24",
+      author: author || "Team SellPhoneCash",
     });
 
     res.status(201).json(blog);

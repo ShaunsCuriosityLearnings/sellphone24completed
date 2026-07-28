@@ -121,7 +121,7 @@ const Homepage = async () => {
               Join the Circular Economy & Save the UAE Environment
             </h2>
             <p className="text-sm text-slate-400 leading-relaxed max-w-2xl">
-              Electronic waste is one of the fastest-growing environmental concerns in the region. By selling your old devices on SellYourPhone24, you ensure they are either safely refurbished and given a second life, or responsively recycled for materials, keeping hazardous heavy metals out of landfill systems.
+              Electronic waste is one of the fastest-growing environmental concerns in the region. By selling your old devices on SellPhoneCash, you ensure they are either safely refurbished and given a second life, or responsively recycled for materials, keeping hazardous heavy metals out of landfill systems.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-800">
               <div>

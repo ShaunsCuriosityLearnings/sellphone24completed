@@ -2,8 +2,8 @@ import { Recycle, ShieldCheck, Heart, Award, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Us | SellYourPhone24",
-  description: "Learn about the mission of SellYourPhone24. We are Dubai's top electronic buyback platform, committed to circular tech recycling and instant payouts.",
+  title: "About Us | SellPhoneCash",
+  description: "Learn about the mission of SellPhoneCash. We are Dubai's top electronic buyback platform, committed to circular tech recycling and instant payouts.",
 };
 
 const AboutPage = () => {
