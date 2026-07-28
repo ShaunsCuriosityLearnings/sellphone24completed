@@ -16,13 +16,13 @@ const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700
 const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" });
 const lato = Lato({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-lato" });
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellyourphone24.ae";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
 const isBeta = baseUrl.includes("beta");
 
 export const metadata: Metadata = {
   title: {
-    default: "SellYourPhone24 | Sell Used Mobile Devices for Instant Cash in UAE",
-    template: "%s | SellYourPhone24",
+    default: "SellPhoneCash | Sell Used Mobile Devices for Instant Cash in UAE",
+    template: "%s | SellPhoneCash",
   },
   icons: {
     icon: "/favicon.webp",

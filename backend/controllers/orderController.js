@@ -1,4 +1,5 @@
 import Order from "../models/Order.js";
+import { sendOrderConfirmationEmails, sendStatusUpdateEmails } from "../utils/emailService.js";
 
 // @desc    Create/Submit a new valuation order
 // @route   POST /api/orders
@@ -20,6 +21,9 @@ export const createOrder = async (req, res) => {
       totalPayout,
       status: "pending",
     });
+
+    // Trigger emails asynchronously (Client confirmation & Admin notification)
+    sendOrderConfirmationEmails(order);
 
     res.status(201).json({
       success: true,
@@ -81,6 +85,9 @@ export const updateOrderStatus = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
+
+    // Trigger emails asynchronously (Client status update & Admin log)
+    sendStatusUpdateEmails(order);
 
     res.status(200).json({
       success: true,

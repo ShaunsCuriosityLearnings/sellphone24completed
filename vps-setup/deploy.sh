@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Sellphone.ae VPS Deployment Script
+# SellPhoneCash.com VPS Deployment Script
 # Run this on your VPS as root (sudo su)
 
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "Starting VPS Setup for beta.sellyourphone24.com..."
+echo "Starting VPS Setup for sellphonecash.com..."
 
 # 1. Update system and install dependencies
 echo "Updating package lists and installing dependencies..."
@@ -77,7 +77,7 @@ if [ ! -f .env.local ]; then
     echo "Example variables needed:"
     echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=..."
     echo "CLERK_SECRET_KEY=..."
-    echo "NEXT_PUBLIC_API_URL=https://beta.sellyourphone24.com/api"
+    echo "NEXT_PUBLIC_API_URL=https://sellphonecash.com/api"
     read -p "Press enter to continue once you have created the .env.local file..."
 fi
 
@@ -92,8 +92,8 @@ echo "Application processes started successfully with PM2."
 
 # 7. Configure Nginx
 echo "Configuring Nginx..."
-cp $DEST_DIR/vps-setup/nginx.conf /etc/nginx/sites-available/sellphone.ae
-ln -sf /etc/nginx/sites-available/sellphone.ae /etc/nginx/sites-enabled/
+cp $DEST_DIR/vps-setup/nginx.conf /etc/nginx/sites-available/sellphonecash.com
+ln -sf /etc/nginx/sites-available/sellphonecash.com /etc/nginx/sites-enabled/
 
 # Remove default nginx config if exists
 rm -f /etc/nginx/sites-enabled/default
@@ -103,8 +103,9 @@ nginx -t
 systemctl restart nginx
 
 # 8. Setup SSL with Let's Encrypt
-echo "Setting up SSL for beta.sellyourphone24.com..."
-echo "Ensure your DNS A record points beta.sellyourphone24.com to this server's IP address."
-certbot --nginx -d beta.sellyourphone24.com --non-interactive --agree-tos -m admin@sellyourphone24.com || echo "Certbot skipped. Run 'certbot --nginx -d beta.sellyourphone24.com' manually when DNS is ready."
+echo "Setting up SSL for sellphonecash.com & www.sellphonecash.com..."
+echo "Ensure your DNS A record points sellphonecash.com to this server's IP address."
+certbot --nginx -d sellphonecash.com -d www.sellphonecash.com --non-interactive --agree-tos -m admin@sellphonecash.com || echo "Certbot skipped. Run 'certbot --nginx -d sellphonecash.com -d www.sellphonecash.com' manually when DNS is ready."
 
-echo "Deployment Complete! Visit https://beta.sellyourphone24.com"
+echo "Deployment Complete! Visit https://sellphonecash.com"
+

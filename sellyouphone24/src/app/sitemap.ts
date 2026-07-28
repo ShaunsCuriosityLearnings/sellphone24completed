@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { api } from "@/lib/api";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellyourphone24.ae";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
 
   // 1. Static base pages
   const staticRoutes = [

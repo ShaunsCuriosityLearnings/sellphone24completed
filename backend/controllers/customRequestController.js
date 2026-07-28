@@ -1,4 +1,5 @@
 import { CustomRequest } from "../models/CustomRequest.js";
+import { sendCustomRequestEmails } from "../utils/emailService.js";
 
 // Create a new custom request
 export const createCustomRequest = async (req, res) => {
@@ -20,6 +21,9 @@ export const createCustomRequest = async (req, res) => {
     });
 
     const savedRequest = await newRequest.save();
+
+    // Trigger email notifications (Client receipt & Admin alert)
+    sendCustomRequestEmails(savedRequest);
 
     res.status(201).json({
       success: true,
