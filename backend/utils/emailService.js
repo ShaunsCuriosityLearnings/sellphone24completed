@@ -55,7 +55,7 @@ const sendMailAsync = async (options) => {
  * 1. Trigger emails when an Order is placed
  */
 export const sendOrderConfirmationEmails = async (order) => {
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+  const adminEmail = process.env.ADMIN_EMAIL || "sellphone24phone@gmail.com";
   const clientEmail = order.customerDetails?.email;
 
   // A. Email to Client
@@ -81,7 +81,7 @@ export const sendOrderConfirmationEmails = async (order) => {
  * 2. Trigger emails when an Order Status is updated
  */
 export const sendStatusUpdateEmails = async (order) => {
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+  const adminEmail = process.env.ADMIN_EMAIL || "sellphone24phone@gmail.com";
   const clientEmail = order.customerDetails?.email;
 
   // A. Email to Client
@@ -107,7 +107,7 @@ export const sendStatusUpdateEmails = async (order) => {
  * 3. Trigger emails when a Custom Device Valuation Request is submitted
  */
 export const sendCustomRequestEmails = async (data) => {
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER;
+  const adminEmail = process.env.ADMIN_EMAIL || "sellphone24phone@gmail.com";
   const clientEmail = data.email;
 
   // A. Email to Client
