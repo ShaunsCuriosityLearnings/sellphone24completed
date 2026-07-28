@@ -42,19 +42,19 @@ const PaymentForm = ({
     setLoading(true);
 
     try {
-      // Map frontend cart items to backend Order devices
+      // Map frontend cart items to backend Order devices with safe defaults
       const devices = cart.map((item) => ({
         // Ensure we pass a 24-character hex ID if it's MongoDB, otherwise pass a fallback string
         productId: (item._id || String(item.id)).match(/^[0-9a-fA-F]{24}$/) 
           ? (item._id || String(item.id)) 
           : "65d78fa1b98cf931acbdc60f", // Fallback seeded device objectId if local mock ID
-        name: item.name,
-        brand: item.brand,
-        category: item.category,
-        selectedStorage: item.selectedStorage,
-        selectedColor: item.selectedColor,
-        selectedCondition: item.selectedCondition,
-        calculatedPrice: item.calculatedPrice,
+        name: item.name || "Mobile Device",
+        brand: item.brand || "Apple",
+        category: item.category || "mobile",
+        selectedStorage: item.selectedStorage || "Standard",
+        selectedColor: item.selectedColor || "Standard",
+        selectedCondition: item.selectedCondition || "Good",
+        calculatedPrice: Number(item.calculatedPrice) || 0,
         quantity: item.quantity || 1,
       }));
 
