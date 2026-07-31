@@ -1,0 +1,255 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const gamesProducts = [
+  // --- SONY PLAYSTATION ---
+  {
+    id: "GAME-001",
+    name: "PlayStation 5 Pro",
+    brand: "Sony",
+    category: "Games",
+    basePrice: 2600,
+    storages: "2TB SSD (+AED 0)",
+    colors: "White / Black",
+    shortDescription: "Ultimate 4K 60FPS gaming with PSSR AI Upscaling & 2TB SSD.",
+    description: "The most powerful PlayStation console ever built. Features upgraded GPU, Advanced Ray Tracing, PlayStation Spectral Super Resolution (PSSR), and 2TB high-speed SSD.",
+    frontViewImage: "/products/ps5-pro-front.webp",
+    sideViewImage: "/products/ps5-pro-side.webp",
+    backViewImage: "/products/ps5-pro-back.webp",
+  },
+  {
+    id: "GAME-002",
+    name: "PlayStation 5 Slim (Disc Edition)",
+    brand: "Sony",
+    category: "Games",
+    basePrice: 1550,
+    storages: "1TB SSD (+AED 0)",
+    colors: "White",
+    shortDescription: "Compact PS5 console with Ultra HD Blu-ray Disc Drive & 1TB SSD.",
+    description: "Packed with powerful gaming tech inside a sleek, compact design. Ultra-high speed 1TB SSD, 4K 120Hz support, DualSense haptic feedback, and Ultra HD Blu-ray Disc Drive.",
+    frontViewImage: "/products/ps5-slim-disc-front.webp",
+    sideViewImage: "/products/ps5-slim-disc-side.webp",
+    backViewImage: "/products/ps5-slim-disc-back.webp",
+  },
+  {
+    id: "GAME-003",
+    name: "PlayStation 5 Slim (Digital Edition)",
+    brand: "Sony",
+    category: "Games",
+    basePrice: 1350,
+    storages: "1TB SSD (+AED 0)",
+    colors: "White",
+    shortDescription: "All-digital PS5 Slim console with 1TB SSD storage.",
+    description: "Experience lightning-fast loading with an ultra-high speed SSD, deeper immersion with support for haptic feedback, adaptive triggers, and 3D Audio.",
+    frontViewImage: "/products/ps5-slim-digital-front.webp",
+    sideViewImage: "/products/ps5-slim-digital-side.webp",
+    backViewImage: "/products/ps5-slim-digital-back.webp",
+  },
+  {
+    id: "GAME-004",
+    name: "PlayStation 4 Pro",
+    brand: "Sony",
+    category: "Games",
+    basePrice: 650,
+    storages: "1TB HDD (+AED 0)",
+    colors: "Jet Black, Glacier White",
+    shortDescription: "Dynamic 4K gaming and 1080p remote play console.",
+    description: "PS4 Pro delivers enhanced resolution, graphics, and performance for your favorite PS4 games with 4K display output.",
+    frontViewImage: "/products/ps4-pro-front.webp",
+    sideViewImage: "/products/ps4-pro-side.webp",
+    backViewImage: "/products/ps4-pro-back.webp",
+  },
+  {
+    id: "GAME-005",
+    name: "PlayStation VR2 (PS VR2)",
+    brand: "Sony",
+    category: "Games",
+    basePrice: 1200,
+    storages: "Standard Edition (+AED 0)",
+    colors: "White / Black",
+    shortDescription: "Next-gen virtual reality headset for PS5 with 4K HDR visuals.",
+    description: "Escape into worlds that feel, look, and sound real. Features 4K HDR displays, 110-degree field of view, eye tracking, and subtle headset vibrations.",
+    frontViewImage: "/products/psvr2-front.webp",
+    sideViewImage: "/products/psvr2-side.webp",
+    backViewImage: "/products/psvr2-back.webp",
+  },
+
+  // --- MICROSOFT XBOX ---
+  {
+    id: "GAME-006",
+    name: "Xbox Series X (1TB Digital Edition)",
+    brand: "Microsoft",
+    category: "Games",
+    basePrice: 1450,
+    storages: "1TB SSD (+AED 0) | 2TB Galaxy Black (+AED 300)",
+    colors: "Robot White, Galaxy Black",
+    shortDescription: "12 Teraflops 4K gaming console with 1TB SSD & Quick Resume.",
+    description: "Experience true 4K gaming at up to 120 FPS, 3D Spatial Audio, and 12 Teraflops of raw processing power with Xbox Velocity Architecture.",
+    frontViewImage: "/products/xbox-series-x-front.webp",
+    sideViewImage: "/products/xbox-series-x-side.webp",
+    backViewImage: "/products/xbox-series-x-back.webp",
+  },
+  {
+    id: "GAME-007",
+    name: "Xbox Series S",
+    brand: "Microsoft",
+    category: "Games",
+    basePrice: 750,
+    storages: "512GB SSD (+AED 0) | 1TB SSD Black (+AED 150)",
+    colors: "Robot White, Carbon Black",
+    shortDescription: "All-digital 1440p next-gen Xbox in a compact size.",
+    description: "Go all-digital with the smallest, sleekest Xbox console ever. Enjoy next-gen speed and performance with Xbox Velocity Architecture.",
+    frontViewImage: "/products/xbox-series-s-front.webp",
+    sideViewImage: "/products/xbox-series-s-side.webp",
+    backViewImage: "/products/xbox-series-s-back.webp",
+  },
+
+  // --- NINTENDO ---
+  {
+    id: "GAME-008",
+    name: "Nintendo Switch OLED Model",
+    brand: "Nintendo",
+    category: "Games",
+    basePrice: 850,
+    storages: "64GB Internal (+AED 0)",
+    colors: "White, Neon Red/Neon Blue, Mario Red Edition",
+    shortDescription: "Vibrant 7-inch OLED screen handheld & TV console.",
+    description: "Feast your eyes on vivid colors and crisp contrast when you play on the go. Features a wide adjustable stand, a dock with a wired LAN port, 64GB storage, and enhanced audio.",
+    frontViewImage: "/products/switch-oled-front.webp",
+    sideViewImage: "/products/switch-oled-side.webp",
+    backViewImage: "/products/switch-oled-back.webp",
+  },
+  {
+    id: "GAME-009",
+    name: "Nintendo Switch Lite",
+    brand: "Nintendo",
+    category: "Games",
+    basePrice: 450,
+    storages: "32GB Internal (+AED 0)",
+    colors: "Turquoise, Yellow, Coral, Gray, Blue",
+    shortDescription: "Compact, lightweight handheld-only Nintendo Switch system.",
+    description: "Dedicated to handheld play. Small and light, with a built-in control pad and sleek unibody design.",
+    frontViewImage: "/products/switch-lite-front.webp",
+    sideViewImage: "/products/switch-lite-side.webp",
+    backViewImage: "/products/switch-lite-back.webp",
+  },
+
+  // --- HANDHELD GAMING PCS ---
+  {
+    id: "GAME-010",
+    name: "Steam Deck OLED",
+    brand: "Valve",
+    category: "Games",
+    basePrice: 1700,
+    storages: "512GB NVMe (+AED 0) | 1TB NVMe (+AED 300)",
+    colors: "Black",
+    shortDescription: "7.4-inch 90Hz HDR OLED handheld gaming PC by Valve.",
+    description: "The premier portable gaming PC. Features a custom 6nm AMD APU, 7.4-inch 90Hz HDR OLED display, faster Wi-Fi 6E, and 50Wh long-life battery.",
+    frontViewImage: "/products/steamdeck-oled-front.webp",
+    sideViewImage: "/products/steamdeck-oled-side.webp",
+    backViewImage: "/products/steamdeck-oled-back.webp",
+  },
+  {
+    id: "GAME-011",
+    name: "ASUS ROG Ally X",
+    brand: "Asus",
+    category: "Games",
+    basePrice: 2200,
+    storages: "1TB M.2 NVMe SSD (+AED 0)",
+    colors: "Black",
+    shortDescription: "Windows 11 gaming handheld PC with AMD Ryzen Z1 Extreme & 80Wh battery.",
+    description: "Play all your PC games on the go with Windows 11 Home, AMD Ryzen Z1 Extreme processor, 24GB LPDDR5X RAM, and a massive 80Wh battery.",
+    frontViewImage: "/products/rog-ally-x-front.webp",
+    sideViewImage: "/products/rog-ally-x-side.webp",
+    backViewImage: "/products/rog-ally-x-back.webp",
+  },
+  {
+    id: "GAME-012",
+    name: "Lenovo Legion Go",
+    brand: "Lenovo",
+    category: "Games",
+    basePrice: 1950,
+    storages: "512GB SSD (+AED 0) | 1TB SSD (+AED 250)",
+    colors: "Shadow Black",
+    shortDescription: "8.8-inch 144Hz QHD+ detachable controller gaming handheld.",
+    description: "Unmatched versatility with detachable Legion TrueStrike controllers, FPS mode, 8.8-inch 144Hz QHD+ display, and AMD Ryzen Z1 Extreme processor.",
+    frontViewImage: "/products/legion-go-front.webp",
+    sideViewImage: "/products/legion-go-side.webp",
+    backViewImage: "/products/legion-go-back.webp",
+  },
+  {
+    id: "GAME-013",
+    name: "MSI Claw A1M",
+    brand: "MSI",
+    category: "Games",
+    basePrice: 1600,
+    storages: "512GB SSD (+AED 0) | 1TB SSD (+AED 200)",
+    colors: "Black",
+    shortDescription: "Intel Core Ultra 7 handheld PC with 120Hz FHD screen.",
+    description: "Ergonomic handheld gaming PC powered by Intel Core Ultra 7 processors, XeSS upscaling, 120Hz display, and Cooler Boost HyperFlow technology.",
+    frontViewImage: "/products/msi-claw-front.webp",
+    sideViewImage: "/products/msi-claw-side.webp",
+    backViewImage: "/products/msi-claw-back.webp",
+  },
+
+  // --- VR & PREMIUM ACCESSORIES ---
+  {
+    id: "GAME-014",
+    name: "Meta Quest 3 (VR Headset)",
+    brand: "Meta",
+    category: "Games",
+    basePrice: 1400,
+    storages: "128GB (+AED 0) | 512GB (+AED 350)",
+    colors: "White",
+    shortDescription: "Breakthrough mixed reality VR headset with Snapdragon XR2 Gen 2.",
+    description: "Transform your home into a virtual playground where virtual elements blend with your physical space. Features 4K+ Infinite Display resolution.",
+    frontViewImage: "/products/meta-quest3-front.webp",
+    sideViewImage: "/products/meta-quest3-side.webp",
+    backViewImage: "/products/meta-quest3-back.webp",
+  },
+];
+
+const headers = [
+  "Product ID",
+  "Product Name",
+  "Brand",
+  "Category",
+  "Base Price (AED)",
+  "Storage / Spec Variants & Boosts",
+  "Available Colors / Editions",
+  "Short Description",
+  "Full Description",
+  "Front View Image Path",
+  "Side View Image Path",
+  "Back View Image Path"
+];
+
+const csvRows = [
+  headers.join(","),
+  ...gamesProducts.map((p) =>
+    [
+      `"${p.id}"`,
+      `"${p.name}"`,
+      `"${p.brand}"`,
+      `"${p.category}"`,
+      `"${p.basePrice}"`,
+      `"${p.storages}"`,
+      `"${p.colors}"`,
+      `"${p.shortDescription.replace(/"/g, '""')}"`,
+      `"${p.description.replace(/"/g, '""')}"`,
+      `"${p.frontViewImage}"`,
+      `"${p.sideViewImage}"`,
+      `"${p.backViewImage}"`
+    ].join(",")
+  )
+];
+
+const csvContent = csvRows.join("\n");
+const outputPath = path.join(__dirname, "../games_and_consoles_catalog.csv");
+
+fs.writeFileSync(outputPath, csvContent);
+console.log(`✅ Games & Consoles CSV Catalog File successfully created at:\n${outputPath}`);
