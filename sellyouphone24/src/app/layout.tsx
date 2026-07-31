@@ -3,6 +3,7 @@ import "./globals.css";
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ChatWidget from "@/components/ChatWidget";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import { ToastContainer } from "react-toastify";
@@ -80,6 +81,9 @@ export default function RootLayout({
 
             {/* Footer */}
             <Footer />
+
+            {/* Floating Customer Support Chatbot */}
+            <ChatWidget />
 
             {/* Toast Notifications */}
             <ToastContainer
