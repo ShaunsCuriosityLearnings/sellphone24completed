@@ -15,8 +15,8 @@ const ProductList = async ({
   const products = await api.getProducts({ category, brand });
   let filteredProducts = products;
 
-  // Limit display size on Homepage for clean look
-  const displayProducts = params === "homepage" ? filteredProducts.slice(0, 4) : filteredProducts;
+  // Limit display size on Homepage for 2 full rows (8 items)
+  const displayProducts = params === "homepage" ? filteredProducts.slice(0, 8) : filteredProducts;
 
   if (displayProducts.length === 0) {
     return (
@@ -31,10 +31,10 @@ const ProductList = async ({
 
   return (
     <div className="space-y-8">
-      {/* Grid container */}
-      <div className="grid grid-cols-3 lg:grid-cols-5 gap-2 md:gap-4">
+      {/* Grid container: 4 items per row on medium/large screens (2 rows total = 8 products) */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-5">
         {displayProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard key={product.id || product._id} product={product} />
         ))}
       </div>
 

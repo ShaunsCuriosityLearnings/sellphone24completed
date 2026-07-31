@@ -9,9 +9,27 @@ import { api } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
+const defaultTopBrands = [
+  { id: "b1", name: "Apple", slug: "apple", logo: "🍎" },
+  { id: "b2", name: "Samsung", slug: "samsung", logo: "📱" },
+  { id: "b3", name: "Sony", slug: "sony", logo: "🎮" },
+  { id: "b4", name: "Dell", slug: "dell", logo: "💻" },
+  { id: "b5", name: "HP", slug: "hp", logo: "💻" },
+  { id: "b6", name: "Lenovo", slug: "lenovo", logo: "💻" },
+];
+
 const Homepage = async () => {
   const blogs = await api.getBlogs();
   const latestBlogs = blogs.slice(0, 2);
+
+  let fetchedBrands = [];
+  try {
+    fetchedBrands = await api.getBrands();
+  } catch (err) {}
+
+  const top6Brands = fetchedBrands.length > 0 
+    ? fetchedBrands.slice(0, 6) 
+    : defaultTopBrands;
 
   return (
     <div className="space-y-16 pb-12">
@@ -81,18 +99,26 @@ const Homepage = async () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {brands.map((brand) => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {top6Brands.map((brand: any) => (
             <Link
-              key={brand.id}
-              href={`/services/smartphones/${brand.slug}`}
-              className="bg-white border border-slate-100 hover:border-emerald-500/30 rounded-3xl p-6 flex flex-col items-center text-center justify-center hover:shadow-lg transition-all duration-300 group cursor-pointer"
+              key={brand.id || brand._id || brand.slug}
+              href={`/services?brand=${brand.slug}`}
+              className="bg-white border border-slate-100 hover:border-emerald-500/30 rounded-3xl p-5 flex flex-col items-center text-center justify-center hover:shadow-lg transition-all duration-300 group cursor-pointer"
             >
-              <span className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{brand.logo}</span>
-              <h3 className="font-bold text-slate-800 group-hover:text-emerald-500 transition-colors text-sm md:text-base">
+              <div className="w-10 h-10 flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
+                {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
+                  <div className="relative w-full h-full">
+                    <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
+                  </div>
+                ) : (
+                  <span>{brand.logo || "📱"}</span>
+                )}
+              </div>
+              <h3 className="font-bold text-slate-800 group-hover:text-emerald-500 transition-colors text-xs md:text-sm">
                 {brand.name}
               </h3>
-              <p className="text-[10px] text-slate-400 mt-1 uppercase font-semibold">Get Top Value →</p>
+              <p className="text-[9px] text-slate-400 mt-0.5 uppercase font-semibold">Get Top Value →</p>
             </Link>
           ))}
         </div>
