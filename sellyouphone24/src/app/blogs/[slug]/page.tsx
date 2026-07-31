@@ -133,7 +133,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
 
           {/* HTML Raw Body Content */}
           <div
-            className="prose prose-slate max-w-none text-slate-600 text-sm md:text-base leading-relaxed space-y-4"
+            className="article-content max-w-none space-y-4"
             dangerouslySetInnerHTML={{ __html: blog.content }}
           />
 
