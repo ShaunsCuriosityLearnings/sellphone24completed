@@ -22,7 +22,7 @@ const Homepage = async () => {
   const blogs = await api.getBlogs();
   const latestBlogs = blogs.slice(0, 2);
 
-  let fetchedBrands = [];
+  let fetchedBrands: any[] = [];
   try {
     fetchedBrands = await api.getBrands();
   } catch (err) {}
