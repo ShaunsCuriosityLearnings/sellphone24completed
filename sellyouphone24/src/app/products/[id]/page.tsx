@@ -16,7 +16,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ id: strin
     const pageUrl = `${baseUrl}/products/${productId}`;
     const imageUrl = product.images?.frontView 
       ? (product.images.frontView.startsWith("http") ? product.images.frontView : `${baseUrl}${product.images.frontView}`)
-      : `${baseUrl}/products/iphone 17 pro max 💖.jpg`;
+      : `${baseUrl}/products/iphone-pro-max.jpg`;
 
     return {
       title,

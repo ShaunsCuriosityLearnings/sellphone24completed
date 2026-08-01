@@ -21,7 +21,7 @@ export const appleiPhones = [
     ],
     shortDescription: "6.9-inch Super Retina XDR, A18 Pro chip, Camera Control button, and 4K 120 fps Dolby Vision.",
     description: "The ultimate flagship iPhone featuring 6.9-inch Super Retina XDR display, grade-5 titanium design, breakthrough A18 Pro chip, revolutionary Camera Control button, 48MP Fusion camera system, and 4K 120 fps Dolby Vision recording.",
-    images: { frontView: "/products/iphone 17 pro max 💖.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" }
+    images: { frontView: "/products/iphone-pro-max.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" }
   },
   {
     name: "iPhone 16 Pro",
@@ -80,7 +80,7 @@ export const appleiPhones = [
     ],
     shortDescription: "6.7-inch Super Retina XDR, A17 Pro chip, Action button, 5x optical zoom camera.",
     description: "Forged in titanium with A17 Pro chip, customizable Action button, 5x Telephoto camera, USB-C 3 speed support, and lightweight durable design.",
-    images: { frontView: "/products/iphone 17 pro max 💖.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" }
+    images: { frontView: "/products/iphone-pro-max.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" }
   },
   {
     name: "iPhone 15 Pro",
@@ -437,7 +437,7 @@ export async function seedAppleiPhones() {
         name: "Smartphones",
         slug: "smartphones",
         description: "Sell your used mobile phone for instant cash. We buy Apple, Samsung, Google, OnePlus and more.",
-        image: "/products/iphone 17 pro max 💖.jpg"
+        image: "/products/iphone-pro-max.jpg"
       });
     }
 
