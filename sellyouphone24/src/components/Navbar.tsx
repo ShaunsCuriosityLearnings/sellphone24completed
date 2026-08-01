@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown, Zap, ShoppingBag, ArrowRight } from "lucide-react";
+import { Menu, X, ChevronDown, Zap, ShoppingBag, ArrowRight, Grid, Sparkles } from "lucide-react";
 import { CategoryType, BrandType } from "@/types";
 import { api } from "@/lib/api";
 import { usePathname } from "next/navigation";
@@ -44,14 +44,14 @@ const Navbar = () => {
   }, [pathname]);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs">
-      {/* Primary Header Row */}
+    <nav className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs">
+      {/* ROW 1: MAIN TOP HEADER BAR */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-16">
           
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-extrabold text-xl text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center font-extrabold text-xl text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
               S
             </div>
             <span className="font-extrabold text-2xl tracking-tight text-slate-900">
@@ -59,89 +59,28 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Core Nav Links */}
-          <div className="hidden xl:flex items-center gap-1 xl:gap-2">
-            <Link
-              href="/services"
-              className={`px-3 py-2 text-sm font-bold transition rounded-lg ${
-                pathname === "/services" ? "text-emerald-600 bg-emerald-50" : "text-slate-700 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
-            >
-              All Services
-            </Link>
+          {/* Right Header Navigation & Actions */}
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+              <Link href="/blogs" className="hover:text-emerald-600 transition">
+                Blogs
+              </Link>
+              <Link href="/about" className="hover:text-emerald-600 transition">
+                About Us
+              </Link>
+              <Link href="/contact" className="hover:text-emerald-600 transition">
+                Contact
+              </Link>
+            </div>
 
-            {categoriesList.map((category) => (
-              <div
-                key={category.id || category.slug}
-                className="relative group py-2"
-                onMouseEnter={() => setActiveDropdown(category.slug)}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <Link
-                  href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-                  className="px-3 py-2 text-sm font-semibold text-slate-700 hover:text-emerald-600 hover:bg-slate-50 transition rounded-lg inline-flex items-center gap-1 whitespace-nowrap"
-                >
-                  {category.name}
-                  {brandsList.some(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id)) && (
-                    <ChevronDown size={14} className="text-slate-400 group-hover:text-emerald-500 transition-transform group-hover:rotate-180" />
-                  )}
-                </Link>
-
-                {/* Brand Dropdown Menu */}
-                {activeDropdown === category.slug && (
-                  <div className="absolute top-full left-0 w-64 bg-white border border-slate-100 shadow-xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2">
-                      Popular {category.name} Brands
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {brandsList
-                        .filter(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id))
-                        .slice(0, 6)
-                        .map((brand) => (
-                          <Link
-                            key={brand.id}
-                            href={`/services/${category.slug}?brand=${brand.slug}`}
-                            className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
-                          >
-                            <div className="w-6 h-6 flex items-center justify-center text-sm shrink-0">
-                              {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
-                                <div className="relative w-full h-full">
-                                  <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
-                                </div>
-                              ) : (
-                                <span>{brand.logo || "📱"}</span>
-                              )}
-                            </div>
-                            <span className="text-xs font-bold text-slate-700 truncate">{brand.name}</span>
-                          </Link>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-3">
-            <Link href="/blogs" className="hidden lg:inline-block text-sm font-semibold text-slate-600 hover:text-emerald-600 transition px-2">
-              Blogs
-            </Link>
-            <Link href="/about" className="hidden lg:inline-block text-sm font-semibold text-slate-600 hover:text-emerald-600 transition px-2">
-              About
-            </Link>
-            <Link href="/contact" className="hidden lg:inline-block text-sm font-semibold text-slate-600 hover:text-emerald-600 transition px-2">
-              Contact
-            </Link>
-
-            {/* Sell Cart Icon */}
+            {/* Sell List Cart Pill */}
             {cartCount > 0 && (
               <Link
                 href="/cart"
-                className="relative p-2.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition flex items-center gap-1.5 font-bold text-xs"
+                className="relative px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition flex items-center gap-2 font-bold text-xs"
               >
-                <ShoppingBag size={18} />
-                <span className="hidden sm:inline">Sell List</span>
+                <ShoppingBag size={16} />
+                <span>Sell List</span>
                 <span className="bg-emerald-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">
                   {cartCount}
                 </span>
@@ -151,7 +90,7 @@ const Navbar = () => {
             {/* Instant Quote CTA Button */}
             <Link
               href="/services"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all hover:scale-102 shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all hover:scale-102 shrink-0 cursor-pointer"
             >
               <Zap size={16} className="fill-white" />
               <span>Instant Quote</span>
@@ -160,46 +99,111 @@ const Navbar = () => {
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 xl:hidden cursor-pointer"
-              aria-label="Toggle menu"
+              className="p-2 rounded-xl bg-slate-100 text-slate-700 hover:text-slate-900 lg:hidden cursor-pointer"
+              aria-label="Toggle Menu"
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Secondary Category Quick Bar (For Medium Screens lg-xl) */}
-      <div className="hidden lg:flex xl:hidden border-t border-slate-100 bg-slate-50/80 px-4 py-2 overflow-x-auto no-scrollbar">
-        <div className="max-w-7xl mx-auto flex items-center gap-6 text-xs font-bold text-slate-700 whitespace-nowrap">
-          <Link href="/services" className="text-emerald-600 flex items-center gap-1">
-            All Categories <ChevronDown size={12} />
-          </Link>
-          {categoriesList.map((cat) => (
+      {/* ROW 2: CATEGORY NAVIGATION BAR (DESKTOP) */}
+      <div className="hidden lg:block bg-slate-900 text-white border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-11 text-xs font-bold tracking-wide">
+            
+            {/* Left: All Services Button */}
             <Link
-              key={cat.id || cat.slug}
-              href={cat.slug === 'any-device' ? '/sell-any-device' : `/services/${cat.slug}`}
-              className="hover:text-emerald-600 transition"
+              href="/services"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
+                pathname === "/services" ? "bg-emerald-500 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"
+              }`}
             >
-              {cat.name}
+              <Grid size={14} className="text-emerald-400" />
+              <span>All Services</span>
             </Link>
-          ))}
+
+            {/* Center: Dynamic Category Links with Hover Dropdowns */}
+            <div className="flex items-center gap-1 xl:gap-2">
+              {categoriesList.map((category) => (
+                <div
+                  key={category.id || category.slug}
+                  className="relative group py-1"
+                  onMouseEnter={() => setActiveDropdown(category.slug)}
+                  onMouseLeave={() => setActiveDropdown(null)}
+                >
+                  <Link
+                    href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                    className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 whitespace-nowrap ${
+                      pathname.includes(`/services/${category.slug}`)
+                        ? "text-emerald-400 bg-slate-800"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800"
+                    }`}
+                  >
+                    <span>{category.name}</span>
+                    {brandsList.some(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id)) && (
+                      <ChevronDown size={12} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
+                    )}
+                  </Link>
+
+                  {/* Brand Dropdown Menu */}
+                  {activeDropdown === category.slug && (
+                    <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2">
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100">
+                        Popular {category.name} Brands
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5 pt-2">
+                        {brandsList
+                          .filter(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id))
+                          .slice(0, 6)
+                          .map((brand) => (
+                            <Link
+                              key={brand.id}
+                              href={`/services/${category.slug}?brand=${brand.slug}`}
+                              className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
+                            >
+                              <div className="w-5 h-5 flex items-center justify-center text-xs shrink-0">
+                                {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
+                                  <div className="relative w-full h-full">
+                                    <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
+                                  </div>
+                                ) : (
+                                  <span>{brand.logo || "📱"}</span>
+                                )}
+                              </div>
+                              <span className="text-xs font-bold text-slate-700 truncate">{brand.name}</span>
+                            </Link>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Right: Guarantee Badge */}
+            <div className="hidden xl:flex items-center gap-1.5 text-emerald-400 text-[11px]">
+              <Sparkles size={13} />
+              <span>Instant UAE Cash Valuation</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* MOBILE DRAWER NAVIGATION */}
       {mobileMenuOpen && (
-        <div className="xl:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50">
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50">
           <div className="space-y-1">
             <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
-              Sell Device Categories
+              Sell Devices
             </div>
             <div className="grid grid-cols-1 gap-1">
               <Link
                 href="/services"
                 className="flex items-center justify-between px-3.5 py-2.5 text-sm font-bold text-slate-800 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition"
               >
-                <span>All Services & Brands</span>
+                <span>All Services & Categories</span>
                 <ArrowRight size={14} className="text-slate-400" />
               </Link>
               {categoriesList.map((category) => (
