@@ -40,6 +40,12 @@ export const getCategoryAliases = (slug) => {
   if (s === "tablets" || s === "ipads") {
     return ["tablets", "ipads"];
   }
+  if (s === "games" || s === "consoles" || s === "gaming") {
+    return ["games", "consoles", "gaming"];
+  }
+  if (s === "tvs" || s === "television" || s === "televisions") {
+    return ["tvs", "television", "televisions"];
+  }
   return [s];
 };
 
