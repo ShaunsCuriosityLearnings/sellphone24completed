@@ -1,5 +1,6 @@
 import Order from "../models/Order.js";
 import { sendOrderConfirmationEmails, sendStatusUpdateEmails } from "../utils/emailService.js";
+import { sendOrderWhatsAppNotification } from "../utils/whatsappService.js";
 
 // @desc    Create/Submit a new valuation order
 // @route   POST /api/orders
@@ -24,6 +25,9 @@ export const createOrder = async (req, res) => {
 
     // Trigger emails asynchronously (Client confirmation & Admin notification)
     sendOrderConfirmationEmails(order);
+
+    // Trigger WhatsApp notification for +971555972150
+    sendOrderWhatsAppNotification(order);
 
     res.status(201).json({
       success: true,

@@ -128,18 +128,33 @@ const CartCheckoutContent = () => {
           <p className="text-xs text-slate-400 max-w-md mx-auto">
             Please make sure you have backed up your photos, contacts, and logged out of iCloud/Google account settings prior to the pickup appointment.
           </p>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+            {completedOrder && (
+              <a
+                href={`https://wa.me/971555972150?text=${encodeURIComponent(
+                  `🚨 *NEW ORDER CREATED - SellPhoneCash*\n\n` +
+                  `👤 *Customer Name:* ${completedOrder.shippingForm?.name || "Customer"}\n` +
+                  `📞 *Phone:* ${completedOrder.shippingForm?.phone || "N/A"}\n` +
+                  `📧 *Email:* ${completedOrder.shippingForm?.email || "N/A"}\n\n` +
+                  `📍 *Pickup Address:* ${completedOrder.shippingForm?.address || ""}, ${completedOrder.shippingForm?.city || ""}, UAE\n` +
+                  `📅 *Pickup Date:* ${completedOrder.shippingForm?.pickupDate || ""}\n` +
+                  `⏰ *Time Slot:* ${completedOrder.shippingForm?.pickupTime || ""}\n\n` +
+                  `📱 *Device:* ${completedOrder.item?.name || "Device"} (${completedOrder.item?.selectedStorage || ""}, ${completedOrder.item?.selectedColor || ""}, ${completedOrder.item?.selectedCondition || ""})\n` +
+                  `💰 *Estimated Evaluation:* AED ${completedOrder.totalPayout?.toLocaleString() || 0}\n` +
+                  `💵 *Payment Method:* Cash on Doorstep Collection`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition cursor-pointer"
+              >
+                <span>💬 Send Order Details to WhatsApp (+971555972150)</span>
+              </a>
+            )}
             <Link
               href="/"
-              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition"
+              className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition text-center"
             >
               Back to Homepage
-            </Link>
-            <Link
-              href="/blogs/safely-erase-phone-before-selling"
-              className="px-6 py-3 border border-slate-200 text-slate-600 hover:text-emerald-500 text-xs font-semibold rounded-xl transition bg-white"
-            >
-              Data Erasure Guide
             </Link>
           </div>
         </div>
