@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 /**
  * Formats a clean WhatsApp order alert string
  */
