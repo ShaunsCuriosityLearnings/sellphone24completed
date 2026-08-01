@@ -70,10 +70,10 @@ const ShippingForm = ({
 
         {/* PHONE */}
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-slate-600">Mobile Number (e.g. +971501234567)</label>
+          <label className="text-xs font-semibold text-slate-600">Mobile Number (e.g. 0555549817)</label>
           <input
             {...register("phone")}
-            placeholder="+971501234567"
+            placeholder="0555549817"
             className="border border-slate-200 rounded-xl p-3 outline-none focus:border-emerald-500 text-sm"
           />
           {errors.phone && (

@@ -210,7 +210,7 @@ export default function ChatWidget() {
           text: `🎉 Thank you, ${userName}! Your details have been captured and logged with support. Click below to connect live on WhatsApp or call support.`,
           options: [
             { label: "💬 Connect with Live Support on WhatsApp", value: "whatsapp" },
-            { label: "📞 Call Support (+971 50 123 4567)", value: "call" },
+            { label: "📞 Call Support (0555549817)", value: "call" },
             { label: "🔄 Start New Chat", value: "menu" },
           ],
         },
@@ -229,9 +229,9 @@ export default function ChatWidget() {
       const msg = encodeURIComponent(
         `Hi SellPhoneCash Support! My name is ${userName || "Customer"}. I'd like support regarding: ${deviceModel || orderQuery || "Device Valuation"}`
       );
-      window.open(`https://wa.me/971501234567?text=${msg}`, "_blank");
+      window.open(`https://wa.me/971555549817?text=${msg}`, "_blank");
     } else if (val === "call") {
-      window.open("tel:+971501234567", "_self");
+      window.open("tel:0555549817", "_self");
     } else if (val === "menu") {
       initChat();
     }
@@ -336,7 +336,7 @@ export default function ChatWidget() {
                       required
                       value={userPhone}
                       onChange={(e) => setUserPhone(e.target.value)}
-                      placeholder="e.g. +971 50 123 4567"
+                      placeholder="0555549817"
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50"
                     />
                   </div>

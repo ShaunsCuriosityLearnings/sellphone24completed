@@ -68,7 +68,7 @@ const HeroSection = () => {
             <div className="absolute inset-0 z-20 flex items-center justify-center group">
               <div className="relative w-[80%] h-[80%] group-hover:scale-105 transition-transform duration-500 ease-out">
                 <Image
-                  src="/products/iphone 17 pro max 💖.jpg"
+                  src="/products/iphone-pro-max.jpg"
                   alt="Sell your Smartphone"
                   fill
                   priority

@@ -35,7 +35,7 @@ const ContactPage = () => {
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider">Phone Support</h4>
-                  <p className="mt-1">+971 4 123 4567</p>
+                  <p className="mt-1 font-semibold text-slate-800">0555549817 (+971 55 554 9817)</p>
                   <p className="text-[10px] text-slate-400">Available Mon-Sat (9:00 AM - 6:00 PM)</p>
                 </div>
               </div>

@@ -116,7 +116,7 @@ const CartCheckoutContent = () => {
                   <span><strong>Time Slot:</strong> {completedOrder.shippingForm.pickupTime}</span>
                 </div>
                 <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
-                  <span className="font-bold text-sm text-slate-800">Total Valuation:</span>
+                  <span className="font-bold text-sm text-slate-800">Estimated Evaluation:</span>
                   <strong className="text-emerald-600 text-xl font-black">AED {completedOrder.totalPayout.toLocaleString()}</strong>
                 </div>
               </div>
@@ -256,7 +256,7 @@ const CartCheckoutContent = () => {
               <hr className="border-slate-100" />
 
               <div className="flex justify-between items-baseline text-slate-800">
-                <span className="font-extrabold text-sm">Total Expected Payout</span>
+                <span className="font-extrabold text-sm">Estimated Evaluation</span>
                 <span className="text-2xl font-black text-emerald-600">
                   AED {totalPayout.toLocaleString()}
                 </span>

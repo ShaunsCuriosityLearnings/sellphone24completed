@@ -91,7 +91,7 @@ export default function SellAnyDevicePage() {
               <input
                 {...register("phone")}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                placeholder="+971 50 123 4567"
+                placeholder="0555549817"
               />
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
             </div>
