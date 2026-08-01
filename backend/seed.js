@@ -7,6 +7,7 @@ import Brand from "./models/Brand.js";
 import Product from "./models/Product.js";
 import Blog from "./models/Blog.js";
 import connectDB from "./config/db.js";
+import { appleiPhones } from "./seedAppleiPhones.js";
 
 const categoriesData = [
   {
@@ -90,41 +91,8 @@ const storagePriceBoosts = {
   "64GB RAM / 2TB SSD": 2000,
 };
 
-const productsData = [
-  // --- SMARTPHONES ---
-  {
-    name: "iPhone 15 Pro Max",
-    brandName: "Apple",
-    category: "smartphones",
-    basePrice: 3200,
-    storages: ["256GB", "512GB", "1TB"],
-    colors: ["Black Titanium", "Natural Titanium", "White Titanium", "Blue Titanium"],
-    description: "Titanium design with A17 Pro chip, Action button, and 5x Telephoto camera.",
-    shortDescription: "Sleek titanium iPhone with A17 Pro chip & triple-lens camera.",
-    images: { frontView: "/products/iphone 17 pro max 💖.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" },
-  },
-  {
-    name: "iPhone 15 Pro",
-    brandName: "Apple",
-    category: "smartphones",
-    basePrice: 2800,
-    storages: ["128GB", "256GB", "512GB", "1TB"],
-    colors: ["Black Titanium", "Natural Titanium", "White Titanium"],
-    description: "Pro performance in a 6.1-inch titanium body with A17 Pro chip.",
-    shortDescription: "Titanium design, A17 Pro chip, customizable Action button.",
-    images: { frontView: "/products/iphone (3).jpg", sideView: "/products/iphone (4).jpg", backView: "/products/iphone (5).jpg" },
-  },
-  {
-    name: "iPhone 15",
-    brandName: "Apple",
-    category: "smartphones",
-    basePrice: 2000,
-    storages: ["128GB", "256GB", "512GB"],
-    colors: ["Black", "Blue", "Green", "Yellow", "Pink"],
-    description: "Dynamic Island, 48MP main camera, and USB-C integration.",
-    shortDescription: "Dynamic Island, 48MP Main camera, and USB-C integration.",
-    images: { frontView: "/products/iphone (6).jpg", sideView: "/products/iphone (7).jpg", backView: "/products/iphone (8).jpg" },
-  },
+const otherProductsData = [
+  // --- NON-IPHONE SMARTPHONES ---
   {
     name: "Galaxy S24 Ultra",
     brandName: "Samsung",
@@ -568,69 +536,97 @@ const seedDatabase = async () => {
   try {
     await connectDB();
 
-    // 1. Clear existing database
-    await Category.deleteMany();
-    await Brand.deleteMany();
-    await Product.deleteMany();
-    console.log("🧹 Database cleared (Categories, Brands, & Products deleted)");
-
-    // 2. Insert Categories
-    const insertedCategories = await Category.insertMany(categoriesData);
-    console.log(`✅ Seeded ${insertedCategories.length} categories.`);
-
-    // Map Category slugs to ObjectIds
+    // 1. Safe Upsert Categories
     const categorySlugToId = {};
-    insertedCategories.forEach((cat) => {
-      categorySlugToId[cat.slug] = cat._id;
-    });
+    for (const cat of categoriesData) {
+      const updatedCat = await Category.findOneAndUpdate(
+        { slug: cat.slug },
+        { $set: cat },
+        { upsert: true, new: true }
+      );
+      categorySlugToId[cat.slug] = updatedCat._id;
+    }
+    console.log(`✅ Safe upserted ${categoriesData.length} categories.`);
 
-    // 3. Format & Insert Brands
-    const formattedBrands = brandsData.map((brand) => {
-      const categoryIds = brand.categoriesSlugs.map((slug) => categorySlugToId[slug]).filter(Boolean);
-      return {
-        name: brand.name,
-        slug: brand.slug,
-        logo: brand.logo,
-        categories: categoryIds,
-      };
-    });
-
-    const insertedBrands = await Brand.insertMany(formattedBrands);
-    console.log(`✅ Seeded ${insertedBrands.length} brands.`);
-
-    // Map Brand names to ObjectIds
+    // 2. Safe Upsert Brands
     const brandNameToId = {};
-    insertedBrands.forEach((br) => {
-      brandNameToId[br.name] = br._id;
-    });
+    for (const brand of brandsData) {
+      const categoryIds = brand.categoriesSlugs.map((slug) => categorySlugToId[slug]).filter(Boolean);
+      const updatedBrand = await Brand.findOneAndUpdate(
+        { slug: brand.slug },
+        {
+          $set: {
+            name: brand.name,
+            slug: brand.slug,
+            logo: brand.logo,
+            categories: categoryIds
+          }
+        },
+        { upsert: true, new: true }
+      );
+      brandNameToId[brand.name] = updatedBrand._id;
+    }
+    console.log(`✅ Safe upserted ${brandsData.length} brands.`);
 
-    // 4. Format & Insert Products
-    const formattedProducts = productsData.map((product) => {
-      const storagesMapped = product.storages.map((sz) => ({
+    // 3. Upsert Apple iPhones (all 28 models)
+    const appleBrandId = brandNameToId["Apple"];
+    let iphoneCount = 0;
+    if (appleBrandId) {
+      for (const ip of appleiPhones) {
+        await Product.findOneAndUpdate(
+          { name: ip.name },
+          {
+            $set: {
+              name: ip.name,
+              brand: appleBrandId,
+              category: "smartphones",
+              basePrice: ip.basePrice,
+              storages: ip.storages,
+              colors: ip.colors,
+              description: ip.description,
+              shortDescription: ip.shortDescription,
+              images: ip.images
+            }
+          },
+          { upsert: true, new: true }
+        );
+        iphoneCount++;
+      }
+      console.log(`📱 Safe upserted ${iphoneCount} Apple iPhone models.`);
+    }
+
+    // 4. Upsert Other Catalog Products
+    let otherCount = 0;
+    for (const p of otherProductsData) {
+      const bId = brandNameToId[p.brandName];
+      if (!bId) continue;
+
+      const storagesMapped = p.storages.map((sz) => ({
         size: sz,
         priceBoost: storagePriceBoosts[sz] !== undefined ? storagePriceBoosts[sz] : 0,
       }));
 
-      const brandId = brandNameToId[product.brandName];
-      if (!brandId) {
-        throw new Error(`Brand ID not found for brand name: ${product.brandName}`);
-      }
-
-      return {
-        name: product.name,
-        brand: brandId,
-        category: product.category,
-        basePrice: product.basePrice,
-        storages: storagesMapped,
-        colors: product.colors,
-        description: product.description,
-        shortDescription: product.shortDescription,
-        images: product.images,
-      };
-    });
-
-    const insertedProducts = await Product.insertMany(formattedProducts);
-    console.log(`🎉 Seeded ${insertedProducts.length} total products across all categories into database!`);
+      await Product.findOneAndUpdate(
+        { name: p.name },
+        {
+          $set: {
+            name: p.name,
+            brand: bId,
+            category: p.category,
+            basePrice: p.basePrice,
+            storages: storagesMapped,
+            colors: p.colors,
+            description: p.description,
+            shortDescription: p.shortDescription,
+            images: p.images,
+          }
+        },
+        { upsert: true, new: true }
+      );
+      otherCount++;
+    }
+    console.log(`📦 Safe upserted ${otherCount} other catalog products.`);
+    console.log(`🎉 Total safe seeding completed! Database populated safely.`);
 
     process.exit(0);
   } catch (error) {
