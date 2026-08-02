@@ -1,45 +1,34 @@
 import HeroSection from "@/components/HeroSection";
+import TrustStatsBar from "@/components/TrustStatsBar";
+import FrontpageSellSection from "@/components/FrontpageSellSection";
 import ServicesGrid from "@/components/ServicesGrid";
 import ProductList from "@/components/ProductList";
-import { brands } from "@/data/mockData";
 import Image from "next/image";
 import Link from "next/link";
-import { ShieldCheck, ArrowRight, Smartphone, BadgePercent, CheckCircle2, Eye, Calendar } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import { api } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
-
-const defaultTopBrands = [
-  { id: "b1", name: "Apple", slug: "apple", logo: "🍎" },
-  { id: "b2", name: "Samsung", slug: "samsung", logo: "📱" },
-  { id: "b3", name: "Sony", slug: "sony", logo: "🎮" },
-  { id: "b4", name: "Dell", slug: "dell", logo: "💻" },
-  { id: "b5", name: "HP", slug: "hp", logo: "💻" },
-  { id: "b6", name: "Lenovo", slug: "lenovo", logo: "💻" },
-];
 
 const Homepage = async () => {
   const blogs = await api.getBlogs();
   const latestBlogs = blogs.slice(0, 2);
 
-  let fetchedBrands: any[] = [];
-  try {
-    fetchedBrands = await api.getBrands();
-  } catch (err) {}
-
-  const top6Brands = fetchedBrands.length > 0 
-    ? fetchedBrands.slice(0, 6) 
-    : defaultTopBrands;
-
   return (
-    <div className="space-y-16 pb-12">
-      {/* Hero Header */}
+    <div className="space-y-12 pb-12">
+      {/* 1. HERO HEADER WITH CASCADING EVALUATION SEARCH WIDGET */}
       <HeroSection />
 
-      {/* Services Grid */}
+      {/* 2. TRUST & STATS BAR (RIGHT AFTER HERO SECTION) */}
+      <TrustStatsBar />
+
+      {/* 3. MAIN FRONTPAGE SELL SECTION MATCHING USER'S DESIGN REFERENCE */}
+      <FrontpageSellSection />
+
+      {/* 4. SERVICES CATEGORY GRID */}
       <ServicesGrid />
 
-      {/* HOW IT WORKS SECTION */}
+      {/* 5. HOW IT WORKS SECTION */}
       <section className="bg-white rounded-[40px] border border-slate-100 p-8 md:p-12 shadow-sm space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">
@@ -58,7 +47,7 @@ const Homepage = async () => {
             </div>
             <h3 className="font-bold text-slate-800 text-lg">Select Your Device</h3>
             <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
-              Find your phone, tablet, or smartwatch model and select its storage size, color, and condition details.
+              Find your phone, tablet, laptop, or smartwatch model and select its storage size, color, and condition details.
             </p>
           </div>
 
@@ -86,56 +75,17 @@ const Homepage = async () => {
         </div>
       </section>
 
-      {/* POPULAR BRANDS */}
-      <section className="space-y-6">
-        <div className="flex justify-between items-end">
-          <div className="space-y-2">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Shop by Brand</h2>
-            <p className="text-sm text-slate-500">Choose a brand to see available buyback devices</p>
-          </div>
-          <Link href="/services" className="text-xs font-bold text-emerald-500 hover:text-emerald-600 flex items-center gap-1">
-            See All Brands
-            <ArrowRight size={14} />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {top6Brands.map((brand: any) => (
-            <Link
-              key={brand.id || brand._id || brand.slug}
-              href={`/services?brand=${brand.slug}`}
-              className="bg-white border border-slate-100 hover:border-emerald-500/30 rounded-3xl p-5 flex flex-col items-center text-center justify-center hover:shadow-lg transition-all duration-300 group cursor-pointer"
-            >
-              <div className="w-10 h-10 flex items-center justify-center text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
-                {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
-                  <div className="relative w-full h-full">
-                    <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
-                  </div>
-                ) : (
-                  <span>{brand.logo || "📱"}</span>
-                )}
-              </div>
-              <h3 className="font-bold text-slate-800 group-hover:text-emerald-500 transition-colors text-xs md:text-sm">
-                {brand.name}
-              </h3>
-              <p className="text-[9px] text-slate-400 mt-0.5 uppercase font-semibold">Get Top Value →</p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* POPULAR MODELS */}
+      {/* 6. POPULAR MODELS */}
       <section className="space-y-6">
         <div className="space-y-2">
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Popular Devices We Buy</h2>
           <p className="text-sm text-slate-500">Instantly sell these trending models at premium rates</p>
         </div>
         
-        {/* Render ProductList configured for homepage limit */}
         <ProductList params="homepage" />
       </section>
 
-      {/* GREEN RECYCLING CORNER & STATISTICS */}
+      {/* 7. GREEN RECYCLING CORNER & STATISTICS */}
       <section className="bg-slate-900 rounded-[40px] text-white p-8 md:p-12 shadow-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-slate-900 to-slate-900" />
         <div className="relative z-10 grid lg:grid-cols-12 gap-10 items-center">
@@ -151,15 +101,15 @@ const Homepage = async () => {
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-slate-800">
               <div>
-                <h4 className="text-2xl md:text-3xl font-extrabold text-emerald-400">12.5k+</h4>
-                <p className="text-xs text-slate-500 mt-1 uppercase font-semibold">Devices Refurbished</p>
+                <h4 className="text-2xl md:text-3xl font-extrabold text-emerald-400">25k+</h4>
+                <p className="text-xs text-slate-500 mt-1 uppercase font-semibold">Devices Purchased</p>
               </div>
               <div>
                 <h4 className="text-2xl md:text-3xl font-extrabold text-emerald-400">4.2 Tons</h4>
                 <p className="text-xs text-slate-500 mt-1 uppercase font-semibold">Carbon Offset Saved</p>
               </div>
               <div>
-                <h4 className="text-2xl md:text-3xl font-extrabold text-emerald-400">AED 18M+</h4>
+                <h4 className="text-2xl md:text-3xl font-extrabold text-emerald-400">AED 25M+</h4>
                 <p className="text-xs text-slate-500 mt-1 uppercase font-semibold">Valuations Paid Out</p>
               </div>
             </div>
@@ -174,92 +124,53 @@ const Homepage = async () => {
         </div>
       </section>
 
-      {/* REPLICATED BLOG HIGHLIGHTS */}
-      <section className="space-y-6">
-        <div className="flex justify-between items-end">
-          <div className="space-y-2">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Latest from Tech & Recycling Blogs</h2>
-            <p className="text-sm text-slate-500">Expert guides on device care, security, and market price trends</p>
-          </div>
-          <Link href="/blogs" className="text-xs font-bold text-emerald-500 hover:text-emerald-600 flex items-center gap-1">
-            See All Articles
-            <ArrowRight size={14} />
-          </Link>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {latestBlogs.map((blog) => (
-            <Link
-              key={blog.id}
-              href={`/blogs/${blog.slug}`}
-              className="bg-white border border-slate-100 hover:border-emerald-500/20 hover:shadow-lg rounded-3xl p-6 flex flex-col sm:flex-row gap-5 transition-all duration-300 group cursor-pointer"
-            >
-              <div className="relative w-full sm:w-1/3 aspect-[16/10] rounded-2xl overflow-hidden bg-slate-50 flex-shrink-0">
-                <Image src={blog.img} alt={blog.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="flex-1 flex flex-col justify-between space-y-2">
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold text-emerald-500">{blog.category}</span>
-                  <h3 className="font-bold text-slate-800 text-sm md:text-base group-hover:text-emerald-500 transition-colors line-clamp-2">
-                    {blog.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 line-clamp-2">{blog.desc}</p>
-                </div>
-                <div className="flex items-center gap-4 text-[10px] text-slate-400 font-medium pt-2 border-t border-slate-50">
-                  <span className="flex items-center gap-1">
-                    <Calendar size={12} />
-                    {new Date(blog.createdAt || new Date()).toLocaleDateString()}
-                  </span>
-                  <span>By {blog.author}</span>
-                </div>
-              </div>
+      {/* 8. LATEST BLOGS */}
+      {latestBlogs.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex justify-between items-end">
+            <div className="space-y-2">
+              <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Latest Tech & Recycling Articles</h2>
+              <p className="text-sm text-slate-500">Expert guides on device care, security, and market price trends</p>
+            </div>
+            <Link href="/blogs" className="text-xs font-bold text-emerald-500 hover:text-emerald-600 flex items-center gap-1">
+              See All Articles
+              <ArrowRight size={14} />
             </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* TESTIMONIALS SECTION */}
-      <section className="bg-slate-100/50 border border-slate-200/50 rounded-[40px] p-8 md:p-12 space-y-10">
-        <div className="text-center max-w-md mx-auto space-y-2">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">What UAE Sellers Say</h2>
-          <p className="text-xs text-slate-500">Hear from thousands of satisfied customers in Dubai, Abu Dhabi & Sharjah.</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-4">
-            <p className="text-xs text-slate-600 italic leading-relaxed">
-              &quot;Had an outstanding experience. Got an instant price estimate for my iPhone 14 Pro, the driver picked it up from Dubai Marina within 4 hours, and bank transfer cleared on the spot!&quot;
-            </p>
-            <div>
-              <div className="flex items-center gap-1 text-xs text-yellow-500 mb-1">★★★★★</div>
-              <h4 className="font-bold text-xs text-slate-800">Sarah M.</h4>
-              <p className="text-[9px] text-slate-400 uppercase font-semibold">Dubai resident</p>
-            </div>
           </div>
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-4">
-            <p className="text-xs text-slate-600 italic leading-relaxed">
-              &quot;The best way to sell old tech. Highly professional courier. Handed my old iPad and received cash instantly. Fully recommended instead of dealing with random buyers online.&quot;
-            </p>
-            <div>
-              <div className="flex items-center gap-1 text-xs text-yellow-500 mb-1">★★★★★</div>
-              <h4 className="font-bold text-xs text-slate-800">Tariq A.</h4>
-              <p className="text-[9px] text-slate-400 uppercase font-semibold">Abu Dhabi resident</p>
-            </div>
-          </div>
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-4">
-            <p className="text-xs text-slate-600 italic leading-relaxed">
-              &quot;Great support team. Walked me through deleting my iCloud accounts properly. Courier verified the condition fast and payment arrived in minutes.&quot;
-            </p>
-            <div>
-              <div className="flex items-center gap-1 text-xs text-yellow-500 mb-1">★★★★★</div>
-              <h4 className="font-bold text-xs text-slate-800">Faisal K.</h4>
-              <p className="text-[9px] text-slate-400 uppercase font-semibold">Sharjah resident</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* FAQ SECTION */}
+          <div className="grid md:grid-cols-2 gap-6">
+            {latestBlogs.map((blog) => (
+              <Link
+                key={blog.id}
+                href={`/blogs/${blog.slug}`}
+                className="bg-white border border-slate-100 hover:border-emerald-500/20 hover:shadow-lg rounded-3xl p-6 flex flex-col sm:flex-row gap-5 transition-all duration-300 group cursor-pointer"
+              >
+                <div className="relative w-full sm:w-1/3 aspect-[16/10] rounded-2xl overflow-hidden bg-slate-50 flex-shrink-0">
+                  <Image src={blog.img} alt={blog.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                </div>
+                <div className="flex-1 flex flex-col justify-between space-y-2">
+                  <div className="space-y-1">
+                    <span className="text-[10px] uppercase font-bold text-emerald-500">{blog.category}</span>
+                    <h3 className="font-bold text-slate-800 text-sm md:text-base group-hover:text-emerald-500 transition-colors line-clamp-2">
+                      {blog.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 line-clamp-2">{blog.desc}</p>
+                  </div>
+                  <div className="flex items-center gap-4 text-[10px] text-slate-400 font-medium pt-2 border-t border-slate-50">
+                    <span className="flex items-center gap-1">
+                      <Calendar size={12} />
+                      {new Date(blog.createdAt || new Date()).toLocaleDateString()}
+                    </span>
+                    <span>By {blog.author}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 9. FAQ SECTION */}
       <section className="bg-white rounded-[40px] border border-slate-100 p-8 md:p-12 shadow-sm space-y-8">
         <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800 text-center">Frequently Asked Questions</h2>
         <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
