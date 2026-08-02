@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown, Zap, ShoppingBag, ArrowRight, Grid, Sparkles } from "lucide-react";
+import { Menu, X, ChevronDown, Zap, ShoppingBag, ArrowRight, Grid, Sparkles, Phone, Truck, ShieldCheck } from "lucide-react";
 import { CategoryType, BrandType } from "@/types";
 import { api } from "@/lib/api";
 import { usePathname } from "next/navigation";
@@ -23,7 +23,6 @@ const Navbar = () => {
   useEffect(() => {
     api.getCategories()
       .then((data) => {
-        // Deduplicate categories (e.g. smartphones vs mobile)
         const seenNames = new Set<string>();
         const filtered = data.filter((cat) => {
           const normName = cat.name.toLowerCase() === "mobile" ? "smartphones" : cat.name.toLowerCase();
@@ -38,13 +37,40 @@ const Navbar = () => {
     api.getBrands().then(setBrandsList).catch(() => {});
   }, []);
 
-  // Close mobile menu on page change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs">
+      
+      {/* TOP ANNOUNCEMENT & TRUST TICKER BAR */}
+      <div className="bg-slate-950 text-white text-[11px] font-medium py-1.5 px-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <span className="inline-flex items-center gap-1.5 text-emerald-400 font-bold">
+              🇦🇪 UAE #1 Rated Phone Buyback
+            </span>
+            <span className="hidden md:inline-block text-slate-500">•</span>
+            <span className="hidden md:flex items-center gap-1 text-slate-300">
+              <Truck size={12} className="text-emerald-400" />
+              Free Pickup Across Dubai & All Emirates
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:flex items-center gap-1 text-slate-300">
+              <ShieldCheck size={12} className="text-emerald-400" />
+              100% Licensed Business
+            </span>
+            <a href="tel:+971500000000" className="flex items-center gap-1 text-emerald-400 font-bold hover:underline">
+              <Phone size={12} />
+              +971 800 SELL (7355)
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* ROW 1: MAIN TOP HEADER BAR */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -77,7 +103,7 @@ const Navbar = () => {
             {cartCount > 0 && (
               <Link
                 href="/cart"
-                className="relative px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition flex items-center gap-2 font-bold text-xs"
+                className="relative px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition flex items-center gap-2 font-bold text-xs border border-emerald-200/60"
               >
                 <ShoppingBag size={16} />
                 <span>Sell List</span>
@@ -242,7 +268,7 @@ const Navbar = () => {
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 

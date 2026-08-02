@@ -1,43 +1,113 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { categories } from "@/data/mockData";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Smartphone, Laptop, Tablet, Watch, Tv, Gamepad2, Sparkles } from "lucide-react";
+import { api } from "@/lib/api";
+import { CategoryType } from "@/types";
+
+const defaultCategories: CategoryType[] = [
+  {
+    id: "cat-1",
+    name: "Smartphones",
+    slug: "smartphones",
+    description: "Sell iPhones, Samsung Galaxy, Pixel & more",
+    image: "/products/iphone-pro-max.jpg",
+  },
+  {
+    id: "cat-2",
+    name: "Laptops",
+    slug: "laptops",
+    description: "Sell MacBooks, Dell XPS, HP, Lenovo & Asus",
+    image: "/products/macbook-pro.webp",
+  },
+  {
+    id: "cat-3",
+    name: "Tablets",
+    slug: "tablets",
+    description: "Sell iPad Pro, Galaxy Tab & Surface",
+    image: "/products/ipad-pro-m4.webp",
+  },
+  {
+    id: "cat-4",
+    name: "Smartwatches",
+    slug: "smartwatches",
+    description: "Sell Apple Watch Ultra, Galaxy Watch",
+    image: "/products/apple-watch-ultra.webp",
+  },
+  {
+    id: "cat-5",
+    name: "Consoles & Gaming",
+    slug: "games",
+    description: "Sell PS5 Pro, Xbox Series X, Switch OLED",
+    image: "/products/ps5-slim.webp",
+  },
+  {
+    id: "cat-6",
+    name: "Smart TVs",
+    slug: "tvs",
+    description: "Sell OLED, QLED & 4K TVs",
+    image: "/products/samsung-neo-qled.webp",
+  },
+];
 
 const ServicesGrid = () => {
+  const [categories, setCategories] = useState<CategoryType[]>(defaultCategories);
+
+  useEffect(() => {
+    api.getCategories()
+      .then((data) => {
+        if (data && data.length > 0) {
+          setCategories(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
-    <section className="space-y-6 mb-12">
+    <section className="space-y-6 my-12">
       <div className="flex justify-between items-end">
         <div className="space-y-2">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Our Services</h2>
-          <p className="text-sm text-slate-500">Choose a category to start selling</p>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-bold uppercase tracking-wider">
+            <Sparkles size={12} />
+            Direct Category Buyback
+          </div>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Explore Our Services</h2>
+          <p className="text-sm text-slate-500">Select a device category to calculate instant cash evaluation</p>
         </div>
-        <Link href="/services" className="text-xs font-bold text-emerald-500 hover:text-emerald-600 flex items-center gap-1">
+        <Link href="/services" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
           View All Services
           <ArrowRight size={14} />
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {categories.map((category) => (
           <Link
-            key={category.id}
+            key={category.id || category.slug}
             href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-            className="group flex flex-col items-center bg-slate-50 hover:bg-white border border-slate-100 hover:border-emerald-500/30 rounded-[24px] p-6 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
+            className="group flex flex-col items-center justify-between bg-white hover:bg-emerald-50/20 border border-slate-100 hover:border-emerald-500/40 rounded-[28px] p-5 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
           >
             {/* Image Container */}
-            <div className="relative w-24 h-24 mb-4 group-hover:scale-110 transition-transform duration-300">
+            <div className="relative w-20 h-20 mb-3 group-hover:scale-110 transition-transform duration-300">
               <Image 
-                src={category.image} 
+                src={category.image || "/products/iphone-pro-max.jpg"} 
                 alt={category.name} 
                 fill 
-                className="object-contain drop-shadow-md"
+                className="object-contain drop-shadow-md p-1"
               />
             </div>
             
-            {/* Title */}
-            <h3 className="font-bold text-slate-800 group-hover:text-emerald-500 transition-colors text-center text-sm">
-              Sell {category.name}
-            </h3>
+            {/* Title & Badge */}
+            <div className="text-center">
+              <h3 className="font-extrabold text-slate-800 group-hover:text-emerald-600 transition-colors text-xs md:text-sm">
+                Sell {category.name}
+              </h3>
+              <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-1 group-hover:text-emerald-500">
+                Get Top Quote →
+              </p>
+            </div>
           </Link>
         ))}
       </div>
