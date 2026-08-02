@@ -25,7 +25,7 @@ const PaymentForm = ({
     },
   });
 
-  const { cart, clearCart } = useCartStore();
+  const { cart } = useCartStore();
   const [loading, setLoading] = useState(false);
 
   const handlePaymentForm: SubmitHandler<PaymentFormInputs> = async () => {
@@ -42,12 +42,10 @@ const PaymentForm = ({
     setLoading(true);
 
     try {
-      // Map frontend cart items to backend Order devices with safe defaults
       const devices = cart.map((item) => ({
-        // Ensure we pass a 24-character hex ID if it's MongoDB, otherwise pass a fallback string
         productId: (item._id || String(item.id)).match(/^[0-9a-fA-F]{24}$/) 
           ? (item._id || String(item.id)) 
-          : "65d78fa1b98cf931acbdc60f", // Fallback seeded device objectId if local mock ID
+          : "65d78fa1b98cf931acbdc60f",
         name: item.name || "Mobile Device",
         brand: item.brand || "Apple",
         category: item.category || "mobile",
@@ -63,12 +61,12 @@ const PaymentForm = ({
       const orderData = {
         customerDetails: {
           name: shippingForm.name,
-          email: shippingForm.email,
+          email: shippingForm.email || "customer@sellphone.ae",
           phone: shippingForm.phone,
-          address: shippingForm.address,
+          address: shippingForm.address || shippingForm.building,
           city: shippingForm.city,
-          state: shippingForm.state || "United Arab Emirates",
-          pincode: shippingForm.pincode || "00000",
+          state: "UAE",
+          pincode: "00000",
         },
         pickupSchedule: {
           pickupDate: shippingForm.pickupDate,

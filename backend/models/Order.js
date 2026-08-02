@@ -9,7 +9,8 @@ const orderSchema = new mongoose.Schema({
     },
     email: {
       type: String,
-      required: [true, "Customer email is required"],
+      required: false,
+      default: "customer@sellphone.ae",
       trim: true,
     },
     phone: {
@@ -29,12 +30,14 @@ const orderSchema = new mongoose.Schema({
     },
     state: {
       type: String,
-      required: [true, "Country is required"],
+      required: false,
       default: "UAE",
       trim: true,
     },
     pincode: {
       type: String,
+      required: false,
+      default: "",
       trim: true,
     }
   },
