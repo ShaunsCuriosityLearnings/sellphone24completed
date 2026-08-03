@@ -22,9 +22,13 @@ import {
   MessageCircle,
   Star,
   Mail,
-  Navigation
+  Navigation,
+  Loader2
 } from "lucide-react";
 import Image from "next/image";
+import useCartStore from "@/app/stores/cartStore";
+import { api } from "@/lib/api";
+import { toast } from "react-toastify";
 
 const uaeLocations = [
   "Dubai Marina",
@@ -48,16 +52,18 @@ const uaeLocations = [
 ];
 
 export default function ShippingForm({
-  setShippingForm,
+  onOrderCreated,
 }: {
-  setShippingForm: (data: ShippingFormInputs) => void;
+  onOrderCreated: (completedData: any) => void;
 }) {
   const router = useRouter();
+  const { cart } = useCartStore();
+
+  const [loading, setLoading] = useState(false);
   
   // Calculate prefilled today's date and 3-hour window
   const todayStr = new Date().toISOString().split("T")[0];
   
-  // Calculate dynamic 3-hour window string (e.g. "Today 2:30 PM - 5:30 PM")
   const now = new Date();
   const currentHour = now.getHours();
   let nextWindowSlot = "Today 2:30 PM - 5:30 PM";
@@ -87,7 +93,7 @@ export default function ShippingForm({
     },
   });
 
-  // Handle GPS Auto-detect location
+  // GPS Auto-detect location
   const handleAutoDetectLocation = () => {
     if (!navigator.geolocation) {
       setLocationStatus("Geolocation is not supported by your browser");
@@ -128,15 +134,71 @@ export default function ShippingForm({
     );
   };
 
-  const handleShippingSubmit: SubmitHandler<ShippingFormInputs> = (data) => {
-    const fullAddress = `${data.building}${data.apartment ? `, Apt/Office ${data.apartment}` : ""}${data.additionalNotes ? ` (${data.additionalNotes})` : ""}`;
-    const finalData = {
-      ...data,
-      pickupOption,
-      address: fullAddress,
-    };
-    setShippingForm(finalData);
-    router.push("/cart?step=2", { scroll: false });
+  const handleShippingSubmit: SubmitHandler<ShippingFormInputs> = async (data) => {
+    if (cart.length === 0) {
+      toast.error("No device selected for valuation.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const fullAddress = `${data.building}${data.apartment ? `, Apt/Office ${data.apartment}` : ""}${data.additionalNotes ? ` (${data.additionalNotes})` : ""}`;
+      
+      const devices = cart.map((item) => ({
+        productId: (item._id || String(item.id)).match(/^[0-9a-fA-F]{24}$/) 
+          ? (item._id || String(item.id)) 
+          : "65d78fa1b98cf931acbdc60f",
+        name: item.name || "Mobile Device",
+        brand: item.brand || "Apple",
+        category: item.category || "mobile",
+        selectedStorage: item.selectedStorage || "Standard",
+        selectedColor: item.selectedColor || "Standard",
+        selectedCondition: item.selectedCondition || "Good",
+        calculatedPrice: Number(item.calculatedPrice) || 0,
+        quantity: item.quantity || 1,
+      }));
+
+      const totalPayout = cart.reduce((acc, item) => acc + item.calculatedPrice * (item.quantity || 1), 0);
+
+      const orderData = {
+        customerDetails: {
+          name: data.name,
+          email: data.email || "customer@sellphone.ae",
+          phone: data.phone,
+          address: fullAddress,
+          city: data.city,
+          state: "UAE",
+          pincode: "",
+        },
+        pickupSchedule: {
+          pickupDate: data.pickupDate,
+          pickupTime: data.pickupTime,
+        },
+        devices,
+        paymentMethod: "cash" as const,
+        totalPayout,
+      };
+
+      const res = await api.createOrder(orderData);
+
+      if (res.success || res.order) {
+        toast.success("Valuation pickup booked successfully!");
+        onOrderCreated({
+          order: res.order,
+          shippingForm: { ...data, address: fullAddress },
+          item: cart[0],
+          totalPayout
+        });
+      } else {
+        toast.error(res.message || "Failed to create valuation request.");
+      }
+    } catch (error) {
+      console.error("Order creation failed:", error);
+      toast.error("An error occurred while creating order.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -255,7 +317,7 @@ export default function ShippingForm({
           <div className="relative">
             <input
               {...register("phone")}
-              placeholder="055 554 9817"
+              placeholder="0555549817"
               className="w-full bg-slate-50/70 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-xs md:text-sm text-slate-800 outline-none focus:border-emerald-500 focus:bg-white transition"
             />
             <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -413,14 +475,24 @@ export default function ShippingForm({
         <span>Your information is secure and encrypted. We never share your personal data.</span>
       </div>
 
-      {/* 5. SUBMIT ACTION BUTTON */}
+      {/* 5. DIRECT ORDER CREATION BUTTON */}
       <div className="space-y-2">
         <button
           type="submit"
-          className="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-slate-950 font-extrabold py-4 px-6 rounded-2xl transition-all duration-200 shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2 text-sm cursor-pointer"
+          disabled={loading}
+          className="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] disabled:bg-slate-300 disabled:text-slate-500 text-slate-950 font-extrabold py-4 px-6 rounded-2xl transition-all duration-200 shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2 text-sm cursor-pointer"
         >
-          <Zap size={18} />
-          {pickupOption === "3_hours" ? "Book FREE Pickup Within 3 Hours →" : "Confirm Scheduled Pickup →"}
+          {loading ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              <span>Booking Doorstep Pickup...</span>
+            </>
+          ) : (
+            <>
+              <Zap size={18} />
+              <span>{pickupOption === "3_hours" ? "Book FREE Pickup Within 3 Hours →" : "Confirm Scheduled Pickup →"}</span>
+            </>
+          )}
         </button>
         <p className="text-center text-[11px] text-slate-400 font-medium">
           🛡️ No obligation. Cancel anytime for FREE.
@@ -432,7 +504,7 @@ export default function ShippingForm({
         
         {/* WhatsApp Help */}
         <a
-          href="https://wa.me/971555972150"
+          href="https://wa.me/971555549817"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-emerald-50/50 hover:bg-emerald-50 border border-emerald-100 rounded-2xl p-3 flex items-center gap-3 transition group"
@@ -443,7 +515,7 @@ export default function ShippingForm({
           <div>
             <h5 className="font-bold text-slate-800 text-xs group-hover:text-emerald-600 transition-colors">Need Help?</h5>
             <p className="text-[10px] text-slate-500">Chat with team on WhatsApp</p>
-            <p className="text-[9px] font-bold text-emerald-600">We reply in under 2 mins</p>
+            <p className="text-[9px] font-bold text-emerald-600">0555549817 (Reply &lt; 2 mins)</p>
           </div>
         </a>
 

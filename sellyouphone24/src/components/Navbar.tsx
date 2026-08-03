@@ -63,9 +63,9 @@ const Navbar = () => {
               <ShieldCheck size={12} className="text-emerald-400" />
               100% Licensed Business
             </span>
-            <a href="tel:+971500000000" className="flex items-center gap-1 text-emerald-400 font-bold hover:underline">
+            <a href="tel:0555549817" className="flex items-center gap-1 text-emerald-400 font-bold hover:underline">
               <Phone size={12} />
-              +971 800 SELL (7355)
+              0555549817
             </a>
           </div>
         </div>

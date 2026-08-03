@@ -11,12 +11,11 @@ const ProductList = async ({
   brand?: string;
   params: "homepage" | "products" | "brandpage";
 }) => {
-  // Dynamic Filtering based on props
   const products = await api.getProducts({ category, brand });
   let filteredProducts = products;
 
-  // Limit display size on Homepage for 2 full rows (8 items)
-  const displayProducts = params === "homepage" ? filteredProducts.slice(0, 8) : filteredProducts;
+  // Display 10 products on homepage (2 full rows of 5 cards)
+  const displayProducts = params === "homepage" ? filteredProducts.slice(0, 10) : filteredProducts;
 
   if (displayProducts.length === 0) {
     return (
@@ -31,8 +30,8 @@ const ProductList = async ({
 
   return (
     <div className="space-y-8">
-      {/* Grid container: 4 items per row on medium/large screens (2 rows total = 8 products) */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-5">
+      {/* Grid container: 5 items per row on large screens (xl:grid-cols-5) */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
         {displayProducts.map((product) => (
           <ProductCard key={product.id || product._id} product={product} />
         ))}

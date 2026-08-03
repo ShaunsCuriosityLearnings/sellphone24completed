@@ -1,31 +1,24 @@
 "use client";
 
-import PaymentForm from "@/components/PaymentForm";
 import ShippingForm from "@/components/ShippingForm";
 
 import Image from "next/image";
 import { 
-  ArrowRight, 
   CheckCircle2, 
   ClipboardList, 
   MapPin, 
   Calendar, 
   Clock, 
-  Banknote, 
-  BadgePercent,
   ShieldCheck,
   Star,
   ChevronDown,
   ChevronUp,
   Zap,
-  Edit,
-  Truck,
-  RotateCcw
+  MessageCircle
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 
-import { ShippingFormInputs } from "@/types";
 import useCartStore from "../stores/cartStore";
 import Link from "next/link";
 
@@ -33,17 +26,12 @@ const steps = [
   {
     id: 1,
     title: "Pickup Details",
-    description: "Enter pickup details",
+    description: "Enter doorstep details",
   },
   {
     id: 2,
-    title: "Payment Info",
-    description: "Confirm payment",
-  },
-  {
-    id: 3,
-    title: "Instant Payment",
-    description: "Get paid instantly",
+    title: "Request Booked!",
+    description: "Instant cash payout",
   },
 ];
 
@@ -51,7 +39,6 @@ const CartCheckoutContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [shippingForm, setShippingForm] = useState<ShippingFormInputs | null>(null);
   const [completedOrder, setCompletedOrder] = useState<any>(null);
   const [showWhyPrice, setShowWhyPrice] = useState<boolean>(false);
   
@@ -69,20 +56,16 @@ const CartCheckoutContent = () => {
     });
   };
 
-  const handleOrderCompletion = () => {
-    setCompletedOrder({
-      item: activeItem,
-      totalPayout,
-      shippingForm
-    });
+  const handleOrderCompletion = (data: any) => {
+    setCompletedOrder(data);
     clearCart();
-    handleStepChange(3);
+    handleStepChange(2);
   };
 
-  // SUCCESS STEP 3 RENDER
-  if (activeStep === 3) {
+  // SUCCESS STEP 2 RENDER
+  if (activeStep === 2) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-8 animate-in fade-in zoom-in-95 duration-300">
+      <div className="max-w-3xl mx-auto px-4 py-12 text-center space-y-8 animate-in fade-in zoom-in-95 duration-300">
         <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
           <CheckCircle2 size={44} />
         </div>
@@ -104,7 +87,7 @@ const CartCheckoutContent = () => {
                 <div className="flex gap-4 items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white border border-slate-100 flex-shrink-0 flex items-center justify-center p-2">
                     <Image
-                      src={completedOrder.item.images.frontView}
+                      src={completedOrder.item.images?.frontView || "/products/iphone-pro-max.jpg"}
                       alt={completedOrder.item.name}
                       fill
                       className="object-contain p-2"
@@ -139,7 +122,7 @@ const CartCheckoutContent = () => {
                 </div>
                 <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
                   <span className="font-bold text-sm text-slate-800">Estimated Evaluation:</span>
-                  <strong className="text-emerald-600 text-xl font-black">AED {completedOrder.totalPayout.toLocaleString()}</strong>
+                  <strong className="text-emerald-600 text-xl font-black">AED {completedOrder.totalPayout?.toLocaleString()}</strong>
                 </div>
               </div>
             </>
@@ -153,7 +136,7 @@ const CartCheckoutContent = () => {
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
             {completedOrder && (
               <a
-                href={`https://wa.me/971555972150?text=${encodeURIComponent(
+                href={`https://wa.me/971555549817?text=${encodeURIComponent(
                   `🚨 *NEW ORDER CREATED - SellPhoneCash*\n\n` +
                   `👤 *Customer Name:* ${completedOrder.shippingForm?.name || "Customer"}\n` +
                   `📞 *Phone:* ${completedOrder.shippingForm?.phone || "N/A"}\n` +
@@ -169,7 +152,8 @@ const CartCheckoutContent = () => {
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition cursor-pointer"
               >
-                <span>💬 Send Order Details to WhatsApp (+971555972150)</span>
+                <MessageCircle size={16} />
+                <span>Send Order Details to WhatsApp (0555549817)</span>
               </a>
             )}
             <Link
@@ -194,16 +178,11 @@ const CartCheckoutContent = () => {
       </div>
 
       {/* STEPS HEADER */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 border-b pb-6 border-slate-200/60 max-w-4xl mx-auto">
+      <div className="flex flex-row items-center justify-center gap-6 md:gap-12 border-b pb-6 border-slate-200/60 max-w-2xl mx-auto">
         {steps.map((step) => (
           <div
             key={step.id}
-            onClick={() => {
-              if (step.id === 1 || shippingForm) {
-                handleStepChange(step.id);
-              }
-            }}
-            className={`flex items-center gap-3 pb-3 border-b-2 cursor-pointer transition-all w-full md:w-auto ${
+            className={`flex items-center gap-3 pb-3 border-b-2 transition-all ${
               step.id === activeStep ? "border-emerald-500 text-slate-900" : "border-transparent text-slate-400"
             }`}
           >
@@ -226,7 +205,7 @@ const CartCheckoutContent = () => {
       </div>
 
       {/* MAIN TWO-COLUMN LAYOUT */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <div className="flex flex-col-reverse lg:flex-row gap-8 items-start">
         
         {/* LEFT COLUMN: CHECKOUT FORM */}
         <div className="w-full lg:w-7/12 bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-sm">
@@ -238,11 +217,9 @@ const CartCheckoutContent = () => {
                 Browse devices to get valuation →
               </Link>
             </div>
-          ) : activeStep === 1 ? (
-            <ShippingForm setShippingForm={setShippingForm} />
-          ) : activeStep === 2 ? (
-            <PaymentForm shippingForm={shippingForm} onSubmitSuccess={handleOrderCompletion} />
-          ) : null}
+          ) : (
+            <ShippingForm onOrderCreated={handleOrderCompletion} />
+          )}
         </div>
 
         {/* RIGHT COLUMN: YOUR DEVICE SIDEBAR */}
