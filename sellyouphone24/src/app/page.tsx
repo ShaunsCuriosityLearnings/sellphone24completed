@@ -11,7 +11,7 @@ export const revalidate = 0;
 
 export default function Home() {
   return (
-    <div className="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="space-y-10 md:space-y-12 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 w-full">
       
       {/* 1. HERO SECTION (Includes Embedded Quick Evaluation Cascading Search Bar) */}
       <HeroSection />
@@ -23,7 +23,7 @@ export default function Home() {
       <ServicesGrid />
 
       {/* 4. HOW IT WORKS SECTION (SINGLE ROW ON MOBILE VIEW) */}
-      <section className="bg-white rounded-[28px] md:rounded-[40px] border border-slate-100 p-4 sm:p-8 md:p-12 shadow-sm space-y-6 md:space-y-10">
+      <section className="bg-white rounded-[28px] md:rounded-[40px] border border-slate-100 p-4 sm:p-8 md:p-12 shadow-sm space-y-6 md:space-y-10 w-full">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h2 className="text-xl md:text-3xl font-extrabold text-slate-800">
             Sell Your Device in <span className="text-emerald-500">3 Easy Steps</span>
@@ -34,22 +34,22 @@ export default function Home() {
         </div>
 
         {/* SINGLE ROW GRID ON MOBILE VIEW (grid-cols-3) */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8 relative">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8 relative w-full">
           
           {/* Step 1 */}
-          <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 p-2 sm:p-4 bg-slate-50/60 md:bg-transparent rounded-2xl border md:border-none border-slate-100">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-emerald-100/70 md:bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm md:text-xl shadow-inner">
+          <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 p-2 sm:p-4 bg-slate-50/60 md:bg-transparent rounded-2xl border md:border-none border-slate-100 w-full">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-emerald-100/70 md:bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm md:text-xl shadow-inner shrink-0">
               01
             </div>
             <h3 className="font-bold text-slate-800 text-xs sm:text-base md:text-lg leading-tight">Select Device</h3>
             <p className="text-[10px] md:text-xs text-slate-500 leading-normal">
-              Choose your model, storage, color & condition.
+              Choose model, storage, color & condition.
             </p>
           </div>
 
           {/* Step 2 */}
-          <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 p-2 sm:p-4 bg-slate-50/60 md:bg-transparent rounded-2xl border md:border-none border-slate-100">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-emerald-100/70 md:bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm md:text-xl shadow-inner">
+          <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 p-2 sm:p-4 bg-slate-50/60 md:bg-transparent rounded-2xl border md:border-none border-slate-100 w-full">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-emerald-100/70 md:bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm md:text-xl shadow-inner shrink-0">
               02
             </div>
             <h3 className="font-bold text-slate-800 text-xs sm:text-base md:text-lg leading-tight">Get Quote</h3>
@@ -59,8 +59,8 @@ export default function Home() {
           </div>
 
           {/* Step 3 */}
-          <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 p-2 sm:p-4 bg-slate-50/60 md:bg-transparent rounded-2xl border md:border-none border-slate-100">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-emerald-100/70 md:bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm md:text-xl shadow-inner">
+          <div className="flex flex-col items-center text-center space-y-2 md:space-y-4 p-2 sm:p-4 bg-slate-50/60 md:bg-transparent rounded-2xl border md:border-none border-slate-100 w-full">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl bg-emerald-100/70 md:bg-emerald-50 text-emerald-600 flex items-center justify-center font-black text-sm md:text-xl shadow-inner shrink-0">
               03
             </div>
             <h3 className="font-bold text-slate-800 text-xs sm:text-base md:text-lg leading-tight">Doorstep Pay</h3>
@@ -73,7 +73,7 @@ export default function Home() {
       </section>
 
       {/* 5. POPULAR MODELS */}
-      <section className="space-y-6">
+      <section className="space-y-6 w-full">
         <div className="space-y-2">
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Popular Devices We Buy</h2>
           <p className="text-sm text-slate-500">Instantly sell these trending models at premium rates</p>
@@ -86,10 +86,10 @@ export default function Home() {
       <FrontpageSellSection />
 
       {/* 7. GREEN RECYCLING CORNER & STATISTICS */}
-      <section className="bg-slate-900 rounded-[28px] md:rounded-[40px] text-white p-6 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden">
+      <section className="bg-slate-900 rounded-[28px] md:rounded-[40px] text-white p-6 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden w-full">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-slate-900 to-slate-900" />
-        <div className="relative z-10 grid lg:grid-cols-12 gap-8 md:gap-10 items-center">
-          <div className="lg:col-span-8 space-y-4 md:space-y-6">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-center w-full">
+          <div className="col-span-1 lg:col-span-8 space-y-4 md:space-y-6 w-full">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
               ♻️ Green E-waste Management
             </span>
@@ -116,7 +116,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="lg:col-span-4 grid grid-cols-2 gap-4">
+          <div className="col-span-1 lg:col-span-4 grid grid-cols-2 gap-4 w-full">
             <div className="bg-slate-800/60 border border-slate-700/50 rounded-3xl p-5 text-center space-y-1">
               <h3 className="text-2xl md:text-3xl font-black text-emerald-400">100%</h3>
               <p className="text-[10px] md:text-xs text-slate-400 font-medium">Safe Data Wiped</p>

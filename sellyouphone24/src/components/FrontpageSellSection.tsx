@@ -145,22 +145,22 @@ export default function FrontpageSellSection() {
   const [mobileTab, setMobileTab] = useState<"prices" | "popular">("prices");
 
   return (
-    <div className="space-y-8 md:space-y-12 my-8 md:my-12">
+    <div className="space-y-8 md:space-y-12 my-8 md:my-12 w-full">
       
       {/* 1. WHY SELL TO SELLPHONECASH? */}
-      <section className="space-y-4 text-center">
+      <section className="space-y-4 text-center w-full">
         <h2 className="text-xl md:text-3xl font-extrabold text-slate-900">
           Why Sell to <span className="text-emerald-500">SellPhoneCash</span>?
         </h2>
 
         {/* Mobile View Features Grid (Compact 2-Cols) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 w-full">
           {whySellFeatures.map((feat, idx) => {
             const Icon = feat.icon;
             return (
               <div 
                 key={idx}
-                className="bg-white border border-slate-100 rounded-2xl md:rounded-3xl p-3.5 md:p-5 flex flex-col items-center text-center space-y-2 md:space-y-3 shadow-xs hover:shadow-md hover:border-emerald-500/30 transition-all duration-300 group"
+                className="bg-white border border-slate-100 rounded-2xl md:rounded-3xl p-3.5 md:p-5 flex flex-col items-center text-center space-y-2 md:space-y-3 shadow-xs hover:shadow-md hover:border-emerald-500/30 transition-all duration-300 group w-full"
               >
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-emerald-50 group-hover:bg-emerald-500 text-emerald-600 group-hover:text-slate-950 flex items-center justify-center transition-colors duration-300">
                   <Icon size={20} />
@@ -176,12 +176,12 @@ export default function FrontpageSellSection() {
       </section>
 
       {/* ========================================================================= */}
-      {/* MOBILE-ONLY INTERACTIVE TABBED SECTION (CONDESED MOBILE VIEW) */}
+      {/* MOBILE-ONLY INTERACTIVE TABBED SECTION (FULL-WIDTH MOBILE VIEW) */}
       {/* ========================================================================= */}
-      <div className="lg:hidden space-y-4">
+      <div className="lg:hidden space-y-4 w-full">
         
         {/* Mobile Segmented Tab Switcher */}
-        <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1">
+        <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1 w-full">
           <button
             onClick={() => setMobileTab("prices")}
             className={`flex-1 py-2.5 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
@@ -209,7 +209,7 @@ export default function FrontpageSellSection() {
 
         {/* Tab 1: Today's Live Buying Prices */}
         {mobileTab === "prices" && (
-          <div className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-3 animate-in fade-in duration-200 w-full">
             <div className="flex justify-between items-center pb-2 border-b border-slate-100">
               <h3 className="font-extrabold text-slate-900 text-sm">Real-time UAE Buying Rates</h3>
               <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
@@ -218,12 +218,12 @@ export default function FrontpageSellSection() {
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               {livePrices.map((item) => (
                 <Link
                   key={item.id}
                   href="/services"
-                  className="flex items-center justify-between p-2.5 rounded-2xl border border-slate-100 bg-slate-50/40 active:bg-slate-100 transition"
+                  className="flex items-center justify-between p-2.5 rounded-2xl border border-slate-100 bg-slate-50/40 active:bg-slate-100 transition w-full"
                 >
                   <div className="flex items-center gap-2.5">
                     <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-white border border-slate-100 shrink-0">
@@ -253,15 +253,15 @@ export default function FrontpageSellSection() {
 
         {/* Tab 2: Popular Devices We Buy */}
         {mobileTab === "popular" && (
-          <div className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-3 animate-in fade-in duration-200 w-full">
             <h3 className="font-extrabold text-slate-900 text-sm mb-2">Select Brand to Trade-in</h3>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 w-full">
               {popularCategories.map((cat, idx) => (
                 <Link
                   key={idx}
                   href={cat.slug === "other" ? "/sell-any-device" : `/services?brand=${cat.slug}`}
-                  className="bg-slate-50 border border-slate-100 active:border-emerald-500 rounded-2xl p-3 flex flex-col items-center text-center justify-center transition group cursor-pointer"
+                  className="bg-slate-50 border border-slate-100 active:border-emerald-500 rounded-2xl p-3 flex flex-col items-center text-center justify-center transition group cursor-pointer w-full"
                 >
                   <div className="w-10 h-10 relative flex items-center justify-center mb-1">
                     {cat.image ? (
@@ -286,10 +286,10 @@ export default function FrontpageSellSection() {
       {/* ========================================================================= */}
       {/* DESKTOP TWO-COLUMN: TODAY'S LIVE PRICES + POPULAR DEVICES */}
       {/* ========================================================================= */}
-      <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-stretch">
+      <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-stretch w-full">
         
         {/* Left Box: Today's Live Buying Prices */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6 w-full">
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
               <h3 className="font-extrabold text-slate-900 text-base md:text-lg">
@@ -337,18 +337,18 @@ export default function FrontpageSellSection() {
         </div>
 
         {/* Right Box: Popular Devices We Buy */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6 w-full">
           <div>
             <h3 className="font-extrabold text-slate-900 text-base md:text-lg mb-4">
               Popular Devices We Buy
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
               {popularCategories.map((cat, idx) => (
                 <Link
                   key={idx}
                   href={cat.slug === "other" ? "/sell-any-device" : `/services?brand=${cat.slug}`}
-                  className="bg-slate-50/80 hover:bg-white border border-slate-100 hover:border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center text-center justify-center hover:shadow-md transition-all duration-200 group cursor-pointer"
+                  className="bg-slate-50/80 hover:bg-white border border-slate-100 hover:border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center text-center justify-center hover:shadow-md transition-all duration-200 group cursor-pointer w-full"
                 >
                   <div className="w-12 h-12 relative flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform">
                     {cat.image ? (
@@ -371,7 +371,7 @@ export default function FrontpageSellSection() {
       </div>
 
       {/* 3. GREEN CALLOUT BANNER (NEED CASH TODAY?) */}
-      <section className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl md:rounded-3xl p-5 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 relative overflow-hidden">
+      <section className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl md:rounded-3xl p-5 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 relative overflow-hidden w-full">
         <div className="flex items-center gap-3 md:gap-4 relative z-10 w-full md:w-auto">
           <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-emerald-300 shrink-0 shadow-inner">
             <Zap size={24} />
@@ -398,10 +398,10 @@ export default function FrontpageSellSection() {
       </section>
 
       {/* 4. TWO-COLUMN: REVIEWS + RECENT PURCHASES */}
-      <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch w-full">
         
-        {/* Left Box: What Our Customers Say (Mobile Carousel / Desktop Grid) */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-4 md:p-6 shadow-sm space-y-4 flex flex-col justify-between">
+        {/* Left Box: What Our Customers Say */}
+        <div className="col-span-1 lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-4 md:p-6 shadow-sm space-y-4 flex flex-col justify-between w-full">
           <div>
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-extrabold text-slate-900 text-sm md:text-lg">
@@ -414,11 +414,11 @@ export default function FrontpageSellSection() {
             </div>
 
             {/* Mobile Carousel / Desktop Grid */}
-            <div className="flex lg:grid lg:grid-cols-3 gap-3 overflow-x-auto snap-x scrollbar-none pb-2 lg:pb-0">
+            <div className="flex lg:grid lg:grid-cols-3 gap-3 overflow-x-auto snap-x scrollbar-none pb-2 lg:pb-0 w-full">
               {customerReviews.map((rev, idx) => (
                 <div 
                   key={idx} 
-                  className="w-[240px] sm:w-[260px] lg:w-auto shrink-0 snap-start bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex flex-col justify-between space-y-2.5"
+                  className="w-[260px] sm:w-[280px] lg:w-auto shrink-0 snap-start bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex flex-col justify-between space-y-2.5"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full overflow-hidden relative bg-slate-200 shrink-0">
@@ -447,7 +447,7 @@ export default function FrontpageSellSection() {
         </div>
 
         {/* Right Box: Recent Purchases */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-4 md:p-6 shadow-sm space-y-3.5">
+        <div className="col-span-1 lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-4 md:p-6 shadow-sm space-y-3.5 w-full">
           <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
             <h3 className="font-extrabold text-slate-900 text-sm md:text-lg">
               Recent Purchases
@@ -458,9 +458,9 @@ export default function FrontpageSellSection() {
             </span>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 w-full">
             {recentPurchases.map((p, idx) => (
-              <div key={idx} className="flex items-center justify-between p-2.5 rounded-2xl border border-slate-50 bg-slate-50/40">
+              <div key={idx} className="flex items-center justify-between p-2.5 rounded-2xl border border-slate-50 bg-slate-50/40 w-full">
                 <div className="flex items-center gap-2.5">
                   <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-white border border-slate-100 shrink-0">
                     <Image src={p.img} alt={p.name} fill className="object-contain p-1" />
