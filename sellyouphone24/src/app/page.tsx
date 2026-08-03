@@ -3,7 +3,6 @@ import ServicesGrid from "@/components/ServicesGrid";
 import ProductList from "@/components/ProductList";
 import TrustStatsBar from "@/components/TrustStatsBar";
 import FrontpageSellSection from "@/components/FrontpageSellSection";
-import QuickEvaluationWidget from "@/components/QuickEvaluationWidget";
 import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck, Zap } from "lucide-react";
 
@@ -11,21 +10,16 @@ export default function Home() {
   return (
     <div className="space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION (Includes Embedded Quick Evaluation Cascading Search Bar) */}
       <HeroSection />
 
-      {/* 2. CASCADING QUICK EVALUATION SEARCH WIDGET */}
-      <section className="-mt-8 relative z-20">
-        <QuickEvaluationWidget />
-      </section>
-
-      {/* 3. TRUST & STATISTICS BADGES BAR */}
+      {/* 2. TRUST & STATISTICS BADGES BAR */}
       <TrustStatsBar />
 
-      {/* 4. MAIN CATEGORY SERVICES GRID */}
+      {/* 3. MAIN CATEGORY SERVICES GRID */}
       <ServicesGrid />
 
-      {/* 5. HOW IT WORKS SECTION (SINGLE ROW ON MOBILE VIEW) */}
+      {/* 4. HOW IT WORKS SECTION (SINGLE ROW ON MOBILE VIEW) */}
       <section className="bg-white rounded-[28px] md:rounded-[40px] border border-slate-100 p-4 sm:p-8 md:p-12 shadow-sm space-y-6 md:space-y-10">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h2 className="text-xl md:text-3xl font-extrabold text-slate-800">
@@ -75,7 +69,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. POPULAR MODELS */}
+      {/* 5. POPULAR MODELS */}
       <section className="space-y-6">
         <div className="space-y-2">
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">Popular Devices We Buy</h2>
@@ -85,10 +79,10 @@ export default function Home() {
         <ProductList params="homepage" />
       </section>
 
-      {/* 7. REFERENCE DESIGN HOME PAGE SECTION */}
+      {/* 6. REFERENCE DESIGN HOME PAGE SECTION */}
       <FrontpageSellSection />
 
-      {/* 8. GREEN RECYCLING CORNER & STATISTICS */}
+      {/* 7. GREEN RECYCLING CORNER & STATISTICS */}
       <section className="bg-slate-900 rounded-[28px] md:rounded-[40px] text-white p-6 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-slate-900 to-slate-900" />
         <div className="relative z-10 grid lg:grid-cols-12 gap-8 md:gap-10 items-center">
