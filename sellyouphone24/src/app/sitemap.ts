@@ -1,6 +1,9 @@
 import { MetadataRoute } from "next";
 import { api } from "@/lib/api";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
 
@@ -28,7 +31,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     categories.forEach((cat) => {
       const catSlug = cat.slug.toLowerCase();
-      // Category services pages (e.g. /services/smartphones)
       dynamicRoutes.push({
         url: `${baseUrl}/services/${catSlug}`,
         lastModified: new Date(),
@@ -36,7 +38,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       });
 
-      // Category + Brand service pages (e.g. /services/smartphones/apple)
       brands.forEach((brand) => {
         const brandSlug = brand.slug.toLowerCase();
         dynamicRoutes.push({
