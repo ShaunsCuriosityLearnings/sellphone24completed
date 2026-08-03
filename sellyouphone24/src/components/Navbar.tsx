@@ -42,51 +42,48 @@ const Navbar = () => {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs max-w-full overflow-x-hidden">
       
       {/* TOP ANNOUNCEMENT & TRUST TICKER BAR */}
-      <div className="bg-slate-950 text-white text-[11px] font-medium py-1.5 px-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1.5 text-emerald-400 font-bold">
-              🇦🇪 UAE #1 Rated Phone Buyback
+      <div className="bg-slate-950 text-white text-[10px] sm:text-[11px] font-medium py-1.5 px-3 sm:px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 truncate">
+            <span className="inline-flex items-center gap-1 text-emerald-400 font-bold whitespace-nowrap">
+              🇦🇪 UAE #1 Buyback
             </span>
-            <span className="hidden md:inline-block text-slate-500">•</span>
-            <span className="hidden md:flex items-center gap-1 text-slate-300">
-              <Truck size={12} className="text-emerald-400" />
-              Free Pickup Across Dubai & All Emirates
+            <span className="hidden sm:inline-block text-slate-600">•</span>
+            <span className="hidden sm:flex items-center gap-1 text-slate-300 truncate">
+              <Truck size={12} className="text-emerald-400 shrink-0" />
+              Free Pickup Across Dubai
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="hidden sm:flex items-center gap-1 text-slate-300">
-              <ShieldCheck size={12} className="text-emerald-400" />
-              100% Licensed Business
-            </span>
-            <a href="tel:0555549817" className="flex items-center gap-1 text-emerald-400 font-bold hover:underline">
-              <Phone size={12} />
-              0555549817
+          <div className="flex items-center gap-3 shrink-0">
+            <a href="tel:0555549817" className="flex items-center gap-1 text-emerald-400 font-extrabold hover:underline">
+              <Phone size={11} />
+              <span>0555549817</span>
             </a>
           </div>
         </div>
       </div>
 
-      {/* ROW 1: MAIN TOP HEADER BAR */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      {/* MAIN TOP HEADER BAR */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-2">
           
           {/* Logo & Brand */}
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center font-extrabold text-xl text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
+          <Link href="/" className="flex items-center gap-2 group shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500 flex items-center justify-center font-extrabold text-lg sm:text-xl text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
               S
             </div>
-            <span className="font-extrabold text-2xl tracking-tight text-slate-900">
+            <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900">
               SellPhone<span className="text-emerald-500">Cash</span>
             </span>
           </Link>
 
-          {/* Right Header Navigation & Actions */}
-          <div className="flex items-center gap-4 sm:gap-6">
+          {/* Right Header Actions */}
+          <div className="flex items-center gap-2 sm:gap-4">
+            
             <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
               <Link href="/blogs" className="hover:text-emerald-600 transition">
                 Blogs
@@ -103,33 +100,34 @@ const Navbar = () => {
             {cartCount > 0 && (
               <Link
                 href="/cart"
-                className="relative px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition flex items-center gap-2 font-bold text-xs border border-emerald-200/60"
+                className="relative px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition flex items-center gap-1.5 font-bold text-xs border border-emerald-200/60 shrink-0"
               >
-                <ShoppingBag size={16} />
-                <span>Sell List</span>
-                <span className="bg-emerald-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">
+                <ShoppingBag size={15} />
+                <span className="hidden sm:inline">Sell List</span>
+                <span className="bg-emerald-600 text-white rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px]">
                   {cartCount}
                 </span>
               </Link>
             )}
 
-            {/* Instant Quote CTA Button */}
+            {/* Instant Quote CTA Button (Desktop only, stays inside screen on mobile) */}
             <Link
               href="/services"
-              className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all hover:scale-102 shrink-0 cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all shrink-0 cursor-pointer"
             >
-              <Zap size={16} className="fill-white" />
+              <Zap size={15} className="fill-slate-950" />
               <span>Instant Quote</span>
             </Link>
 
-            {/* Mobile Menu Toggle */}
+            {/* PROMINENT HIGH-VISIBILITY HAMBURGER MENU TOGGLE FOR MOBILE */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl bg-slate-100 text-slate-700 hover:text-slate-900 lg:hidden cursor-pointer"
-              aria-label="Toggle Menu"
+              className="p-2.5 rounded-xl bg-slate-900 text-white hover:bg-emerald-500 hover:text-slate-950 lg:hidden transition flex items-center justify-center shrink-0 cursor-pointer shadow-md"
+              aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
+
           </div>
         </div>
       </div>
@@ -139,7 +137,6 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11 text-xs font-bold tracking-wide">
             
-            {/* Left: All Services Button */}
             <Link
               href="/services"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
@@ -150,7 +147,6 @@ const Navbar = () => {
               <span>All Services</span>
             </Link>
 
-            {/* Center: Dynamic Category Links with Hover Dropdowns */}
             <div className="flex items-center gap-1 xl:gap-2">
               {categoriesList.map((category) => (
                 <div
@@ -173,7 +169,6 @@ const Navbar = () => {
                     )}
                   </Link>
 
-                  {/* Brand Dropdown Menu */}
                   {activeDropdown === category.slug && (
                     <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2">
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100">
@@ -208,7 +203,6 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Right: Guarantee Badge */}
             <div className="hidden xl:flex items-center gap-1.5 text-emerald-400 text-[11px]">
               <Sparkles size={13} />
               <span>Instant UAE Cash Valuation</span>
@@ -260,7 +254,7 @@ const Navbar = () => {
           <div className="pt-2">
             <Link
               href="/services"
-              className="w-full inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl text-sm font-bold transition shadow-md"
+              className="w-full inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-3 rounded-xl text-sm font-bold transition shadow-md"
             >
               <Zap size={18} />
               Get Instant Quote Now
