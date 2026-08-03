@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { 
@@ -9,14 +10,15 @@ import {
   ShieldCheck, 
   RotateCcw, 
   Lock, 
-  Clock, 
   ArrowRight, 
   Zap, 
   Star, 
   MoreHorizontal,
   Smartphone,
   Tablet,
-  Laptop
+  Laptop,
+  Flame,
+  Activity
 } from "lucide-react";
 
 const whySellFeatures = [
@@ -28,16 +30,16 @@ const whySellFeatures = [
   {
     icon: Truck,
     title: "Free Doorstep Pickup",
-    desc: "Within 3 hours across Dubai",
+    desc: "Within 3 hours in Dubai",
   },
   {
     icon: TrendingUp,
     title: "Best Prices",
-    desc: "We beat our competitors",
+    desc: "We beat competitors",
   },
   {
     icon: ShieldCheck,
-    title: "No Hidden Charges",
+    title: "No Hidden Fees",
     desc: "100% transparent",
   },
   {
@@ -48,7 +50,7 @@ const whySellFeatures = [
   {
     icon: Lock,
     title: "Data Privacy",
-    desc: "Your data is 100% safe",
+    desc: "100% data wiped",
   },
 ];
 
@@ -140,29 +142,32 @@ const recentPurchases = [
 ];
 
 export default function FrontpageSellSection() {
+  const [mobileTab, setMobileTab] = useState<"prices" | "popular">("prices");
+
   return (
-    <div className="space-y-12 my-12">
+    <div className="space-y-8 md:space-y-12 my-8 md:my-12">
       
       {/* 1. WHY SELL TO SELLPHONECASH? */}
-      <section className="space-y-6 text-center">
-        <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900">
+      <section className="space-y-4 text-center">
+        <h2 className="text-xl md:text-3xl font-extrabold text-slate-900">
           Why Sell to <span className="text-emerald-500">SellPhoneCash</span>?
         </h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Mobile View Features Grid (Compact 2-Cols) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
           {whySellFeatures.map((feat, idx) => {
             const Icon = feat.icon;
             return (
               <div 
                 key={idx}
-                className="bg-white border border-slate-100 rounded-3xl p-5 flex flex-col items-center text-center space-y-3 shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all duration-300 group"
+                className="bg-white border border-slate-100 rounded-2xl md:rounded-3xl p-3.5 md:p-5 flex flex-col items-center text-center space-y-2 md:space-y-3 shadow-xs hover:shadow-md hover:border-emerald-500/30 transition-all duration-300 group"
               >
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 group-hover:bg-emerald-500 text-emerald-600 group-hover:text-slate-950 flex items-center justify-center transition-colors duration-300">
-                  <Icon size={22} />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-emerald-50 group-hover:bg-emerald-500 text-emerald-600 group-hover:text-slate-950 flex items-center justify-center transition-colors duration-300">
+                  <Icon size={20} />
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 text-xs md:text-sm">{feat.title}</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">{feat.desc}</p>
+                  <p className="text-[10px] md:text-[11px] text-slate-500 mt-0.5 leading-snug">{feat.desc}</p>
                 </div>
               </div>
             );
@@ -170,8 +175,118 @@ export default function FrontpageSellSection() {
         </div>
       </section>
 
-      {/* 2. TWO-COLUMN: TODAY'S LIVE PRICES + POPULAR DEVICES */}
-      <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+      {/* ========================================================================= */}
+      {/* MOBILE-ONLY INTERACTIVE TABBED SECTION (CONDESED MOBILE VIEW) */}
+      {/* ========================================================================= */}
+      <div className="lg:hidden space-y-4">
+        
+        {/* Mobile Segmented Tab Switcher */}
+        <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1">
+          <button
+            onClick={() => setMobileTab("prices")}
+            className={`flex-1 py-2.5 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              mobileTab === "prices"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Activity size={14} className={mobileTab === "prices" ? "text-emerald-500" : ""} />
+            <span>Today&apos;s Live Prices</span>
+          </button>
+          
+          <button
+            onClick={() => setMobileTab("popular")}
+            className={`flex-1 py-2.5 rounded-xl font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer ${
+              mobileTab === "popular"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Flame size={14} className={mobileTab === "popular" ? "text-emerald-500" : ""} />
+            <span>Popular Devices</span>
+          </button>
+        </div>
+
+        {/* Tab 1: Today's Live Buying Prices */}
+        {mobileTab === "prices" && (
+          <div className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h3 className="font-extrabold text-slate-900 text-sm">Real-time UAE Buying Rates</h3>
+              <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live Rates
+              </span>
+            </div>
+
+            <div className="space-y-2">
+              {livePrices.map((item) => (
+                <Link
+                  key={item.id}
+                  href="/services"
+                  className="flex items-center justify-between p-2.5 rounded-2xl border border-slate-100 bg-slate-50/40 active:bg-slate-100 transition"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-white border border-slate-100 shrink-0">
+                      <Image src={item.img} alt={item.name} fill className="object-contain p-1" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-xs">{item.name}</h4>
+                      <p className="text-[9px] font-medium text-slate-400">{item.spec}</p>
+                    </div>
+                  </div>
+                  <span className="font-extrabold text-emerald-600 text-xs bg-emerald-50 px-2.5 py-1 rounded-xl">
+                    {item.price}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            <Link
+              href="/services"
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-1 pt-2 border-t border-slate-100"
+            >
+              <span>View All Buying Prices</span>
+              <ArrowRight size={13} />
+            </Link>
+          </div>
+        )}
+
+        {/* Tab 2: Popular Devices We Buy */}
+        {mobileTab === "popular" && (
+          <div className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm space-y-3 animate-in fade-in duration-200">
+            <h3 className="font-extrabold text-slate-900 text-sm mb-2">Select Brand to Trade-in</h3>
+
+            <div className="grid grid-cols-2 gap-2">
+              {popularCategories.map((cat, idx) => (
+                <Link
+                  key={idx}
+                  href={cat.slug === "other" ? "/sell-any-device" : `/services?brand=${cat.slug}`}
+                  className="bg-slate-50 border border-slate-100 active:border-emerald-500 rounded-2xl p-3 flex flex-col items-center text-center justify-center transition group cursor-pointer"
+                >
+                  <div className="w-10 h-10 relative flex items-center justify-center mb-1">
+                    {cat.image ? (
+                      <Image src={cat.image} alt={cat.name} fill className="object-contain" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                        <MoreHorizontal size={16} />
+                      </div>
+                    )}
+                  </div>
+                  <span className="font-bold text-slate-800 text-[11px] truncate w-full">
+                    {cat.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* ========================================================================= */}
+      {/* DESKTOP TWO-COLUMN: TODAY'S LIVE PRICES + POPULAR DEVICES */}
+      {/* ========================================================================= */}
+      <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-stretch">
         
         {/* Left Box: Today's Live Buying Prices */}
         <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6">
@@ -256,17 +371,17 @@ export default function FrontpageSellSection() {
       </div>
 
       {/* 3. GREEN CALLOUT BANNER (NEED CASH TODAY?) */}
-      <section className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-emerald-300 flex-shrink-0 shadow-inner">
-            <Zap size={28} />
+      <section className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl md:rounded-3xl p-5 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 relative overflow-hidden">
+        <div className="flex items-center gap-3 md:gap-4 relative z-10 w-full md:w-auto">
+          <div className="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-emerald-300 shrink-0 shadow-inner">
+            <Zap size={24} />
           </div>
           <div>
-            <h3 className="text-xl md:text-2xl font-black leading-tight">
+            <h3 className="text-base md:text-2xl font-black leading-tight">
               Need Cash Today? Book a FREE Pickup Within 3 Hours
             </h3>
-            <p className="text-xs text-emerald-100 mt-1 font-medium flex items-center gap-2">
-              <span>Quick, Easy & 100% Free Service</span>
+            <p className="text-[10px] md:text-xs text-emerald-100 mt-0.5 font-medium flex items-center gap-2">
+              <span>Quick & 100% Free Service</span>
               <span>•</span>
               <span className="font-bold text-white">Available Across Dubai & UAE</span>
             </p>
@@ -275,7 +390,7 @@ export default function FrontpageSellSection() {
 
         <Link
           href="/cart"
-          className="bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-4 px-8 rounded-2xl transition-all duration-200 shadow-lg flex items-center gap-2 text-xs md:text-sm whitespace-nowrap relative z-10 hover:scale-[1.02]"
+          className="w-full md:w-auto bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-3.5 md:py-4 px-6 md:px-8 rounded-2xl transition-all duration-200 shadow-lg flex items-center justify-center gap-2 text-xs md:text-sm whitespace-nowrap relative z-10 active:scale-95 cursor-pointer"
         >
           Request Pickup Now
           <ArrowRight size={16} className="text-emerald-600" />
@@ -283,26 +398,30 @@ export default function FrontpageSellSection() {
       </section>
 
       {/* 4. TWO-COLUMN: REVIEWS + RECENT PURCHASES */}
-      <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+      <div className="grid lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
         
-        {/* Left Box: What Our Customers Say */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-6 flex flex-col justify-between">
+        {/* Left Box: What Our Customers Say (Mobile Carousel / Desktop Grid) */}
+        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-4 md:p-6 shadow-sm space-y-4 flex flex-col justify-between">
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-extrabold text-slate-900 text-base md:text-lg">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-extrabold text-slate-900 text-sm md:text-lg">
                 What Our Customers Say
               </h3>
               <Link href="/about" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-                View All Reviews
-                <ArrowRight size={14} />
+                <span>View All</span>
+                <ArrowRight size={13} />
               </Link>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-3">
+            {/* Mobile Carousel / Desktop Grid */}
+            <div className="flex lg:grid lg:grid-cols-3 gap-3 overflow-x-auto snap-x scrollbar-none pb-2 lg:pb-0">
               {customerReviews.map((rev, idx) => (
-                <div key={idx} className="bg-slate-50/80 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                <div 
+                  key={idx} 
+                  className="w-[240px] sm:w-[260px] lg:w-auto shrink-0 snap-start bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex flex-col justify-between space-y-2.5"
+                >
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full overflow-hidden relative bg-slate-200">
+                    <div className="w-7 h-7 rounded-full overflow-hidden relative bg-slate-200 shrink-0">
                       <Image src={rev.avatar} alt={rev.name} fill className="object-cover" />
                     </div>
                     <div>
@@ -312,13 +431,13 @@ export default function FrontpageSellSection() {
                     <span className="ml-auto text-xs font-black text-amber-500">G</span>
                   </div>
 
-                  <p className="text-[11px] text-slate-600 italic leading-relaxed">
+                  <p className="text-[10px] md:text-[11px] text-slate-600 italic leading-relaxed line-clamp-3">
                     {rev.quote}
                   </p>
 
                   <div className="flex text-amber-400 text-xs">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={12} fill="currentColor" />
+                      <Star key={i} size={11} fill="currentColor" />
                     ))}
                   </div>
                 </div>
@@ -328,31 +447,31 @@ export default function FrontpageSellSection() {
         </div>
 
         {/* Right Box: Recent Purchases */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-4">
-          <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-            <h3 className="font-extrabold text-slate-900 text-base md:text-lg">
+        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-4 md:p-6 shadow-sm space-y-3.5">
+          <div className="flex justify-between items-center pb-2.5 border-b border-slate-100">
+            <h3 className="font-extrabold text-slate-900 text-sm md:text-lg">
               Recent Purchases
             </h3>
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Live
+            <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Feed
             </span>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {recentPurchases.map((p, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 rounded-2xl border border-slate-50 bg-slate-50/40">
-                <div className="flex items-center gap-3">
-                  <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-white border border-slate-100 flex-shrink-0">
+              <div key={idx} className="flex items-center justify-between p-2.5 rounded-2xl border border-slate-50 bg-slate-50/40">
+                <div className="flex items-center gap-2.5">
+                  <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-white border border-slate-100 shrink-0">
                     <Image src={p.img} alt={p.name} fill className="object-contain p-1" />
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-800 text-xs">{p.name}</h4>
-                    <p className="text-[10px] text-slate-400">{p.variant}</p>
+                    <p className="text-[9px] text-slate-400">{p.variant}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="block font-extrabold text-emerald-600 text-xs md:text-sm">
+                  <span className="block font-extrabold text-emerald-600 text-xs">
                     {p.price}
                   </span>
                   <span className="text-[9px] font-medium text-slate-400">{p.timeAgo}</span>
