@@ -40,10 +40,10 @@ export const formatWhatsAppOrderMessage = (order) => {
 };
 
 /**
- * Send WhatsApp order notification to +971555972150
+ * Send WhatsApp order notification to +971555549817
  */
 export const sendOrderWhatsAppNotification = async (order) => {
-  const targetWhatsAppNumber = process.env.WHATSAPP_NOTIFY_NUMBER || "971555972150";
+  const targetWhatsAppNumber = process.env.WHATSAPP_NOTIFY_NUMBER || "971555549817";
   const message = formatWhatsAppOrderMessage(order);
 
   console.log(`📱 [WhatsApp Service] Order #${order._id || 'NEW'} notification prepared for +${targetWhatsAppNumber}`);

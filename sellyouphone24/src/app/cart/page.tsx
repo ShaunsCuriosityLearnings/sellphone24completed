@@ -17,7 +17,7 @@ import {
   MessageCircle
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 
 import useCartStore from "../stores/cartStore";
 import Link from "next/link";
@@ -48,7 +48,6 @@ const CartCheckoutContent = () => {
   const activeItem = cart[0] || null;
 
   const subtotal = activeItem ? activeItem.calculatedPrice * (activeItem.quantity || 1) : 0;
-  const totalPayout = subtotal;
 
   const handleStepChange = (step: number) => {
     router.push(`/cart?step=${step}`, {
@@ -56,10 +55,33 @@ const CartCheckoutContent = () => {
     });
   };
 
+  const triggerAutoWhatsApp = (data: any) => {
+    if (!data) return;
+    try {
+      const waMsg = encodeURIComponent(
+        `🚨 *NEW ORDER CREATED - SellPhoneCash*\n\n` +
+        `👤 *Customer Name:* ${data.shippingForm?.name || "Customer"}\n` +
+        `📞 *Phone:* ${data.shippingForm?.phone || "N/A"}\n` +
+        `📧 *Email:* ${data.shippingForm?.email || "N/A"}\n\n` +
+        `📍 *Pickup Address:* ${data.shippingForm?.address || ""}, ${data.shippingForm?.city || ""}, UAE\n` +
+        `📅 *Pickup Date:* ${data.shippingForm?.pickupDate || ""}\n` +
+        `⏰ *Time Slot:* ${data.shippingForm?.pickupTime || ""}\n\n` +
+        `📱 *Device:* ${data.item?.name || "Device"} (${data.item?.selectedStorage || ""}, ${data.item?.selectedColor || ""}, ${data.item?.selectedCondition || ""})\n` +
+        `💰 *Estimated Evaluation:* AED ${data.totalPayout?.toLocaleString() || 0}\n` +
+        `💵 *Payment Method:* Cash on Doorstep Collection`
+      );
+      window.open(`https://wa.me/971555549817?text=${waMsg}`, "_blank");
+    } catch (err) {
+      console.error("Auto WhatsApp trigger error:", err);
+    }
+  };
+
   const handleOrderCompletion = (data: any) => {
     setCompletedOrder(data);
     clearCart();
     handleStepChange(2);
+    // Automatically launch WhatsApp with prefilled order alert to 0555549817 (+971555549817)
+    triggerAutoWhatsApp(data);
   };
 
   // SUCCESS STEP 2 RENDER
@@ -73,7 +95,7 @@ const CartCheckoutContent = () => {
         <div className="space-y-3">
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Valuation Request Booked!</h1>
           <p className="text-slate-500 text-sm max-w-lg mx-auto">
-            Your pickup appointment is confirmed. Our representative will contact you shortly to coordinate the collection.
+            Your pickup appointment is confirmed. We have automatically opened WhatsApp to notify our team for immediate pickup dispatch.
           </p>
         </div>
 
@@ -135,26 +157,13 @@ const CartCheckoutContent = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
             {completedOrder && (
-              <a
-                href={`https://wa.me/971555549817?text=${encodeURIComponent(
-                  `🚨 *NEW ORDER CREATED - SellPhoneCash*\n\n` +
-                  `👤 *Customer Name:* ${completedOrder.shippingForm?.name || "Customer"}\n` +
-                  `📞 *Phone:* ${completedOrder.shippingForm?.phone || "N/A"}\n` +
-                  `📧 *Email:* ${completedOrder.shippingForm?.email || "N/A"}\n\n` +
-                  `📍 *Pickup Address:* ${completedOrder.shippingForm?.address || ""}, ${completedOrder.shippingForm?.city || ""}, UAE\n` +
-                  `📅 *Pickup Date:* ${completedOrder.shippingForm?.pickupDate || ""}\n` +
-                  `⏰ *Time Slot:* ${completedOrder.shippingForm?.pickupTime || ""}\n\n` +
-                  `📱 *Device:* ${completedOrder.item?.name || "Device"} (${completedOrder.item?.selectedStorage || ""}, ${completedOrder.item?.selectedColor || ""}, ${completedOrder.item?.selectedCondition || ""})\n` +
-                  `💰 *Estimated Evaluation:* AED ${completedOrder.totalPayout?.toLocaleString() || 0}\n` +
-                  `💵 *Payment Method:* Cash on Doorstep Collection`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => triggerAutoWhatsApp(completedOrder)}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition cursor-pointer"
               >
                 <MessageCircle size={16} />
                 <span>Send Order Details to WhatsApp (0555549817)</span>
-              </a>
+              </button>
             )}
             <Link
               href="/"
