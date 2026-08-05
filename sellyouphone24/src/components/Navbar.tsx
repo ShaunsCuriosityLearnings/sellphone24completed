@@ -9,12 +9,71 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import useCartStore from "@/app/stores/cartStore";
 
+const DEFAULT_FALLBACK_BRANDS: BrandType[] = [
+  { id: "apple", name: "Apple", slug: "apple", logo: "🍎", categories: ["smartphones", "laptops", "tablets", "smartwatches"] },
+  { id: "samsung", name: "Samsung", slug: "samsung", logo: "📱", categories: ["smartphones", "tablets", "smartwatches", "tvs"] },
+  { id: "google", name: "Google", slug: "google", logo: "🔎", categories: ["smartphones", "smartwatches"] },
+  { id: "oneplus", name: "OnePlus", slug: "oneplus", logo: "➕", categories: ["smartphones", "tablets"] },
+  { id: "dell", name: "Dell", slug: "dell", logo: "💻", categories: ["laptops"] },
+  { id: "sony", name: "Sony", slug: "sony", logo: "🎮", categories: ["games", "tvs"] },
+];
+
+const matchBrandToCategory = (brand: BrandType, category: CategoryType): boolean => {
+  const catSlug = category.slug.toLowerCase();
+  const bSlug = (brand.slug || "").toLowerCase();
+  const bName = (brand.name || "").toLowerCase();
+
+  // Explicit category matching if brand.categories exists
+  if (brand.categories && Array.isArray(brand.categories) && brand.categories.length > 0) {
+    const catAliases =
+      catSlug === "smartphones" || catSlug === "mobile"
+        ? ["smartphones", "mobile", "phones"]
+        : catSlug === "laptops" || catSlug === "macbooks"
+        ? ["laptops", "macbooks"]
+        : catSlug === "smartwatches" || catSlug === "watches"
+        ? ["smartwatches", "watches"]
+        : catSlug === "tablets" || catSlug === "ipads"
+        ? ["tablets", "ipads"]
+        : [catSlug];
+
+    const isMatch = brand.categories.some((c) => {
+      if (typeof c === "string") {
+        const lowerC = c.toLowerCase();
+        return c === category.id || c === category._id || catAliases.includes(lowerC);
+      }
+      if (typeof c === "object" && c !== null) {
+        const cSlug = (c.slug || "").toLowerCase();
+        const cId = c.id || c._id;
+        const cName = (c.name || "").toLowerCase();
+        return (
+          catAliases.includes(cSlug) ||
+          catAliases.includes(cName) ||
+          (cId && (cId === category.id || cId === category._id || String(cId) === String(category.id)))
+        );
+      }
+      return false;
+    });
+
+    if (isMatch) return true;
+  }
+
+  // Known defaults matching by brand name/slug if array matching wasn't matched
+  if (catSlug === "smartphones") return ["apple", "samsung", "google", "oneplus", "xiaomi"].includes(bName) || ["apple", "samsung", "google", "oneplus", "xiaomi"].includes(bSlug);
+  if (catSlug === "laptops") return ["apple", "dell", "hp", "asus", "lenovo", "microsoft", "razer", "acer", "msi"].includes(bName) || ["apple", "dell", "hp", "asus", "lenovo", "microsoft", "razer", "acer", "msi"].includes(bSlug);
+  if (catSlug === "tablets") return ["apple", "samsung", "oneplus", "lenovo", "microsoft", "xiaomi"].includes(bName) || ["apple", "samsung", "oneplus", "lenovo", "microsoft", "xiaomi"].includes(bSlug);
+  if (catSlug === "smartwatches") return ["apple", "samsung", "google"].includes(bName) || ["apple", "samsung", "google"].includes(bSlug);
+  if (catSlug === "games") return ["sony", "microsoft", "nintendo", "valve", "asus", "lenovo", "meta", "msi"].includes(bName) || ["sony", "microsoft", "nintendo", "valve", "asus", "lenovo", "meta", "msi"].includes(bSlug);
+  if (catSlug === "tvs") return ["samsung", "lg", "sony", "tcl"].includes(bName) || ["samsung", "lg", "sony", "tcl"].includes(bSlug);
+
+  return false;
+};
+
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
   const [categoriesList, setCategoriesList] = useState<CategoryType[]>([]);
-  const [brandsList, setBrandsList] = useState<BrandType[]>([]);
+  const [brandsList, setBrandsList] = useState<BrandType[]>(DEFAULT_FALLBACK_BRANDS);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const cart = useCartStore((state) => state.cart);
@@ -34,7 +93,11 @@ const Navbar = () => {
       })
       .catch(() => {});
 
-    api.getBrands().then(setBrandsList).catch(() => {});
+    api.getBrands().then((fetchedBrands) => {
+      if (fetchedBrands && fetchedBrands.length > 0) {
+        setBrandsList(fetchedBrands);
+      }
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -42,7 +105,7 @@ const Navbar = () => {
   }, [pathname]);
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs max-w-full overflow-x-hidden">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs max-w-full">
       
       {/* TOP ANNOUNCEMENT & TRUST TICKER BAR */}
       <div className="bg-slate-950 text-white text-[10px] sm:text-[11px] font-medium py-1.5 px-3 sm:px-4 overflow-hidden">
@@ -110,7 +173,7 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* Instant Quote CTA Button (Desktop only, stays inside screen on mobile) */}
+            {/* Instant Quote CTA Button */}
             <Link
               href="/services"
               className="hidden sm:inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all shrink-0 cursor-pointer"
@@ -119,7 +182,7 @@ const Navbar = () => {
               <span>Instant Quote</span>
             </Link>
 
-            {/* PROMINENT HIGH-VISIBILITY HAMBURGER MENU TOGGLE FOR MOBILE */}
+            {/* MOBILE MENU TOGGLE */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2.5 rounded-xl bg-slate-900 text-white hover:bg-emerald-500 hover:text-slate-950 lg:hidden transition flex items-center justify-center shrink-0 cursor-pointer shadow-md"
@@ -133,7 +196,7 @@ const Navbar = () => {
       </div>
 
       {/* ROW 2: CATEGORY NAVIGATION BAR (DESKTOP) */}
-      <div className="hidden lg:block bg-slate-900 text-white border-t border-slate-800">
+      <div className="hidden lg:block bg-slate-900 text-white border-t border-slate-800 relative z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11 text-xs font-bold tracking-wide">
             
@@ -147,60 +210,73 @@ const Navbar = () => {
               <span>All Services</span>
             </Link>
 
-            <div className="flex items-center gap-1 xl:gap-2">
-              {categoriesList.map((category) => (
-                <div
-                  key={category.id || category.slug}
-                  className="relative group py-1"
-                  onMouseEnter={() => setActiveDropdown(category.slug)}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <Link
-                    href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-                    className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 whitespace-nowrap ${
-                      pathname.includes(`/services/${category.slug}`)
-                        ? "text-emerald-400 bg-slate-800"
-                        : "text-slate-300 hover:text-white hover:bg-slate-800"
-                    }`}
-                  >
-                    <span>{category.name}</span>
-                    {brandsList.some(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id)) && (
-                      <ChevronDown size={12} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
-                    )}
-                  </Link>
+            <div className="flex items-center gap-1 xl:gap-2 h-full">
+              {categoriesList.map((category) => {
+                const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
+                const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 6) : brandsList.slice(0, 6);
+                const hasBrands = displayBrands.length > 0;
 
-                  {activeDropdown === category.slug && (
-                    <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100">
-                        Popular {category.name} Brands
-                      </div>
-                      <div className="grid grid-cols-2 gap-1.5 pt-2">
-                        {brandsList
-                          .filter(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id))
-                          .slice(0, 6)
-                          .map((brand) => (
+                return (
+                  <div
+                    key={category.id || category.slug}
+                    className="relative group h-full flex items-center"
+                    onMouseEnter={() => setActiveDropdown(category.slug)}
+                    onMouseLeave={() => setActiveDropdown(null)}
+                  >
+                    <Link
+                      href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                      className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 whitespace-nowrap ${
+                        pathname.includes(`/services/${category.slug}`)
+                          ? "text-emerald-400 bg-slate-800"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800"
+                      }`}
+                    >
+                      <span>{category.name}</span>
+                      {hasBrands && (
+                        <ChevronDown size={12} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
+                      )}
+                    </Link>
+
+                    {activeDropdown === category.slug && hasBrands && (
+                      <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-2xl p-3.5 z-50 animate-in fade-in slide-in-from-top-2">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100 flex justify-between items-center">
+                          <span>Popular {category.name} Brands</span>
+                          <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md font-bold">Instant Cash</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5 pt-2.5">
+                          {displayBrands.map((brand) => (
                             <Link
-                              key={brand.id}
+                              key={brand.id || brand._id || brand.name}
                               href={`/services/${category.slug}?brand=${brand.slug}`}
-                              className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
+                              className="flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50/70 hover:border-emerald-200 transition border border-transparent group/item"
                             >
-                              <div className="w-5 h-5 flex items-center justify-center text-xs shrink-0">
+                              <div className="w-6 h-6 flex items-center justify-center text-xs shrink-0 rounded-lg bg-slate-100 group-hover/item:bg-white transition">
                                 {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
-                                  <div className="relative w-full h-full">
+                                  <div className="relative w-4 h-4">
                                     <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
                                   </div>
                                 ) : (
                                   <span>{brand.logo || "📱"}</span>
                                 )}
                               </div>
-                              <span className="text-xs font-bold text-slate-700 truncate">{brand.name}</span>
+                              <span className="text-xs font-bold text-slate-700 group-hover/item:text-emerald-700 truncate">{brand.name}</span>
                             </Link>
                           ))}
+                        </div>
+                        <div className="mt-2.5 pt-2 border-t border-slate-100 text-center">
+                          <Link
+                            href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                            className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1"
+                          >
+                            <span>View All {category.name} Models</span>
+                            <ArrowRight size={11} />
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="hidden xl:flex items-center gap-1.5 text-emerald-400 text-[11px]">
