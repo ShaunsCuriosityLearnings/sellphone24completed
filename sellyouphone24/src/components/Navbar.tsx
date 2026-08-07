@@ -41,8 +41,32 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  const getMatchingBrandsForCategory = (category: CategoryType) => {
+    const catSlug = (category.slug || "").toLowerCase();
+    const catId = (category.id || category._id || "").toString();
+    const catName = (category.name || "").toLowerCase();
+
+    const matched = brandsList.filter((brand) => {
+      if (!brand.categories || !Array.isArray(brand.categories) || brand.categories.length === 0) return true;
+      return brand.categories.some((c: any) => {
+        if (!c) return false;
+        if (typeof c === "string") {
+          const s = c.toLowerCase();
+          return s === catSlug || s === catName || c === catId;
+        }
+        if (typeof c === "object") {
+          const s = (c.slug || c.name || "").toLowerCase();
+          const id = (c._id || c.id || "").toString();
+          return s === catSlug || s === catName || (id && id === catId);
+        }
+        return false;
+      });
+    });
+    return matched.length > 0 ? matched : brandsList;
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs max-w-full overflow-x-hidden">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs max-w-full">
       
       {/* TOP ANNOUNCEMENT & TRUST TICKER BAR */}
       <div className="bg-slate-950 text-white text-[10px] sm:text-[11px] font-medium py-1.5 px-3 sm:px-4 overflow-hidden">
@@ -110,7 +134,7 @@ const Navbar = () => {
               </Link>
             )}
 
-            {/* Instant Quote CTA Button (Desktop only, stays inside screen on mobile) */}
+            {/* Instant Quote CTA Button */}
             <Link
               href="/services"
               className="hidden sm:inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-emerald-500/20 hover:shadow-lg transition-all shrink-0 cursor-pointer"
@@ -148,59 +172,59 @@ const Navbar = () => {
             </Link>
 
             <div className="flex items-center gap-1 xl:gap-2">
-              {categoriesList.map((category) => (
-                <div
-                  key={category.id || category.slug}
-                  className="relative group py-1"
-                  onMouseEnter={() => setActiveDropdown(category.slug)}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <Link
-                    href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-                    className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 whitespace-nowrap ${
-                      pathname.includes(`/services/${category.slug}`)
-                        ? "text-emerald-400 bg-slate-800"
-                        : "text-slate-300 hover:text-white hover:bg-slate-800"
-                    }`}
+              {categoriesList.map((category) => {
+                const categoryBrands = getMatchingBrandsForCategory(category);
+                return (
+                  <div
+                    key={category.id || category.slug}
+                    className="relative group py-1"
+                    onMouseEnter={() => setActiveDropdown(category.slug)}
+                    onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <span>{category.name}</span>
-                    {brandsList.some(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id)) && (
+                    <Link
+                      href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                      className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 whitespace-nowrap ${
+                        pathname.includes(`/services/${category.slug}`)
+                          ? "text-emerald-400 bg-slate-800"
+                          : "text-slate-300 hover:text-white hover:bg-slate-800"
+                      }`}
+                    >
+                      <span>{category.name}</span>
                       <ChevronDown size={12} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
-                    )}
-                  </Link>
+                    </Link>
 
-                  {activeDropdown === category.slug && (
-                    <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100">
-                        Popular {category.name} Brands
+                    {activeDropdown === category.slug && (
+                      <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-100 shadow-2xl rounded-2xl p-3 z-50 animate-in fade-in slide-in-from-top-2">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100">
+                          Popular {category.name} Brands
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5 pt-2">
+                          {categoryBrands
+                            .slice(0, 6)
+                            .map((brand) => (
+                              <Link
+                                key={brand.id || brand.slug}
+                                href={`/services/${category.slug}?brand=${brand.slug}`}
+                                className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
+                              >
+                                <div className="w-5 h-5 flex items-center justify-center text-xs shrink-0">
+                                  {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
+                                    <div className="relative w-full h-full">
+                                      <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
+                                    </div>
+                                  ) : (
+                                    <span>{brand.logo || "📱"}</span>
+                                  )}
+                                </div>
+                                <span className="text-xs font-bold text-slate-700 truncate">{brand.name}</span>
+                              </Link>
+                            ))}
+                        </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-1.5 pt-2">
-                        {brandsList
-                          .filter(b => b.categories?.some(c => c.slug === category.slug || c === category.id || c === category._id))
-                          .slice(0, 6)
-                          .map((brand) => (
-                            <Link
-                              key={brand.id}
-                              href={`/services/${category.slug}?brand=${brand.slug}`}
-                              className="flex items-center gap-2 p-2 rounded-xl hover:bg-slate-50 transition border border-transparent hover:border-slate-100"
-                            >
-                              <div className="w-5 h-5 flex items-center justify-center text-xs shrink-0">
-                                {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
-                                  <div className="relative w-full h-full">
-                                    <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
-                                  </div>
-                                ) : (
-                                  <span>{brand.logo || "📱"}</span>
-                                )}
-                              </div>
-                              <span className="text-xs font-bold text-slate-700 truncate">{brand.name}</span>
-                            </Link>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="hidden xl:flex items-center gap-1.5 text-emerald-400 text-[11px]">
@@ -213,7 +237,7 @@ const Navbar = () => {
 
       {/* MOBILE DRAWER NAVIGATION */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50">
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50 max-h-[85vh] overflow-y-auto">
           <div className="space-y-1">
             <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
               Sell Devices

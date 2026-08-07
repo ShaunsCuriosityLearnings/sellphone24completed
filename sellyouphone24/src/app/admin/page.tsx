@@ -27,7 +27,10 @@ import {
   Laptop,
   Watch,
   Tablet,
-  Cpu
+  Cpu,
+  Database,
+  Download,
+  Upload
 } from "lucide-react";
 import Image from "next/image";
 
@@ -143,7 +146,7 @@ export default function AdminPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   
-  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add-product" | "brands" | "categories" | "blogs">("products");
+  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "database">("products");
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [products, setProducts] = useState<ProductType[]>([]);
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -152,10 +155,54 @@ export default function AdminPage() {
   
   const [loading, setLoading] = useState(true);
   const [submittingProduct, setSubmittingProduct] = useState(false);
+  const [restoringDb, setRestoringDb] = useState(false);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all");
   const [productSearch, setProductSearch] = useState<string>("");
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>("all");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
+
+  const handleDownloadBackup = () => {
+    window.location.href = api.exportDatabaseUrl();
+  };
+
+  const handleDownloadProducts = () => {
+    window.location.href = api.exportProductsUrl();
+  };
+
+  const handleRestoreBackupFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm("⚠️ Restore database from this backup file? Existing documents with matching IDs will be updated.")) {
+      e.target.value = "";
+      return;
+    }
+
+    setRestoringDb(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const content = event.target?.result as string;
+          const backupPayload = JSON.parse(content);
+          const token = await getToken();
+          const res = await api.restoreDatabase(backupPayload, token || undefined);
+          toast.success(`🎉 ${res.message || "Database restored successfully!"}`);
+          await loadData(false);
+        } catch (err: any) {
+          toast.error(`Failed to parse or restore file: ${err.message}`);
+        } finally {
+          setRestoringDb(false);
+          e.target.value = "";
+        }
+      };
+      reader.readAsText(file);
+    } catch (err: any) {
+      toast.error(`Restore error: ${err.message}`);
+      setRestoringDb(false);
+      e.target.value = "";
+    }
+  };
 
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
@@ -776,6 +823,15 @@ export default function AdminPage() {
             >
               <BookOpen size={13} /> Blogs <span className="text-[10px] opacity-75">({blogs.length})</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab("database")}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
+                activeTab === "database" ? "bg-slate-900 text-white shadow-sm" : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
+              }`}
+            >
+              <Database size={13} /> Database Backup & Restore
+            </button>
           </div>
         </div>
 
@@ -788,6 +844,82 @@ export default function AdminPage() {
         ) : (
           <div>
             
+            {/* DATABASE BACKUP & RESTORE TAB */}
+            {activeTab === "database" && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Database className="text-emerald-500" size={18} />
+                    Database Snapshot, Export & 1-Click Restore
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Export your complete product catalog, categories, brands, orders, and blog posts to a local JSON file on your machine.
+                    If your VPS restarts or flushes data, simply upload your backup file here to instantly restore your entire database!
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  {/* EXPORT CARD */}
+                  <div className="border border-slate-200 bg-slate-50 rounded-xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                      <Download className="text-emerald-600" size={18} />
+                      <span>Download Local Database Backups</span>
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Download a complete snapshot of all products, categories, brands, blogs, and customer orders to store safely on your computer.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                      <button
+                        onClick={handleDownloadBackup}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm text-xs cursor-pointer"
+                      >
+                        <Download size={15} />
+                        <span>Download Full Database (.json)</span>
+                      </button>
+                      
+                      <button
+                        onClick={handleDownloadProducts}
+                        className="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      >
+                        <Smartphone size={14} />
+                        <span>Products Only (.json)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* RESTORE CARD */}
+                  <div className="border border-emerald-200 bg-emerald-50/40 rounded-xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                      <Upload className="text-emerald-600" size={18} />
+                      <span>Restore Database from Snapshot File</span>
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Select a previously downloaded backup JSON file from your computer to populate or recover your VPS database in seconds.
+                    </p>
+
+                    <div className="pt-2">
+                      <label className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md text-xs cursor-pointer">
+                        {restoringDb ? (
+                          <RefreshCw className="animate-spin" size={16} />
+                        ) : (
+                          <Upload size={16} />
+                        )}
+                        <span>{restoringDb ? "Restoring Database..." : "Upload & Restore Backup (.json)"}</span>
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleRestoreBackupFile}
+                          disabled={restoringDb}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* PRODUCTS TAB */}
             {activeTab === "products" && (
               <div className="space-y-3">

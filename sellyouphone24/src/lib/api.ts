@@ -289,4 +289,21 @@ export const api = {
       headers: token ? { "Authorization": `Bearer ${token}` } : {},
     });
   },
+
+  // --- DATABASE BACKUP & RESTORE ---
+  exportDatabaseUrl(): string {
+    return `${API_BASE}/database/export`;
+  },
+
+  exportProductsUrl(): string {
+    return `${API_BASE}/database/export/products`;
+  },
+
+  async restoreDatabase(backupPayload: any, token?: string): Promise<{ message: string; counts: any }> {
+    return safeFetch<{ message: string; counts: any }>(`${API_BASE}/database/restore`, {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: JSON.stringify(backupPayload),
+    });
+  },
 };
