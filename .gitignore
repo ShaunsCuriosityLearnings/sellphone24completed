@@ -22,3 +22,7 @@ Thumbs.db
 
 # Clerk
 .clerk/
+
+# Database backups
+backend/backups/
+
