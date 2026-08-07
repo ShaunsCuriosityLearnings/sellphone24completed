@@ -8,6 +8,80 @@ import Product from "./models/Product.js";
 import connectDB from "./config/db.js";
 
 export const appleiPhones = [
+  // --- iPhone 17 Series ---
+  {
+    name: "iPhone 17 Pro Max",
+    category: "smartphones",
+    basePrice: 4200,
+    colors: ["Titanium Gray", "Desert Titanium", "White Titanium", "Black Titanium"],
+    storages: [
+      { size: "256GB", priceBoost: 0 },
+      { size: "512GB", priceBoost: 400 },
+      { size: "1TB", priceBoost: 800 },
+      { size: "2TB", priceBoost: 1500 }
+    ],
+    shortDescription: "6.9-inch Super Retina XDR Pro display, A19 Pro chip, Camera Control, and 48MP triple camera system.",
+    description: "Apple's flagship 6.9-inch iPhone 17 Pro Max featuring grade-5 titanium frame, revolutionary A19 Pro chip, 48MP Fusion triple camera system, 120Hz ProMotion display, and extended battery performance.",
+    images: { frontView: "/products/iphone-pro-max.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" }
+  },
+  {
+    name: "iPhone 17 Pro",
+    category: "smartphones",
+    basePrice: 3600,
+    colors: ["Titanium Gray", "Desert Titanium", "White Titanium", "Black Titanium"],
+    storages: [
+      { size: "128GB", priceBoost: 0 },
+      { size: "256GB", priceBoost: 200 },
+      { size: "512GB", priceBoost: 450 },
+      { size: "1TB", priceBoost: 850 }
+    ],
+    shortDescription: "6.3-inch Super Retina XDR Pro display, A19 Pro chip, Camera Control button, and 5x Telephoto zoom.",
+    description: "Pro performance in a 6.3-inch titanium design with A19 Pro chip, Camera Control button, 48MP Fusion triple camera system, 5x optical Telephoto zoom, and studio-quality audio recording.",
+    images: { frontView: "/products/iphone (3).jpg", sideView: "/products/iphone (4).jpg", backView: "/products/iphone (5).jpg" }
+  },
+  {
+    name: "iPhone 17 Air",
+    category: "smartphones",
+    basePrice: 3200,
+    colors: ["Sky Blue", "Titanium Gray", "Cloud White", "Space Black"],
+    storages: [
+      { size: "128GB", priceBoost: 0 },
+      { size: "256GB", priceBoost: 200 },
+      { size: "512GB", priceBoost: 450 }
+    ],
+    shortDescription: "Ultra-slim 6.6-inch aluminum chassis, A19 chip, 120Hz ProMotion display, and 48MP Fusion camera.",
+    description: "The ultra-thin iPhone 17 Air engineered with a sleek 6.6-inch ProMotion 120Hz OLED display, superfast A19 chip, 48MP camera, and lightweight ergonomic design.",
+    images: { frontView: "/products/iphone (6).jpg", sideView: "/products/iphone (7).jpg", backView: "/products/iphone (8).jpg" }
+  },
+  {
+    name: "iPhone 17 Plus",
+    category: "smartphones",
+    basePrice: 2900,
+    colors: ["Ultramarine", "Teal", "Pink", "White", "Black"],
+    storages: [
+      { size: "128GB", priceBoost: 0 },
+      { size: "256GB", priceBoost: 200 },
+      { size: "512GB", priceBoost: 450 }
+    ],
+    shortDescription: "6.7-inch Super Retina XDR display, A19 chip, Action button, and 48MP dual camera system.",
+    description: "Expansive 6.7-inch display featuring A19 chip, Action button, Camera Control, 48MP dual camera system, and long-lasting battery life.",
+    images: { frontView: "/products/iphone (6).jpg", sideView: "/products/iphone (7).jpg", backView: "/products/iphone (8).jpg" }
+  },
+  {
+    name: "iPhone 17",
+    category: "smartphones",
+    basePrice: 2700,
+    colors: ["Ultramarine", "Teal", "Pink", "White", "Black"],
+    storages: [
+      { size: "128GB", priceBoost: 0 },
+      { size: "256GB", priceBoost: 200 },
+      { size: "512GB", priceBoost: 450 }
+    ],
+    shortDescription: "6.1-inch Super Retina XDR display with 120Hz ProMotion, A19 chip, and 48MP Fusion camera.",
+    description: "Powerful 6.1-inch iPhone 17 upgraded with 120Hz ProMotion OLED display, A19 chip, Camera Control button, and 48MP dual camera system.",
+    images: { frontView: "/products/iphone (6).jpg", sideView: "/products/iphone (7).jpg", backView: "/products/iphone (8).jpg" }
+  },
+
   // --- iPhone 16 Series ---
   {
     name: "iPhone 16 Pro Max",
