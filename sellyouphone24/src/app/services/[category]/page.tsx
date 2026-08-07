@@ -1,6 +1,6 @@
 import { api } from "@/lib/api";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Zap } from "lucide-react";
 import ProductCatalog from "@/components/ProductCatalog";
 
@@ -77,6 +77,11 @@ export const generateMetadata = async ({ params }: { params: Promise<{ category:
 
 const CategoryPage = async ({ params }: { params: Promise<{ category: string }> }) => {
   const categorySlug = (await params).category;
+
+  if (categorySlug.toLowerCase() === "any-device" || categorySlug.toLowerCase() === "sell-any-device") {
+    redirect("/sell-any-device");
+  }
+
   const categories = await api.getCategories();
   
   const category = resolveCanonicalCategory(categories, categorySlug);
