@@ -364,6 +364,32 @@ export default function AdminPage() {
     }
   };
 
+  const handleBatchImageUpload = (filesList: FileList | File[] | null) => {
+    if (!filesList || filesList.length === 0) return;
+
+    const fileArray = Array.from(filesList).slice(0, 3);
+    const updatedImages = { ...newProduct.images };
+
+    if (fileArray[0]) updatedImages.frontView = fileArray[0];
+    if (fileArray[1]) updatedImages.sideView = fileArray[1];
+    if (fileArray[2]) updatedImages.backView = fileArray[2];
+
+    setNewProduct((prev) => ({ ...prev, images: updatedImages }));
+    toast.success(`🎉 Allocated ${fileArray.length} image(s): 1st → Front, 2nd → Side, 3rd → Back!`);
+  };
+
+  const getPreviewUrl = (imgSrc: string | File): string => {
+    if (!imgSrc) return "";
+    if (imgSrc instanceof File) {
+      try {
+        return URL.createObjectURL(imgSrc);
+      } catch (e) {
+        return "";
+      }
+    }
+    return imgSrc;
+  };
+
   const openAddProductForCategory = (catSlug: string) => {
     setEditingProductId(null);
     const presets = CATEGORY_SPEC_PRESETS[catSlug.toLowerCase()] || DEFAULT_PRESETS;
@@ -1421,39 +1447,193 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="font-bold text-slate-600 block mb-1">Front Image *</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, frontView: e.target.files[0] } });
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
-                      />
+                  {/* Product Images: 3-in-1 Batch Upload & Automatic Slot Allocation */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                          <Upload size={14} className="text-emerald-500" />
+                          <span>Product Images (Batch Select 3 Images At Once or Single Slots)</span>
+                        </span>
+                        <p className="text-[10px] text-slate-500">
+                          Select 3 images together in one go — the 1st photo allocates to <strong>Front View</strong>, 2nd to <strong>Side View</strong>, and 3rd to <strong>Back View</strong>.
+                        </p>
+                      </div>
+
+                      <label className="cursor-pointer px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition">
+                        <Upload size={13} />
+                        <span>⚡ Batch Select 3 Images At Once</span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            handleBatchImageUpload(e.target.files);
+                            e.target.value = "";
+                          }}
+                          className="hidden"
+                        />
+                      </label>
                     </div>
-                    <div>
-                      <label className="font-bold text-slate-600 block mb-1">Side Image</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, sideView: e.target.files[0] } });
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
-                      />
+
+                    {/* Drag and Drop Zone */}
+                    <div
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (e.dataTransfer.files) {
+                          handleBatchImageUpload(e.dataTransfer.files);
+                        }
+                      }}
+                      className="border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-white/80 rounded-xl p-3 text-center transition cursor-pointer"
+                    >
+                      <p className="text-[11px] text-slate-600 font-semibold">
+                        📸 Drag & drop 3 image files here, or click the green button above to auto-allocate to Front, Side & Back views.
+                      </p>
                     </div>
-                    <div>
-                      <label className="font-bold text-slate-600 block mb-1">Back Image</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, backView: e.target.files[0] } });
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
-                      />
+
+                    {/* 3 Allocated Image Slot Preview Cards */}
+                    <div className="grid grid-cols-3 gap-3 pt-1">
+                      {/* Slot 1: Front View (Main) */}
+                      <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2 text-center flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-extrabold text-[11px] text-slate-800">1. Front View (Main) *</span>
+                            {newProduct.images.frontView && (
+                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Allocated</span>
+                            )}
+                          </div>
+                          
+                          {newProduct.images.frontView ? (
+                            <div className="relative w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group">
+                              <img
+                                src={getPreviewUrl(newProduct.images.frontView)}
+                                alt="Front View"
+                                className="w-full h-full object-contain p-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewProduct({ ...newProduct, images: { ...newProduct.images, frontView: "" } })}
+                                className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition shadow"
+                                title="Remove Image"
+                              >
+                                <XCircle size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-full h-24 bg-slate-100/70 border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 gap-1">
+                              <Smartphone size={20} />
+                              <span className="text-[10px]">No Front Image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-1">
+                          <label className="text-[10px] text-slate-500 font-medium block text-left mb-0.5">Replace Single File:</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, frontView: e.target.files[0] } });
+                            }}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Slot 2: Side View */}
+                      <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2 text-center flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-extrabold text-[11px] text-slate-800">2. Side View</span>
+                            {newProduct.images.sideView && (
+                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Allocated</span>
+                            )}
+                          </div>
+
+                          {newProduct.images.sideView ? (
+                            <div className="relative w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group">
+                              <img
+                                src={getPreviewUrl(newProduct.images.sideView)}
+                                alt="Side View"
+                                className="w-full h-full object-contain p-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewProduct({ ...newProduct, images: { ...newProduct.images, sideView: "" } })}
+                                className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition shadow"
+                                title="Remove Image"
+                              >
+                                <XCircle size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-full h-24 bg-slate-100/70 border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 gap-1">
+                              <Smartphone size={20} />
+                              <span className="text-[10px]">No Side Image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-1">
+                          <label className="text-[10px] text-slate-500 font-medium block text-left mb-0.5">Replace Single File:</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, sideView: e.target.files[0] } });
+                            }}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Slot 3: Back View */}
+                      <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2 text-center flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-extrabold text-[11px] text-slate-800">3. Back View</span>
+                            {newProduct.images.backView && (
+                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Allocated</span>
+                            )}
+                          </div>
+
+                          {newProduct.images.backView ? (
+                            <div className="relative w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group">
+                              <img
+                                src={getPreviewUrl(newProduct.images.backView)}
+                                alt="Back View"
+                                className="w-full h-full object-contain p-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewProduct({ ...newProduct, images: { ...newProduct.images, backView: "" } })}
+                                className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition shadow"
+                                title="Remove Image"
+                              >
+                                <XCircle size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-full h-24 bg-slate-100/70 border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 gap-1">
+                              <Smartphone size={20} />
+                              <span className="text-[10px]">No Back Image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-1">
+                          <label className="text-[10px] text-slate-500 font-medium block text-left mb-0.5">Replace Single File:</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, backView: e.target.files[0] } });
+                            }}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
