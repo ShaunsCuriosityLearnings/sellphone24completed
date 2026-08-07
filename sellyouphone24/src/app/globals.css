@@ -194,3 +194,26 @@ h6 {
 .article-content a:hover {
   color: #059669;
 }
+
+/* Speed & Performance Animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.6s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* GPU Hardware Acceleration for Smooth Backdrops */
+.backdrop-blur-xl,
+.backdrop-blur-2xl {
+  transform: translateZ(0);
+  will-change: backdrop-filter;
+}
+
