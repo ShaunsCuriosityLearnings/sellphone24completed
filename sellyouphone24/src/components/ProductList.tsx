@@ -39,8 +39,8 @@ const ProductList = async ({
 
   return (
     <div className="space-y-6">
-      {/* 3 cards per row on mobile (grid-cols-3), 4 cards per row on desktop (lg:grid-cols-4 xl:grid-cols-4) */}
-      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+      {/* 2 cards per row on mobile (grid-cols-2), 4 cards per row on desktop (lg:grid-cols-4 xl:grid-cols-4) */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
         {displayProducts.map((product) => (
           <ProductCard key={product.id || product._id} product={product} />
         ))}
