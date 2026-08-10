@@ -3,6 +3,7 @@ import Brand from "../models/Brand.js";
 import Product from "../models/Product.js";
 import Blog from "../models/Blog.js";
 import Order from "../models/Order.js";
+import Testimonial from "../models/Testimonial.js";
 import fs from "fs";
 import path from "path";
 
@@ -16,6 +17,7 @@ export const exportDatabase = async (req, res) => {
     const products = await Product.find({}).lean();
     const blogs = await Blog.find({}).lean();
     const orders = await Order.find({}).lean();
+    const testimonials = await Testimonial.find({}).lean();
 
     const backupData = {
       version: "1.0",
@@ -26,12 +28,14 @@ export const exportDatabase = async (req, res) => {
         products: products.length,
         blogs: blogs.length,
         orders: orders.length,
+        testimonials: testimonials.length,
       },
       categories,
       brands,
       products,
       blogs,
       orders,
+      testimonials,
     };
 
     // Save a copy to backups/latest.json locally on server
@@ -84,7 +88,7 @@ export const restoreDatabase = async (req, res) => {
       return res.status(400).json({ message: "Invalid backup format. Must contain products or categories array." });
     }
 
-    let restoredCounts = { categories: 0, brands: 0, products: 0, blogs: 0, orders: 0 };
+    let restoredCounts = { categories: 0, brands: 0, products: 0, blogs: 0, orders: 0, testimonials: 0 };
 
     if (Array.isArray(backupData.categories)) {
       for (const cat of backupData.categories) {
@@ -124,6 +128,14 @@ export const restoreDatabase = async (req, res) => {
           await Order.findOneAndUpdate({ _id: ord._id }, ord, { upsert: true, new: true });
           restoredCounts.orders++;
         }
+      }
+    }
+
+    if (Array.isArray(backupData.testimonials)) {
+      for (const t of backupData.testimonials) {
+        const filter = t._id ? { _id: t._id } : { name: t.name, quote: t.quote };
+        await Testimonial.findOneAndUpdate(filter, t, { upsert: true, new: true });
+        restoredCounts.testimonials++;
       }
     }
 

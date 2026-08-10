@@ -1,4 +1,4 @@
-import { CategoryType, BrandType, ProductType, BlogType, CartItemType } from "@/types";
+import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType } from "@/types";
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
 
 let API_BASE = "/api";
@@ -62,12 +62,15 @@ export const api = {
   },
 
   // --- BRANDS ---
-  async getBrands(params?: { category?: string }): Promise<BrandType[]> {
+  async getBrands(params?: { category?: string; featured?: boolean }): Promise<BrandType[]> {
     const fallback = mockBrands;
     try {
-      const url = params?.category
-        ? `${API_BASE}/brands?category=${params.category}`
-        : `${API_BASE}/brands`;
+      const query = new URLSearchParams();
+      if (params?.category) query.append("category", params.category);
+      if (params?.featured) query.append("featured", "true");
+
+      const queryString = query.toString();
+      const url = `${API_BASE}/brands${queryString ? `?${queryString}` : ""}`;
       const dbBrands = await safeFetch<any[]>(url, { method: "GET" }, mockBrands);
       return dbBrands.map((b) => ({
         ...b,
@@ -102,11 +105,13 @@ export const api = {
   },
 
   // --- PRODUCTS ---
-  async getProducts(params?: { category?: string; brand?: string; search?: string }): Promise<ProductType[]> {
+  async getProducts(params?: { category?: string; brand?: string; search?: string; isPopular?: boolean; isLivePrice?: boolean }): Promise<ProductType[]> {
     const query = new URLSearchParams();
     if (params?.category) query.append("category", params.category);
     if (params?.brand) query.append("brand", params.brand);
     if (params?.search) query.append("search", params.search);
+    if (params?.isPopular) query.append("isPopular", "true");
+    if (params?.isLivePrice) query.append("isLivePrice", "true");
 
     const queryString = query.toString();
     const url = `${API_BASE}/products${queryString ? `?${queryString}` : ""}`;
@@ -304,6 +309,67 @@ export const api = {
       method: "POST",
       headers: token ? { "Authorization": `Bearer ${token}` } : {},
       body: JSON.stringify(backupPayload),
+    });
+  },
+
+  // --- TESTIMONIALS ---
+  async getTestimonials(params?: { featured?: boolean }): Promise<TestimonialType[]> {
+    const url = params?.featured ? `${API_BASE}/testimonials?featured=true` : `${API_BASE}/testimonials`;
+    const fallback: TestimonialType[] = [
+      {
+        id: "t1",
+        name: "Ahmed R.",
+        location: "Dubai Marina",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+        quote: "Got my iPhone 15 Pro Max picked up in 1 hour and received cash instantly.",
+        rating: 5,
+      },
+      {
+        id: "t2",
+        name: "Sara K.",
+        location: "Jumeirah",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+        quote: "Best price in Dubai! Very professional and trustworthy team.",
+        rating: 5,
+      },
+      {
+        id: "t3",
+        name: "Khalid M.",
+        location: "Business Bay",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+        quote: "Smooth and quick process. Highly recommended!",
+        rating: 5,
+      },
+    ];
+
+    try {
+      const res = await safeFetch<any[]>(url, { method: "GET" }, fallback);
+      return res.map(t => ({ ...t, id: t._id || t.id }));
+    } catch (e) {
+      return fallback;
+    }
+  },
+
+  async createTestimonial(testimonial: any, token?: string): Promise<TestimonialType> {
+    return safeFetch<TestimonialType>(`${API_BASE}/testimonials`, {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: JSON.stringify(testimonial),
+    });
+  },
+
+  async updateTestimonial(id: string | number, testimonial: any, token?: string): Promise<TestimonialType> {
+    return safeFetch<TestimonialType>(`${API_BASE}/testimonials/${id}`, {
+      method: "PUT",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: JSON.stringify(testimonial),
+    });
+  },
+
+  async deleteTestimonial(id: string | number, token?: string): Promise<{ message: string }> {
+    return safeFetch<{ message: string }>(`${API_BASE}/testimonials/${id}`, {
+      method: "DELETE",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
     });
   },
 };

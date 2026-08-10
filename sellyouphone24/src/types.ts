@@ -23,6 +23,8 @@ export type ProductType = {
   description: string;
   shortDescription: string;
   images: ProductImagesType;
+  isPopular?: boolean;
+  isLivePrice?: boolean;
 };
 
 export type ProductsType = ProductType[];
@@ -88,6 +90,10 @@ export type BrandType = {
   slug: string;
   logo: string;
   categories?: any[];
+  isFeaturedOnFrontpage?: boolean;
+  frontpageDisplayName?: string;
+  frontpageImage?: string;
+  displayOrder?: number;
 };
 
 export type CategoryType = {
@@ -112,6 +118,19 @@ export type BlogType = {
   author: string;
   views?: number;
   likes?: number;
+};
+
+export type TestimonialType = {
+  id?: string;
+  _id?: string;
+  name: string;
+  location?: string;
+  avatar?: string;
+  quote: string;
+  rating?: number;
+  isFeatured?: boolean;
+  displayOrder?: number;
+  createdAt?: string;
 };
 
 export type CommentType = {

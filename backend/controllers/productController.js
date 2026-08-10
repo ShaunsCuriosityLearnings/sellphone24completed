@@ -54,8 +54,16 @@ export const getCategoryAliases = (slug) => {
 // @access  Public
 export const getProducts = async (req, res) => {
   try {
-    const { category, brand, search } = req.query;
+    const { category, brand, search, isPopular, isLivePrice } = req.query;
     const filter = {};
+
+    if (isPopular === "true") {
+      filter.isPopular = true;
+    }
+
+    if (isLivePrice === "true") {
+      filter.isLivePrice = true;
+    }
 
     if (category) {
       const aliases = getCategoryAliases(category);

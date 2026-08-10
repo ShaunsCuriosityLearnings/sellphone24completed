@@ -1,6 +1,7 @@
 import { api } from "@/lib/api";
 import Link from "next/link";
 import ProductCard from "./ProductCard";
+import { ProductType } from "@/types";
 
 const ProductList = async ({
   category,
@@ -11,11 +12,19 @@ const ProductList = async ({
   brand?: string;
   params: "homepage" | "products" | "brandpage";
 }) => {
-  const products = await api.getProducts({ category, brand });
-  let filteredProducts = products;
+  let displayProducts: ProductType[] = [];
 
-  // Display 10 products on homepage (2 full rows of 5 cards)
-  const displayProducts = params === "homepage" ? filteredProducts.slice(0, 10) : filteredProducts;
+  if (params === "homepage") {
+    const popularProducts = await api.getProducts({ isPopular: true });
+    if (popularProducts && popularProducts.length > 0) {
+      displayProducts = popularProducts.slice(0, 10);
+    } else {
+      const allProducts = await api.getProducts({ category, brand });
+      displayProducts = allProducts.slice(0, 10);
+    }
+  } else {
+    displayProducts = await api.getProducts({ category, brand });
+  }
 
   if (displayProducts.length === 0) {
     return (
