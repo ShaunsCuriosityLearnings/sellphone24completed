@@ -149,46 +149,46 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
       </div>
 
       {/* Sidebar Filters */}
-      <div className={`w-full lg:w-64 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6 shrink-0 ${isMobileFiltersOpen ? 'block' : 'hidden lg:block'}`}>
+      <div className={`w-full lg:w-64 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs space-y-5 shrink-0 ${isMobileFiltersOpen ? 'block' : 'hidden lg:block'}`}>
         <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-          <h3 className="font-extrabold text-slate-900 text-base">Filters</h3>
+          <h3 className="font-extrabold text-slate-900 text-sm">Filters</h3>
           {isMobileFiltersOpen && (
             <button onClick={() => setIsMobileFiltersOpen(false)} className="text-slate-400 hover:text-slate-600">
-              <X size={20} />
+              <X size={18} />
             </button>
           )}
         </div>
 
         {/* Search */}
         <div className="hidden lg:block">
-          <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Search Model</label>
+          <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Search Model</label>
           <div className="relative">
             <input
               type="text"
               placeholder="e.g. iPhone 15 Pro..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500"
+              className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
           </div>
         </div>
 
         {/* Brand Filter */}
         {brands && brands.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Brands</h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {brands.map(brand => {
                 const isSelected = selectedBrands.includes(brand.slug.toLowerCase());
                 return (
                   <button
                     key={brand.id || brand.slug}
                     onClick={() => toggleBrand(brand.slug)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 border ${
                       isSelected 
-                        ? "bg-emerald-500 text-slate-950 border-emerald-500 shadow-md shadow-emerald-500/20" 
-                        : "bg-slate-50 text-slate-700 border-slate-100 hover:border-slate-300"
+                        ? "bg-emerald-500 text-slate-950 border-emerald-500 shadow-xs" 
+                        : "bg-slate-50 text-slate-700 border-slate-200/80 hover:border-slate-300"
                     }`}
                   >
                     <span>{brand.name}</span>
@@ -201,17 +201,17 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
 
         {/* Storage Filter */}
         {availableStorages.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-slate-100">
+          <div className="space-y-2.5 pt-3 border-t border-slate-100">
             <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Storage Capacity</h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {availableStorages.map(storage => (
                 <button
                   key={storage}
                   onClick={() => toggleStorage(storage)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all border ${
                     selectedStorages.includes(storage) 
-                      ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20" 
-                      : "bg-slate-50 text-slate-700 border-slate-100 hover:border-slate-300"
+                      ? "bg-slate-900 text-white border-slate-900 shadow-xs" 
+                      : "bg-slate-50 text-slate-700 border-slate-200/80 hover:border-slate-300"
                   }`}
                 >
                   {storage}
@@ -223,17 +223,17 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
 
         {/* Color Filter */}
         {availableColors.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-slate-100">
+          <div className="space-y-2.5 pt-3 border-t border-slate-100">
             <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Available Colors</h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {availableColors.map(color => (
                 <button
                   key={color}
                   onClick={() => toggleColor(color)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all border ${
                     selectedColors.includes(color) 
-                      ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20" 
-                      : "bg-slate-50 text-slate-700 border-slate-100 hover:border-slate-300"
+                      ? "bg-slate-900 text-white border-slate-900 shadow-xs" 
+                      : "bg-slate-50 text-slate-700 border-slate-200/80 hover:border-slate-300"
                   }`}
                 >
                   {color}
@@ -247,40 +247,40 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
         {(selectedBrands.length > 0 || selectedStorages.length > 0 || selectedColors.length > 0 || searchQuery) && (
           <button 
             onClick={clearAllFilters}
-            className="w-full py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 transition cursor-pointer"
+            className="w-full py-2 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 transition cursor-pointer"
           >
             Clear All Filters
           </button>
         )}
       </div>
 
-      {/* Main Content (Product Grid - 5 Cards per row on Desktop) */}
+      {/* Main Content (Product Grid - 4 Cards per row on Desktop, 3 Cards per row on Mobile) */}
       <div className="flex-1 w-full">
-        <div className="hidden lg:flex justify-between items-end mb-6">
-          <p className="text-sm font-semibold text-slate-500">
+        <div className="hidden lg:flex justify-between items-end mb-4">
+          <p className="text-xs font-semibold text-slate-500">
             Showing <span className="text-slate-900 font-extrabold">{filteredProducts.length}</span> devices
           </p>
         </div>
 
         {filteredProducts.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center shadow-sm">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="text-slate-300 w-8 h-8" />
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-8 text-center shadow-xs">
+            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Search className="text-slate-400 w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-800 mb-2">No Devices Found</h3>
-            <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-1">No Devices Found</h3>
+            <p className="text-xs text-slate-500 max-w-md mx-auto mb-4">
               We couldn&apos;t find any devices matching your selected filters. Try removing some filters to see more results.
             </p>
             <button 
               onClick={clearAllFilters}
-              className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-emerald-500/20"
+              className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl transition shadow-sm"
             >
               Clear Filters
             </button>
           </div>
         ) : (
-          /* Desktop: 5 Cards in a row (grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5) */
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          /* Mobile: 3 Cards per row (grid-cols-3), Desktop: 4 Cards per row (lg:grid-cols-4 xl:grid-cols-4) */
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
             {filteredProducts.map(product => (
               <ProductCard key={product.id || product._id} product={product} />
             ))}

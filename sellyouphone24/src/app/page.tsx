@@ -23,7 +23,7 @@ export default function Home() {
       <ServicesGrid />
 
       {/* 4. HOW IT WORKS SECTION (SINGLE ROW ON MOBILE VIEW) */}
-      <section className="bg-white rounded-[28px] md:rounded-[40px] border border-slate-100 p-4 sm:p-8 md:p-12 shadow-sm space-y-6 md:space-y-10 w-full">
+      <section className="bg-white rounded-2xl md:rounded-3xl border border-slate-200/80 p-4 sm:p-8 md:p-10 shadow-xs space-y-6 md:space-y-8 w-full">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h2 className="text-xl md:text-3xl font-extrabold text-slate-800">
             Sell Your Device in <span className="text-emerald-500">3 Easy Steps</span>
@@ -86,7 +86,7 @@ export default function Home() {
       <FrontpageSellSection />
 
       {/* 7. GREEN RECYCLING CORNER & STATISTICS */}
-      <section className="bg-slate-900 rounded-[28px] md:rounded-[40px] text-white p-6 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden w-full">
+      <section className="bg-slate-900 rounded-2xl md:rounded-3xl text-white p-6 sm:p-8 md:p-10 shadow-xl border border-slate-800 relative overflow-hidden w-full">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-slate-900 to-slate-900" />
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-center w-full">
           <div className="col-span-1 lg:col-span-8 space-y-4 md:space-y-6 w-full">

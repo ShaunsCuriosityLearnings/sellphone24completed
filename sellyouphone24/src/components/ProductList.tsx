@@ -17,10 +17,10 @@ const ProductList = async ({
   if (params === "homepage") {
     const popularProducts = await api.getProducts({ isPopular: true });
     if (popularProducts && popularProducts.length > 0) {
-      displayProducts = popularProducts.slice(0, 10);
+      displayProducts = popularProducts.slice(0, 8);
     } else {
       const allProducts = await api.getProducts({ category, brand });
-      displayProducts = allProducts.slice(0, 10);
+      displayProducts = allProducts.slice(0, 8);
     }
   } else {
     displayProducts = await api.getProducts({ category, brand });
@@ -28,9 +28,9 @@ const ProductList = async ({
 
   if (displayProducts.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
-        <p className="text-slate-500 font-medium">No devices found in this category.</p>
-        <Link href="/services" className="mt-4 inline-block text-emerald-500 underline font-semibold text-sm">
+      <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/80 p-8 shadow-xs">
+        <p className="text-slate-500 font-medium text-xs">No devices found in this category.</p>
+        <Link href="/services" className="mt-3 inline-block text-emerald-600 underline font-bold text-xs">
           Browse All Services
         </Link>
       </div>
@@ -38,19 +38,19 @@ const ProductList = async ({
   }
 
   return (
-    <div className="space-y-8">
-      {/* Grid container: 5 items per row on large screens (xl:grid-cols-5) */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
+    <div className="space-y-6">
+      {/* 3 cards per row on mobile (grid-cols-3), 4 cards per row on desktop (lg:grid-cols-4 xl:grid-cols-4) */}
+      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         {displayProducts.map((product) => (
           <ProductCard key={product.id || product._id} product={product} />
         ))}
       </div>
 
       {params === "homepage" && (
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center pt-4">
           <Link
             href="/services"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-slate-900 hover:bg-emerald-500 hover:text-slate-950 text-white font-semibold rounded-full transition shadow-lg shadow-slate-900/10 cursor-pointer text-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-emerald-500 hover:text-slate-950 text-white font-bold rounded-xl transition shadow-md cursor-pointer text-xs"
           >
             Browse All Devices & Get Quote
           </Link>

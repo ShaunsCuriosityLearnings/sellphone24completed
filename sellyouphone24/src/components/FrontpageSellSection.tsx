@@ -349,40 +349,40 @@ export default function FrontpageSellSection() {
       {/* ========================================================================= */}
       {/* DESKTOP TWO-COLUMN: TODAY'S LIVE PRICES + POPULAR DEVICES */}
       {/* ========================================================================= */}
-      <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-stretch w-full">
+      <div className="hidden lg:grid lg:grid-cols-12 gap-6 items-stretch w-full">
         
         {/* Left Box: Today's Live Buying Prices */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6 w-full">
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between space-y-5 w-full">
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-              <h3 className="font-extrabold text-slate-900 text-base md:text-lg">
+              <h3 className="font-extrabold text-slate-900 text-base">
                 Today&apos;s Live Buying Prices
               </h3>
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Updated 5 mins ago
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {livePricesList.map((item, idx) => (
                 <Link
                   key={item.id || idx}
                   href="/services"
-                  className="flex items-center justify-between p-3 rounded-2xl border border-slate-50 hover:border-emerald-200 hover:bg-slate-50/60 transition group"
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-emerald-300 hover:bg-emerald-50/20 transition group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-100">
                       <Image src={item.img} alt={item.name} fill className="object-contain p-1" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-emerald-600 transition-colors">
+                      <h4 className="font-bold text-slate-800 text-xs group-hover:text-emerald-600 transition-colors">
                         {item.name}
                       </h4>
-                      <p className="text-[10px] font-medium text-slate-400">{item.spec}</p>
+                      <p className="text-[9px] font-medium text-slate-400">{item.spec}</p>
                     </div>
                   </div>
-                  <span className="font-extrabold text-emerald-600 text-xs md:text-sm">
+                  <span className="font-extrabold text-emerald-600 text-xs">
                     {item.price}
                   </span>
                 </Link>
@@ -400,29 +400,29 @@ export default function FrontpageSellSection() {
         </div>
 
         {/* Right Box: Popular Devices We Buy */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6 w-full">
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between space-y-5 w-full">
           <div>
-            <h3 className="font-extrabold text-slate-900 text-base md:text-lg mb-4">
+            <h3 className="font-extrabold text-slate-900 text-base mb-3">
               Popular Devices We Buy
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
               {popularBrandsList.map((cat, idx) => (
                 <Link
                   key={idx}
                   href={cat.slug === "other" ? "/sell-any-device" : `/services?brand=${cat.slug}`}
-                  className="bg-slate-50/80 hover:bg-white border border-slate-100 hover:border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center text-center justify-center hover:shadow-md transition-all duration-200 group cursor-pointer w-full"
+                  className="bg-slate-50/80 hover:bg-white border border-slate-200/80 hover:border-emerald-500/40 rounded-xl p-3.5 flex flex-col items-center text-center justify-center hover:shadow-sm transition-all duration-200 group cursor-pointer w-full"
                 >
-                  <div className="w-12 h-12 relative flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 relative flex items-center justify-center mb-1.5 group-hover:scale-105 transition-transform">
                     {cat.image ? (
                       <Image src={cat.image} alt={cat.name} fill className="object-contain" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                        <MoreHorizontal size={20} />
+                      <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                        <MoreHorizontal size={16} />
                       </div>
                     )}
                   </div>
-                  <span className="font-bold text-slate-800 text-xs group-hover:text-emerald-600 transition-colors">
+                  <span className="font-bold text-slate-800 text-[11px] group-hover:text-emerald-600 transition-colors">
                     {cat.name}
                   </span>
                 </Link>

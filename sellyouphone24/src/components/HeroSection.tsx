@@ -5,7 +5,7 @@ import QuickEvaluationWidget from "@/components/QuickEvaluationWidget";
 
 const HeroSection = () => {
   return (
-    <section className="relative w-full rounded-[28px] md:rounded-[40px] overflow-hidden bg-gradient-to-b from-emerald-50 via-teal-50/20 to-white border border-emerald-100/50 mb-8 isolate">
+    <section className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-b from-emerald-50/80 via-teal-50/20 to-white border border-slate-200/80 mb-6 isolate shadow-xs">
       {/* Abstract Background Shapes */}
       <div className="absolute top-0 right-0 -z-10 translate-x-1/3 -translate-y-1/4">
         <div className="w-[600px] h-[600px] rounded-full bg-emerald-200/40 blur-[80px] mix-blend-multiply" />
