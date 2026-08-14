@@ -115,6 +115,7 @@ export type BlogType = {
   img: string;
   category: string;
   createdAt?: string;
+  updatedAt?: string;
   author: string;
   views?: number;
   likes?: number;

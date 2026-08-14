@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { api } from "@/lib/api";
 import { CategoryType, ProductType, BrandType, BlogType, TestimonialType } from "@/types";
+import { autoFormatPlainTextToMarkdown, parseMarkdownToHtml } from "@/lib/markdown";
 import { toast } from "react-toastify";
 import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
 import { 
@@ -306,6 +307,7 @@ export default function AdminPage() {
     category: "Buying Guides",
     author: "Team SellPhoneCash",
   });
+  const [blogPreviewMode, setBlogPreviewMode] = useState(false);
 
   const [editingTestimonialId, setEditingTestimonialId] = useState<string | number | null>(null);
   const [newTestimonial, setNewTestimonial] = useState({
@@ -2336,16 +2338,90 @@ export default function AdminPage() {
                       />
                     </div>
 
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Full Content (Markdown) *</label>
-                      <textarea
-                        rows={5}
-                        required
-                        placeholder="Markdown content..."
-                        value={newBlog.content}
-                        onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none font-mono text-[11px] focus:border-emerald-500 focus:bg-white"
-                      />
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between flex-wrap gap-1">
+                        <label className="font-bold text-slate-700 block">Full Article Content (Markdown) *</label>
+                        <button
+                          type="button"
+                          onClick={() => setBlogPreviewMode(!blogPreviewMode)}
+                          className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition"
+                        >
+                          {blogPreviewMode ? "✏️ Edit Markdown" : "👁️ Live Preview"}
+                        </button>
+                      </div>
+
+                      {/* Toolbar Quick Formatting Buttons */}
+                      <div className="flex flex-wrap gap-1 p-1.5 bg-slate-100 border border-slate-200 rounded-lg text-[10px]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const formatted = autoFormatPlainTextToMarkdown(newBlog.content);
+                            setNewBlog({ ...newBlog, content: formatted });
+                            toast.success("Auto-formatted plain text into Markdown!");
+                          }}
+                          className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded shadow-2xs transition flex items-center gap-1"
+                          title="Convert plain text draft paragraphs to formatted markdown headings & lists"
+                        >
+                          ⚡ Auto-Format Plain Text
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n## Section Heading\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + H2 Heading
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n### Subheading\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + H3 Subheading
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n* List Point 1\n* List Point 2\n* List Point 3\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + Bullet List
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n1. Step 1\n2. Step 2\n3. Step 3\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + Numbered List
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n> Key takeaway quote or note box\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + Quote Box
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + " **bold text** " })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          **Bold**
+                        </button>
+                      </div>
+
+                      {blogPreviewMode ? (
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 max-h-80 overflow-y-auto article-content text-xs">
+                          <div dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(newBlog.content || "") }} />
+                        </div>
+                      ) : (
+                        <textarea
+                          rows={8}
+                          required
+                          placeholder="Paste or write article content here. Use '⚡ Auto-Format Plain Text' button above to format plain text into headings and lists!"
+                          value={newBlog.content}
+                          onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none font-mono text-[11px] focus:border-emerald-500 focus:bg-white"
+                        />
+                      )}
                     </div>
 
                     <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer">
