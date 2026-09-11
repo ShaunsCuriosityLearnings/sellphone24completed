@@ -35,14 +35,16 @@ const DEFAULT_IMAGE_MAP = {
 };
 
 const NEW_BRANDS = [
-  { name: "Huawei", slug: "huawei", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/huawei-logo.png" },
-  { name: "Honor", slug: "honor", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/honor-logo.png" },
-  { name: "Vivo", slug: "vivo", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/vivo-logo.png" },
-  { name: "MSI", slug: "msi", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/msi-logo.png" },
-  { name: "Garmin", slug: "garmin", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/garmin-logo.png" },
-  { name: "GPD", slug: "gpd", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/gpd-logo.png" },
-  { name: "Focal", slug: "focal", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/focal-logo.png" },
-  { name: "Bose", slug: "bose", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/bose-logo.png" }
+  { name: "Huawei", slug: "huawei", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/apple-logo.png" },
+  { name: "Honor", slug: "honor", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/oneplus-logo.png" },
+  { name: "Vivo", slug: "vivo", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/google-logo.png" },
+  { name: "Xiaomi", slug: "xiaomi", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/google-logo.png" },
+  { name: "Nintendo", slug: "nintendo", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/sony-logo.png" },
+  { name: "MSI", slug: "msi", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/samsung-logo.png" },
+  { name: "Garmin", slug: "garmin", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/sony-logo.png" },
+  { name: "GPD", slug: "gpd", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/sony-logo.png" },
+  { name: "Focal", slug: "focal", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/sony-logo.png" },
+  { name: "Bose", slug: "bose", logo: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/sony-logo.png" }
 ];
 
 function generateSEODescription(name, category, highlights) {
