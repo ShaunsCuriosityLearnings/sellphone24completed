@@ -533,7 +533,7 @@ async function seedHighValueModels() {
     console.log("⚡ Connecting to MongoDB for SellPhoneCash...");
     await connectToMongoDB();
 
-    // PHASE 1: RESTORE ORIGINAL BACKUP (178 PRODUCTS) IF DATABASE IS MISSING ITEMS
+    // PHASE 1: RESTORE ORIGINAL DATABASE SNAPSHOT (178 PRODUCTS) IF DB WAS WIPED OR MISSING ITEMS
     const backupDir = path.join(process.cwd(), "backups");
     const latestBackupPath = path.join(backupDir, "latest.json");
 
@@ -568,6 +568,11 @@ async function seedHighValueModels() {
       console.log("✅ Original 178 products, brands & categories fully restored!");
     }
 
+    // MAP CATEGORY SLUGS TO CATEGORY OBJECTIDS
+    const categoryMapBySlug = {};
+    const allCategories = await Category.find({});
+    allCategories.forEach(c => { categoryMapBySlug[c.slug.toLowerCase()] = c._id; });
+
     const initialProductCount = await Product.countDocuments();
     const initialBrandCount = await Brand.countDocuments();
     console.log(`📊 State after Phase 1: ${initialBrandCount} Brands, ${initialProductCount} Products.`);
@@ -584,8 +589,8 @@ async function seedHighValueModels() {
     fs.writeFileSync(backupPath, JSON.stringify({ products: productsBackup, brands: brandsBackup, categories: categoriesBackup }, null, 2));
     console.log(`🔒 Safety Backup created at: ${backupPath}`);
 
-    // PHASE 2: UPSERT NEW BRANDS
-    console.log("\n🏷️ Phase 2: Processing New Brands...");
+    // PHASE 2: UPSERT NEW BRANDS & LINK CATEGORY OBJECTIDS
+    console.log("\n🏷️ Phase 2: Processing Brands & Category Links...");
     const brandMap = {};
     const existingBrands = await Brand.find({});
     existingBrands.forEach(b => { brandMap[b.slug.toLowerCase()] = b._id; });
@@ -600,8 +605,8 @@ async function seedHighValueModels() {
       console.log(`  ✅ Brand Verified/Added: ${bData.name} (${bData.slug})`);
     }
 
-    // PHASE 3: UPSERT 22 NEW HIGH VALUE PRODUCTS (PRESERVING ALL EXISTING ITEMS & CUSTOM IMAGES)
-    console.log("\n📦 Phase 3: Adding 2026 High-Value Flagships...");
+    // PHASE 3: UPSERT 22 NEW HIGH VALUE PRODUCTS & AUTO-LINK BRAND->CATEGORY HIERARCHY
+    console.log("\n📦 Phase 3: Adding 2026 High-Value Flagships & Building Hierarchy...");
     let addedCount = 0;
     let updatedCount = 0;
 
@@ -610,6 +615,12 @@ async function seedHighValueModels() {
       if (!brandId) {
         console.warn(`⚠️ Warning: Brand slug ${pData.brandSlug} not found. Skipping ${pData.name}.`);
         continue;
+      }
+
+      // Link Brand to Category ObjectId ($addToSet)
+      const catObjId = categoryMapBySlug[pData.category.toLowerCase()];
+      if (catObjId) {
+        await Brand.findByIdAndUpdate(brandId, { $addToSet: { categories: catObjId } });
       }
 
       const productPayload = {
@@ -641,11 +652,24 @@ async function seedHighValueModels() {
       }
     }
 
+    // HIERARCHY REPAIR FOR ALL EXISTING PRODUCTS
+    console.log("\n🔗 Phase 4: Auto-repairing Brand-Category Hierarchy Links for ALL Products...");
+    const allProducts = await Product.find({});
+    for (const prod of allProducts) {
+      if (prod.brand && prod.category) {
+        const catObjId = categoryMapBySlug[prod.category.toLowerCase()];
+        if (catObjId) {
+          await Brand.findByIdAndUpdate(prod.brand, { $addToSet: { categories: catObjId } });
+        }
+      }
+    }
+    console.log("✅ All Brand-to-Category hierarchy links synced successfully!");
+
     const finalProductCount = await Product.countDocuments();
     const finalBrandCount = await Brand.countDocuments();
 
     console.log("\n==========================================");
-    console.log(`🎉 DUAL-PHASE SEEDING COMPLETE!`);
+    console.log(`🎉 HIERARCHY-PRESERVING SEEDING COMPLETE!`);
     console.log(`📈 Brands: ${initialBrandCount} -> ${finalBrandCount}`);
     console.log(`📦 Total Products Live in Database: ${finalProductCount} (Original: 178 + New Flagships: ${addedCount})`);
     console.log("==========================================\n");
