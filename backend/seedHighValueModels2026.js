@@ -535,12 +535,13 @@ async function seedHighValueModels() {
     console.log("⚡ Connecting to MongoDB for SellPhoneCash...");
     await connectToMongoDB();
 
-    // PHASE 1: RESTORE ORIGINAL DATABASE SNAPSHOT (178 PRODUCTS) IF DB WAS WIPED OR MISSING ITEMS
+    // PHASE 1: CHECK DATABASE STATE (INCREMENTAL MODE - PRESERVES LIVE DATA)
+    const productCountCheck = await Product.countDocuments();
     const backupDir = path.join(process.cwd(), "backups");
     const latestBackupPath = path.join(backupDir, "latest.json");
 
-    if (fs.existsSync(latestBackupPath)) {
-      console.log("🔄 Phase 1: Restoring Original Database Snapshot from latest.json...");
+    if (productCountCheck === 0 && fs.existsSync(latestBackupPath)) {
+      console.log("⚡ Database is empty. Auto-restoring initial snapshot from latest.json...");
       const rawLatest = fs.readFileSync(latestBackupPath, "utf-8");
       const latestData = JSON.parse(rawLatest);
 
@@ -567,7 +568,9 @@ async function seedHighValueModels() {
           await Blog.findOneAndUpdate({ _id: b._id }, b, { upsert: true, new: true });
         }
       }
-      console.log("✅ Original 178 products, brands & categories fully restored!");
+      console.log("✅ Initial snapshot restored into empty database!");
+    } else {
+      console.log(`🔒 Live database detected (${productCountCheck} existing products). Skipping snapshot restore to preserve live database.`);
     }
 
     // MAP CATEGORY SLUGS TO CATEGORY OBJECTIDS
