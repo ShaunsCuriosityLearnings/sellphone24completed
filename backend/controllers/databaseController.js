@@ -77,11 +77,14 @@ export const exportProducts = async (req, res) => {
   }
 };
 
-// @desc    Restore database from JSON snapshot payload
+// @desc    Restore database from JSON snapshot payload (High-Speed Bulk Upsert)
 // @route   POST /api/database/restore
 // @access  Admin
 export const restoreDatabase = async (req, res) => {
   try {
+    req.setTimeout(300000); // 5 min timeout
+    res.setTimeout(300000);
+
     const backupData = req.body;
 
     if (!backupData || (!backupData.products && !backupData.categories)) {
@@ -90,53 +93,74 @@ export const restoreDatabase = async (req, res) => {
 
     let restoredCounts = { categories: 0, brands: 0, products: 0, blogs: 0, orders: 0, testimonials: 0 };
 
-    if (Array.isArray(backupData.categories)) {
-      for (const cat of backupData.categories) {
-        const filter = cat._id ? { _id: cat._id } : { slug: cat.slug };
-        await Category.findOneAndUpdate(filter, cat, { upsert: true, new: true });
-        restoredCounts.categories++;
-      }
+    // Parallel Bulk Upsert for Categories
+    if (Array.isArray(backupData.categories) && backupData.categories.length > 0) {
+      await Promise.all(
+        backupData.categories.map((cat) => {
+          const filter = cat._id ? { _id: cat._id } : { slug: cat.slug };
+          return Category.findOneAndUpdate(filter, cat, { upsert: true, new: true });
+        })
+      );
+      restoredCounts.categories = backupData.categories.length;
     }
 
-    if (Array.isArray(backupData.brands)) {
-      for (const br of backupData.brands) {
-        const filter = br._id ? { _id: br._id } : { slug: br.slug };
-        await Brand.findOneAndUpdate(filter, br, { upsert: true, new: true });
-        restoredCounts.brands++;
-      }
+    // Parallel Bulk Upsert for Brands
+    if (Array.isArray(backupData.brands) && backupData.brands.length > 0) {
+      await Promise.all(
+        backupData.brands.map((br) => {
+          const filter = br._id ? { _id: br._id } : { slug: br.slug };
+          return Brand.findOneAndUpdate(filter, br, { upsert: true, new: true });
+        })
+      );
+      restoredCounts.brands = backupData.brands.length;
     }
 
-    if (Array.isArray(backupData.products)) {
-      for (const prod of backupData.products) {
-        const filter = prod._id ? { _id: prod._id } : { name: prod.name, category: prod.category };
-        await Product.findOneAndUpdate(filter, prod, { upsert: true, new: true });
-        restoredCounts.products++;
+    // Parallel Bulk Upsert for Products
+    if (Array.isArray(backupData.products) && backupData.products.length > 0) {
+      // Process in batches of 50 for max MongoDB Atlas efficiency
+      const batchSize = 50;
+      for (let i = 0; i < backupData.products.length; i += batchSize) {
+        const batch = backupData.products.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map((prod) => {
+            const filter = prod._id ? { _id: prod._id } : { name: prod.name, category: prod.category };
+            return Product.findOneAndUpdate(filter, prod, { upsert: true, new: true });
+          })
+        );
       }
+      restoredCounts.products = backupData.products.length;
     }
 
-    if (Array.isArray(backupData.blogs)) {
-      for (const b of backupData.blogs) {
-        const filter = b._id ? { _id: b._id } : { slug: b.slug };
-        await Blog.findOneAndUpdate(filter, b, { upsert: true, new: true });
-        restoredCounts.blogs++;
-      }
+    // Parallel Bulk Upsert for Blogs
+    if (Array.isArray(backupData.blogs) && backupData.blogs.length > 0) {
+      await Promise.all(
+        backupData.blogs.map((b) => {
+          const filter = b._id ? { _id: b._id } : { slug: b.slug };
+          return Blog.findOneAndUpdate(filter, b, { upsert: true, new: true });
+        })
+      );
+      restoredCounts.blogs = backupData.blogs.length;
     }
 
-    if (Array.isArray(backupData.orders)) {
-      for (const ord of backupData.orders) {
-        if (ord._id) {
-          await Order.findOneAndUpdate({ _id: ord._id }, ord, { upsert: true, new: true });
-          restoredCounts.orders++;
-        }
-      }
+    // Orders
+    if (Array.isArray(backupData.orders) && backupData.orders.length > 0) {
+      await Promise.all(
+        backupData.orders.filter(ord => ord._id).map((ord) => {
+          return Order.findOneAndUpdate({ _id: ord._id }, ord, { upsert: true, new: true });
+        })
+      );
+      restoredCounts.orders = backupData.orders.length;
     }
 
-    if (Array.isArray(backupData.testimonials)) {
-      for (const t of backupData.testimonials) {
-        const filter = t._id ? { _id: t._id } : { name: t.name, quote: t.quote };
-        await Testimonial.findOneAndUpdate(filter, t, { upsert: true, new: true });
-        restoredCounts.testimonials++;
-      }
+    // Testimonials
+    if (Array.isArray(backupData.testimonials) && backupData.testimonials.length > 0) {
+      await Promise.all(
+        backupData.testimonials.map((t) => {
+          const filter = t._id ? { _id: t._id } : { name: t.name, quote: t.quote };
+          return Testimonial.findOneAndUpdate(filter, t, { upsert: true, new: true });
+        })
+      );
+      restoredCounts.testimonials = backupData.testimonials.length;
     }
 
     // Update server's local latest.json backup file
