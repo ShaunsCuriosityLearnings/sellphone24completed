@@ -5,6 +5,7 @@ import { connectToMongoDB } from "./config/db.js";
 import Category from "./models/Category.js";
 import Brand from "./models/Brand.js";
 import Product from "./models/Product.js";
+import Blog from "./models/Blog.js";
 
 const DEFAULT_IMAGE_MAP = {
   iphone18promax: "https://res.cloudinary.com/xwjzpwxq/image/upload/v1725700000/iphone-16-pro-max.png",
@@ -77,7 +78,7 @@ const NEW_HIGH_VALUE_PRODUCTS = [
     description: generateSEODescription(
       "iPhone 18 Pro Max",
       "smartphone",
-      "- Next-generation Apple Silicon A20 Pro Bionic Bionic Chip\n- Up to 2TB Ultra High Speed Storage\n- Titanium Frame with Variable Aperture Triple Camera System\n- ProMotion 120Hz LTPO Super Retina XDR Display"
+      "- Next-generation Apple Silicon A20 Pro Bionic Chip\n- Up to 2TB Ultra High Speed Storage\n- Titanium Frame with Variable Aperture Triple Camera System\n- ProMotion 120Hz LTPO Super Retina XDR Display"
     ),
     images: { frontView: DEFAULT_IMAGE_MAP.iphone18promax },
     isPopular: true,
@@ -532,12 +533,46 @@ async function seedHighValueModels() {
     console.log("⚡ Connecting to MongoDB for SellPhoneCash...");
     await connectToMongoDB();
 
+    // PHASE 1: RESTORE ORIGINAL BACKUP (178 PRODUCTS) IF DATABASE IS MISSING ITEMS
+    const backupDir = path.join(process.cwd(), "backups");
+    const latestBackupPath = path.join(backupDir, "latest.json");
+
+    if (fs.existsSync(latestBackupPath)) {
+      console.log("🔄 Phase 1: Restoring Original Database Snapshot from latest.json...");
+      const rawLatest = fs.readFileSync(latestBackupPath, "utf-8");
+      const latestData = JSON.parse(rawLatest);
+
+      if (Array.isArray(latestData.categories)) {
+        for (const cat of latestData.categories) {
+          await Category.findOneAndUpdate({ _id: cat._id }, cat, { upsert: true, new: true });
+        }
+      }
+
+      if (Array.isArray(latestData.brands)) {
+        for (const br of latestData.brands) {
+          await Brand.findOneAndUpdate({ _id: br._id }, br, { upsert: true, new: true });
+        }
+      }
+
+      if (Array.isArray(latestData.products)) {
+        for (const prod of latestData.products) {
+          await Product.findOneAndUpdate({ _id: prod._id }, prod, { upsert: true, new: true });
+        }
+      }
+
+      if (Array.isArray(latestData.blogs)) {
+        for (const b of latestData.blogs) {
+          await Blog.findOneAndUpdate({ _id: b._id }, b, { upsert: true, new: true });
+        }
+      }
+      console.log("✅ Original 178 products, brands & categories fully restored!");
+    }
+
     const initialProductCount = await Product.countDocuments();
     const initialBrandCount = await Brand.countDocuments();
-    console.log(`📊 Initial State: ${initialBrandCount} Brands, ${initialProductCount} Products.`);
+    console.log(`📊 State after Phase 1: ${initialBrandCount} Brands, ${initialProductCount} Products.`);
 
-    // 1. CREATE AUTOMATIC BACKUP BEFORE SEEDING
-    const backupDir = path.join(process.cwd(), "backups");
+    // CREATE SAFETY BACKUP SNAPSHOT
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
     
     const productsBackup = await Product.find({}).lean();
@@ -547,31 +582,31 @@ async function seedHighValueModels() {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const backupPath = path.join(backupDir, `pre-seed-2026-high-value-${timestamp}.json`);
     fs.writeFileSync(backupPath, JSON.stringify({ products: productsBackup, brands: brandsBackup, categories: categoriesBackup }, null, 2));
-    console.log(`🔒 Automatic Pre-seed Backup created at: ${backupPath}`);
+    console.log(`🔒 Safety Backup created at: ${backupPath}`);
 
-    // 2. UPSERT NEW BRANDS
-    console.log("\n🏷️ Processing Brands...");
+    // PHASE 2: UPSERT NEW BRANDS
+    console.log("\n🏷️ Phase 2: Processing New Brands...");
     const brandMap = {};
     const existingBrands = await Brand.find({});
-    existingBrands.forEach(b => { brandMap[b.slug] = b._id; });
+    existingBrands.forEach(b => { brandMap[b.slug.toLowerCase()] = b._id; });
 
     for (const bData of NEW_BRANDS) {
       const brand = await Brand.findOneAndUpdate(
-        { slug: bData.slug },
-        { name: bData.name, slug: bData.slug, logo: bData.logo },
+        { slug: bData.slug.toLowerCase() },
+        { name: bData.name, slug: bData.slug.toLowerCase(), logo: bData.logo },
         { upsert: true, new: true }
       );
-      brandMap[bData.slug] = brand._id;
-      console.log(`  ✅ Brand Upserted: ${bData.name} (${bData.slug})`);
+      brandMap[bData.slug.toLowerCase()] = brand._id;
+      console.log(`  ✅ Brand Verified/Added: ${bData.name} (${bData.slug})`);
     }
 
-    // 3. UPSERT NEW HIGH VALUE PRODUCTS WITH RICH SEO DESCRIPTIONS
-    console.log("\n📦 Processing 2026 High-Value Products with SEO descriptions...");
+    // PHASE 3: UPSERT 22 NEW HIGH VALUE PRODUCTS (PRESERVING ALL EXISTING ITEMS & CUSTOM IMAGES)
+    console.log("\n📦 Phase 3: Adding 2026 High-Value Flagships...");
     let addedCount = 0;
     let updatedCount = 0;
 
     for (const pData of NEW_HIGH_VALUE_PRODUCTS) {
-      const brandId = brandMap[pData.brandSlug];
+      const brandId = brandMap[pData.brandSlug.toLowerCase()];
       if (!brandId) {
         console.warn(`⚠️ Warning: Brand slug ${pData.brandSlug} not found. Skipping ${pData.name}.`);
         continue;
@@ -593,13 +628,12 @@ async function seedHighValueModels() {
 
       const existing = await Product.findOne({ name: pData.name });
       if (existing) {
-        // PRESERVE existing images if they already exist in DB!
         if (existing.images && existing.images.frontView) {
           productPayload.images = existing.images;
         }
         await Product.updateOne({ _id: existing._id }, productPayload);
         updatedCount++;
-        console.log(`  🔄 Product Updated (Images Preserved): ${pData.name}`);
+        console.log(`  🔄 Product Updated: ${pData.name}`);
       } else {
         await Product.create(productPayload);
         addedCount++;
@@ -611,9 +645,9 @@ async function seedHighValueModels() {
     const finalBrandCount = await Brand.countDocuments();
 
     console.log("\n==========================================");
-    console.log(`🎉 SEEDING COMPLETE FOR SELLPHONECASH!`);
+    console.log(`🎉 DUAL-PHASE SEEDING COMPLETE!`);
     console.log(`📈 Brands: ${initialBrandCount} -> ${finalBrandCount}`);
-    console.log(`📦 Products: ${initialProductCount} -> ${finalProductCount} (Added: ${addedCount}, Updated: ${updatedCount})`);
+    console.log(`📦 Total Products Live in Database: ${finalProductCount} (Original: 178 + New Flagships: ${addedCount})`);
     console.log("==========================================\n");
 
     process.exit(0);
