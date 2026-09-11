@@ -593,9 +593,13 @@ async function seedHighValueModels() {
 
       const existing = await Product.findOne({ name: pData.name });
       if (existing) {
+        // PRESERVE existing images if they already exist in DB!
+        if (existing.images && existing.images.frontView) {
+          productPayload.images = existing.images;
+        }
         await Product.updateOne({ _id: existing._id }, productPayload);
         updatedCount++;
-        console.log(`  🔄 Product Updated: ${pData.name}`);
+        console.log(`  🔄 Product Updated (Images Preserved): ${pData.name}`);
       } else {
         await Product.create(productPayload);
         addedCount++;
