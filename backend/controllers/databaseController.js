@@ -77,7 +77,7 @@ export const exportProducts = async (req, res) => {
   }
 };
 
-// @desc    Restore database from JSON snapshot payload (High-Speed Bulk Upsert)
+// @desc    Restore database from JSON snapshot payload (Clean Hard Restore)
 // @route   POST /api/database/restore
 // @access  Admin
 export const restoreDatabase = async (req, res) => {
@@ -91,79 +91,42 @@ export const restoreDatabase = async (req, res) => {
       return res.status(400).json({ message: "Invalid backup format. Must contain products or categories array." });
     }
 
-    let restoredCounts = { categories: 0, brands: 0, products: 0, blogs: 0, orders: 0, testimonials: 0 };
+    // STEP 1: HARD CLEAR ALL COLLECTIONS TO ELIMINATE ANY EXTRA OR SEEDED MODELS
+    await Promise.all([
+      Category.deleteMany({}),
+      Brand.deleteMany({}),
+      Product.deleteMany({}),
+      Blog.deleteMany({}),
+      Order.deleteMany({}),
+      Testimonial.deleteMany({})
+    ]);
 
-    // Parallel Bulk Upsert for Categories
+    // STEP 2: FAST BULK RE-INSERT EXACT BACKUP DATA
     if (Array.isArray(backupData.categories) && backupData.categories.length > 0) {
-      await Promise.all(
-        backupData.categories.map((cat) => {
-          const filter = cat._id ? { _id: cat._id } : { slug: cat.slug };
-          return Category.findOneAndUpdate(filter, cat, { upsert: true, new: true });
-        })
-      );
-      restoredCounts.categories = backupData.categories.length;
+      await Category.insertMany(backupData.categories);
     }
 
-    // Parallel Bulk Upsert for Brands
     if (Array.isArray(backupData.brands) && backupData.brands.length > 0) {
-      await Promise.all(
-        backupData.brands.map((br) => {
-          const filter = br._id ? { _id: br._id } : { slug: br.slug };
-          return Brand.findOneAndUpdate(filter, br, { upsert: true, new: true });
-        })
-      );
-      restoredCounts.brands = backupData.brands.length;
+      await Brand.insertMany(backupData.brands);
     }
 
-    // Parallel Bulk Upsert for Products
     if (Array.isArray(backupData.products) && backupData.products.length > 0) {
-      // Process in batches of 50 for max MongoDB Atlas efficiency
-      const batchSize = 50;
-      for (let i = 0; i < backupData.products.length; i += batchSize) {
-        const batch = backupData.products.slice(i, i + batchSize);
-        await Promise.all(
-          batch.map((prod) => {
-            const filter = prod._id ? { _id: prod._id } : { name: prod.name, category: prod.category };
-            return Product.findOneAndUpdate(filter, prod, { upsert: true, new: true });
-          })
-        );
-      }
-      restoredCounts.products = backupData.products.length;
+      await Product.insertMany(backupData.products);
     }
 
-    // Parallel Bulk Upsert for Blogs
     if (Array.isArray(backupData.blogs) && backupData.blogs.length > 0) {
-      await Promise.all(
-        backupData.blogs.map((b) => {
-          const filter = b._id ? { _id: b._id } : { slug: b.slug };
-          return Blog.findOneAndUpdate(filter, b, { upsert: true, new: true });
-        })
-      );
-      restoredCounts.blogs = backupData.blogs.length;
+      await Blog.insertMany(backupData.blogs);
     }
 
-    // Orders
     if (Array.isArray(backupData.orders) && backupData.orders.length > 0) {
-      await Promise.all(
-        backupData.orders.filter(ord => ord._id).map((ord) => {
-          return Order.findOneAndUpdate({ _id: ord._id }, ord, { upsert: true, new: true });
-        })
-      );
-      restoredCounts.orders = backupData.orders.length;
+      await Order.insertMany(backupData.orders.filter(ord => ord._id));
     }
 
-    // Testimonials
     if (Array.isArray(backupData.testimonials) && backupData.testimonials.length > 0) {
-      await Promise.all(
-        backupData.testimonials.map((t) => {
-          const filter = t._id ? { _id: t._id } : { name: t.name, quote: t.quote };
-          return Testimonial.findOneAndUpdate(filter, t, { upsert: true, new: true });
-        })
-      );
-      restoredCounts.testimonials = backupData.testimonials.length;
+      await Testimonial.insertMany(backupData.testimonials);
     }
 
-    // Update server's local latest.json backup file
+    // Save as latest.json on server
     try {
       const backupDir = path.join(process.cwd(), "backups");
       if (!fs.existsSync(backupDir)) {
@@ -172,9 +135,15 @@ export const restoreDatabase = async (req, res) => {
       fs.writeFileSync(path.join(backupDir, "latest.json"), JSON.stringify(backupData, null, 2));
     } catch (e) {}
 
+    const productCount = Array.isArray(backupData.products) ? backupData.products.length : 0;
+
     res.status(200).json({
-      message: "Database successfully restored!",
-      counts: restoredCounts,
+      message: `Database successfully restored to exact backup snapshot!`,
+      counts: {
+        products: productCount,
+        brands: backupData.brands ? backupData.brands.length : 0,
+        categories: backupData.categories ? backupData.categories.length : 0
+      },
     });
   } catch (error) {
     res.status(500).json({ message: "Database restore failed: " + error.message });

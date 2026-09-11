@@ -8,9 +8,10 @@ import Brand from "./models/Brand.js";
 import Product from "./models/Product.js";
 import Blog from "./models/Blog.js";
 import Order from "./models/Order.js";
+import Testimonial from "./models/Testimonial.js";
 
 async function restoreDatabase() {
-  console.log("🔄 Starting MongoDB Database Restore from Backup...");
+  console.log("🔄 Starting Clean Hard MongoDB Database Restore from Backup...");
   try {
     await connectToMongoDB();
 
@@ -18,53 +19,62 @@ async function restoreDatabase() {
     const latestPath = path.join(backupDir, "latest.json");
 
     if (!fs.existsSync(latestPath)) {
-      throw new Error(`No backup file found at ${latestPath}. Run 'npm run backup' or 'node backup.js' first.`);
+      throw new Error(`No backup file found at ${latestPath}. Place your backup file at backups/latest.json first.`);
     }
 
     const raw = fs.readFileSync(latestPath, "utf-8");
     const backupData = JSON.parse(raw);
 
-    console.log(`📅 Found Backup from: ${backupData.timestamp}`);
-    console.log(
-      `📊 Restoring: ${backupData.counts.products} Products, ${backupData.counts.categories} Categories, ${backupData.counts.brands} Brands, ${backupData.counts.blogs} Blogs, ${backupData.counts.orders} Orders.`
-    );
+    const productCount = Array.isArray(backupData.products) ? backupData.products.length : 0;
+    const categoryCount = Array.isArray(backupData.categories) ? backupData.categories.length : 0;
+    const brandCount = Array.isArray(backupData.brands) ? backupData.brands.length : 0;
 
-    // Restore Categories
-    if (Array.isArray(backupData.categories)) {
-      for (const cat of backupData.categories) {
-        await Category.findOneAndUpdate({ _id: cat._id }, cat, { upsert: true, new: true });
-      }
+    console.log(`📅 Found Backup Snapshot timestamp: ${backupData.timestamp || "N/A"}`);
+    console.log(`📊 Backup Snapshot Contains: ${productCount} Products, ${categoryCount} Categories, ${brandCount} Brands.`);
+
+    // STEP 1: CLEAR EXISTING COLLECTIONS TO ELIMINATE EXTRA/LEFTOVER MODELS
+    console.log("🧹 Clearing existing collections...");
+    await Promise.all([
+      Category.deleteMany({}),
+      Brand.deleteMany({}),
+      Product.deleteMany({}),
+      Blog.deleteMany({}),
+      Order.deleteMany({}),
+      Testimonial.deleteMany({})
+    ]);
+
+    // STEP 2: RE-INSERT EXACT BACKUP DATA
+    console.log("📥 Re-inserting exact backup data...");
+    if (Array.isArray(backupData.categories) && backupData.categories.length > 0) {
+      await Category.insertMany(backupData.categories);
     }
 
-    // Restore Brands
-    if (Array.isArray(backupData.brands)) {
-      for (const br of backupData.brands) {
-        await Brand.findOneAndUpdate({ _id: br._id }, br, { upsert: true, new: true });
-      }
+    if (Array.isArray(backupData.brands) && backupData.brands.length > 0) {
+      await Brand.insertMany(backupData.brands);
     }
 
-    // Restore Products
-    if (Array.isArray(backupData.products)) {
-      for (const prod of backupData.products) {
-        await Product.findOneAndUpdate({ _id: prod._id }, prod, { upsert: true, new: true });
-      }
+    if (Array.isArray(backupData.products) && backupData.products.length > 0) {
+      await Product.insertMany(backupData.products);
     }
 
-    // Restore Blogs
-    if (Array.isArray(backupData.blogs)) {
-      for (const b of backupData.blogs) {
-        await Blog.findOneAndUpdate({ _id: b._id }, b, { upsert: true, new: true });
-      }
+    if (Array.isArray(backupData.blogs) && backupData.blogs.length > 0) {
+      await Blog.insertMany(backupData.blogs);
     }
 
-    // Restore Orders
-    if (Array.isArray(backupData.orders)) {
-      for (const ord of backupData.orders) {
-        await Order.findOneAndUpdate({ _id: ord._id }, ord, { upsert: true, new: true });
-      }
+    if (Array.isArray(backupData.orders) && backupData.orders.length > 0) {
+      await Order.insertMany(backupData.orders);
     }
 
-    console.log("🎉 Database successfully restored from backup snapshot!");
+    if (Array.isArray(backupData.testimonials) && backupData.testimonials.length > 0) {
+      await Testimonial.insertMany(backupData.testimonials);
+    }
+
+    const finalCount = await Product.countDocuments();
+
+    console.log("==========================================");
+    console.log(`🎉 DATABASE RESTORE SUCCESSFUL!`);
+    console.log(`📦 Database now contains EXACTLY ${finalCount} Products from your backup file.`);
+    console.log("==========================================\n");
     process.exit(0);
   } catch (error) {
     console.error(`❌ Restore failed: ${error.message}`);
