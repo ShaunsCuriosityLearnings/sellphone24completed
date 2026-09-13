@@ -51,6 +51,24 @@ async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): P
   }
 }
 
+const normalizeProductImages = (img: any) => {
+  const fallback = "/products/iphone-pro-max.jpg";
+  if (!img) {
+    return { frontView: fallback, sideView: fallback, backView: fallback };
+  }
+  if (typeof img === "string") {
+    const clean = img.trim() || fallback;
+    return { frontView: clean, sideView: clean, backView: clean };
+  }
+  if (typeof img === "object") {
+    const front = img.frontView || img.main || img.url || fallback;
+    const side = img.sideView || front;
+    const back = img.backView || front;
+    return { frontView: front, sideView: side, backView: back };
+  }
+  return { frontView: fallback, sideView: fallback, backView: fallback };
+};
+
 export const api = {
   // --- CATEGORIES ---
   async getCategories(): Promise<CategoryType[]> {
@@ -131,13 +149,12 @@ export const api = {
     const queryString = query.toString();
     const url = `${API_BASE}/products${queryString ? `?${queryString}` : ""}`;
 
-    // Map MongoDB products returned to match frontend ProductType schema
-    // Specifically, ensuring ID mapping (mapping _id string to id number/string)
     const dbProducts = await safeFetch<any[]>(url, { method: "GET" }, mockProducts);
     return dbProducts.map((p) => ({
       ...p,
       id: p._id || p.id,
-      storages: p.storages,
+      images: normalizeProductImages(p.images),
+      storages: Array.isArray(p.storages) ? p.storages : [],
     })) as ProductType[];
   },
 
@@ -148,7 +165,8 @@ export const api = {
       return {
         ...p,
         id: p._id || p.id,
-        storages: p.storages,
+        images: normalizeProductImages(p.images),
+        storages: Array.isArray(p.storages) ? p.storages : [],
       } as ProductType;
     } catch (err) {
       return null;
@@ -163,7 +181,6 @@ export const api = {
   },
 
   async getProductById(id: string | number): Promise<ProductType> {
-    // If ID looks like a local mock number, find it in mock data
     const mockProduct = mockProducts.find((p) => p.id === Number(id));
     
     try {
@@ -171,7 +188,8 @@ export const api = {
       return {
         ...p,
         id: p._id || p.id,
-        storages: p.storages,
+        images: normalizeProductImages(p.images),
+        storages: Array.isArray(p.storages) ? p.storages : [],
       } as ProductType;
     } catch (err) {
       if (mockProduct) {

@@ -33,6 +33,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 if (process.env.CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) {
   // Apply Clerk middleware only for modifying routes (non-GET requests) to prevent cookies from blocking public GET requests
