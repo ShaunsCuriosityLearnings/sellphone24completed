@@ -217,11 +217,14 @@ export const updateProduct = async (req, res) => {
     });
 
     if (String(dataToUpdate.isLivePrice) === "true") {
-      const liveCount = await Product.countDocuments({ isLivePrice: true, _id: { $ne: id } });
-      if (liveCount >= 6) {
-        return res.status(400).json({
-          message: "Maximum 6 devices allowed in Today's Live Buying Prices section. Remove an existing device first."
-        });
+      const existingProduct = await Product.findById(id);
+      if (existingProduct && !existingProduct.isLivePrice) {
+        const liveCount = await Product.countDocuments({ isLivePrice: true });
+        if (liveCount >= 6) {
+          return res.status(400).json({
+            message: "Maximum 6 devices allowed in Today's Live Buying Prices section. Remove an existing device first."
+          });
+        }
       }
     }
 
