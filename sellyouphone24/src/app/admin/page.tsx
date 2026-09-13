@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { 
+  ClipboardList,
   BarChart3, 
   Smartphone, 
   Layers, 
