@@ -30,14 +30,21 @@ async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): P
       ...options,
       headers: reqHeaders,
     });
+
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`HTTP ${res.status}: ${errorText}`);
+      let cleanMessage = errorText;
+      try {
+        const parsed = JSON.parse(errorText);
+        if (parsed.message) cleanMessage = parsed.message;
+      } catch (e) {}
+      throw new Error(cleanMessage || `HTTP Error ${res.status}`);
     }
+
     return await res.json() as T;
   } catch (error) {
-    console.warn(`⚠️ API Request failed for ${url}. Error: ${(error as Error).message}. Using fallback data.`);
     if (fallback !== undefined) {
+      console.warn(`⚠️ API Request failed for ${url}. Error: ${(error as Error).message}. Using fallback data.`);
       return fallback;
     }
     throw error;

@@ -500,11 +500,20 @@ export default function AdminPage() {
       if (!pId) return;
 
       const updatedVal = !product[flag];
+
+      if (flag === "isLivePrice" && updatedVal) {
+        const currentLiveCount = products.filter(p => p.isLivePrice && (p.id || p._id) !== pId).length;
+        if (currentLiveCount >= 6) {
+          toast.error("Maximum 6 devices allowed in Today's Live Buying Prices section. Remove an existing device first.");
+          return;
+        }
+      }
+
       await api.updateProduct(pId, { [flag]: updatedVal }, token || undefined);
       toast.success(`${product.name}: ${flag === 'isPopular' ? 'Homepage Popular' : 'Live Price'} set to ${updatedVal ? 'ENABLED' : 'DISABLED'}`);
       setProducts(products.map(p => (p.id === pId || p._id === pId) ? { ...p, [flag]: updatedVal } : p));
     } catch (err: any) {
-      toast.error(`Failed to toggle ${flag}: ${err.message}`);
+      toast.error(err.message || `Failed to toggle ${flag}`);
     }
   };
 
