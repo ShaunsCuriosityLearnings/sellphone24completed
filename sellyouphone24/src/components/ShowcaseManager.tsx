@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ProductType } from "@/types";
 import { api } from "@/lib/api";
 import { toast } from "react-toastify";
+import { useAuth } from "@clerk/nextjs";
 import { 
   Sparkles, 
   Star, 
@@ -51,13 +52,25 @@ export default function ShowcaseManager({ products, token, onRefreshData }: Show
     (typeof p.brand === "string" ? p.brand : (p.brand as any)?.name || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const { getToken } = useAuth();
+
+  const getFreshToken = async (): Promise<string | undefined> => {
+    try {
+      const t = await getToken();
+      return t || token || undefined;
+    } catch (err) {
+      return token || undefined;
+    }
+  };
+
   // Handlers
   const handleSetHero = async (product: ProductType) => {
     const id = getPId(product);
     if (!id) return;
     setLoadingAction(`hero_${id}`);
     try {
-      await api.setHeroProduct(id, token);
+      const activeToken = await getFreshToken();
+      await api.setHeroProduct(id, activeToken);
       toast.success(`"${product.name}" tagged as Featured Hero Product!`);
       await onRefreshData();
     } catch (err: any) {
@@ -72,7 +85,8 @@ export default function ShowcaseManager({ products, token, onRefreshData }: Show
     if (!id) return;
     setLoadingAction(`pop_${id}`);
     try {
-      await api.updateProduct(id, { isPopular: setPopular }, token);
+      const activeToken = await getFreshToken();
+      await api.updateProduct(id, { isPopular: setPopular }, activeToken);
       toast.success(setPopular ? `Added "${product.name}" to Popular Devices` : `Removed "${product.name}" from Popular Devices`);
       await onRefreshData();
     } catch (err: any) {
@@ -92,7 +106,8 @@ export default function ShowcaseManager({ products, token, onRefreshData }: Show
     if (!id) return;
     setLoadingAction(`live_${id}`);
     try {
-      await api.updateProduct(id, { isLivePrice: setLive }, token);
+      const activeToken = await getFreshToken();
+      await api.updateProduct(id, { isLivePrice: setLive }, activeToken);
       toast.success(setLive ? `Added "${product.name}" to Live Buying Prices` : `Removed "${product.name}" from Live Buying Prices`);
       await onRefreshData();
     } catch (err: any) {
