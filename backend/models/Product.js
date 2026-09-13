@@ -49,6 +49,10 @@ const productSchema = new mongoose.Schema({
   isLivePrice: {
     type: Boolean,
     default: false,
+  },
+  isHeroProduct: {
+    type: Boolean,
+    default: false,
   }
 }, { timestamps: true });
 

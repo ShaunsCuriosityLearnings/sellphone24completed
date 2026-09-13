@@ -1,0 +1,12 @@
+{
+  "name": "sellphone-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix sellyouphone24 run dev",
+    "dev:frontend": "npm --prefix sellyouphone24 run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "build": "npm --prefix sellyouphone24 run build",
+    "start": "npm --prefix sellyouphone24 run start"
+  }
+}

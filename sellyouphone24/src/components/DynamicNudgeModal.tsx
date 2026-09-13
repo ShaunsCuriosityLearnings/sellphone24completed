@@ -59,7 +59,7 @@ export default function DynamicNudgeModal() {
         </div>
         <div className="space-y-1.5 pr-4">
           <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-            🔥 Exclusive Lock-In Bonus
+            Exclusive Lock-In Bonus
           </span>
           <h4 className="font-extrabold text-sm text-white leading-tight">
             Lock in your highest valuation payout today!

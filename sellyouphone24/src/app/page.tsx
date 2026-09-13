@@ -91,7 +91,7 @@ export default function Home() {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-center w-full">
           <div className="col-span-1 lg:col-span-8 space-y-4 md:space-y-6 w-full">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
-              ♻️ Green E-waste Management
+              Green E-waste Management
             </span>
             <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
               Turn your old tech into <span className="text-emerald-400">instant cash</span> while protecting the environment.

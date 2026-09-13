@@ -124,6 +124,43 @@ export const getProductById = async (req, res) => {
   }
 };
 
+// @desc    Get currently tagged Hero Product
+// @route   GET /api/products/hero
+// @access  Public
+export const getHeroProduct = async (req, res) => {
+  try {
+    const heroProduct = await Product.findOne({ isHeroProduct: true }).populate("brand");
+    if (!heroProduct) {
+      return res.status(200).json(null);
+    }
+    res.status(200).json(formatProduct(heroProduct));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Set a single product as Hero Product
+// @route   POST /api/products/set-hero/:id
+// @access  Admin
+export const setHeroProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Clear previous hero tags
+    await Product.updateMany({}, { isHeroProduct: false });
+
+    // Set new hero product
+    const updated = await Product.findByIdAndUpdate(id, { isHeroProduct: true }, { new: true }).populate("brand");
+    if (!updated) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(formatProduct(updated));
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 // @desc    Create new product
 // @route   POST /api/products
 // @access  Admin
@@ -137,6 +174,15 @@ export const createProduct = async (req, res) => {
         try { data[field] = JSON.parse(data[field]); } catch (e) {}
       }
     });
+
+    if (String(data.isLivePrice) === "true") {
+      const liveCount = await Product.countDocuments({ isLivePrice: true });
+      if (liveCount >= 6) {
+        return res.status(400).json({
+          message: "Maximum 6 devices allowed in Today's Live Buying Prices section. Remove an existing device first."
+        });
+      }
+    }
 
     if (req.files) {
       if (!data.images) data.images = {};
@@ -169,6 +215,15 @@ export const updateProduct = async (req, res) => {
         try { dataToUpdate[field] = JSON.parse(dataToUpdate[field]); } catch (e) {}
       }
     });
+
+    if (String(dataToUpdate.isLivePrice) === "true") {
+      const liveCount = await Product.countDocuments({ isLivePrice: true, _id: { $ne: id } });
+      if (liveCount >= 6) {
+        return res.status(400).json({
+          message: "Maximum 6 devices allowed in Today's Live Buying Prices section. Remove an existing device first."
+        });
+      }
+    }
 
     if (req.files) {
       if (!dataToUpdate.images) dataToUpdate.images = {};

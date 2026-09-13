@@ -25,6 +25,7 @@ export type ProductType = {
   images: ProductImagesType;
   isPopular?: boolean;
   isLivePrice?: boolean;
+  isHeroProduct?: boolean;
 };
 
 export type ProductsType = ProductType[];

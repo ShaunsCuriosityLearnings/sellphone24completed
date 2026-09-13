@@ -1,9 +1,30 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ArrowRight, CheckCircle2, Shield } from "lucide-react";
+import { CheckCircle2, Shield } from "lucide-react";
 import QuickEvaluationWidget from "@/components/QuickEvaluationWidget";
+import { api } from "@/lib/api";
+import { ProductType } from "@/types";
 
 const HeroSection = () => {
+  const [heroProduct, setHeroProduct] = useState<ProductType | null>(null);
+
+  useEffect(() => {
+    async function loadHero() {
+      const p = await api.getHeroProduct();
+      if (p) setHeroProduct(p);
+    }
+    loadHero();
+  }, []);
+
+  const heroImage = (typeof heroProduct?.images === "object" && heroProduct.images?.frontView) || (typeof heroProduct?.images === "string" ? heroProduct.images : "/products/iphone-pro-max.jpg");
+  const heroName = heroProduct?.name || "Sell your Smartphone";
+  
+  // Calculate max valuation payout tag
+  const maxStorageBoost = heroProduct?.storages?.reduce((max, s) => Math.max(max, s.priceBoost || 0), 0) || 0;
+  const topValuationPrice = heroProduct ? (heroProduct.basePrice + maxStorageBoost) : 3780;
+
   return (
     <section className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-b from-emerald-50/80 via-teal-50/20 to-white border border-slate-200/80 mb-6 isolate shadow-xs">
       {/* Abstract Background Shapes */}
@@ -20,7 +41,7 @@ const HeroSection = () => {
           {/* Text Content */}
           <div className="space-y-4 sm:space-y-6 relative z-10 w-full">
             <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white border border-emerald-100 shadow-sm text-emerald-600 text-xs font-bold tracking-wide uppercase">
-              ⚡ Instant Cash Valuation UAE
+              Instant Cash Valuation UAE
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] tracking-tight">
@@ -52,8 +73,8 @@ const HeroSection = () => {
               <div className="absolute inset-0 z-20 flex items-center justify-center group">
                 <div className="relative w-[80%] h-[80%] group-hover:scale-105 transition-transform duration-500 ease-out">
                   <Image
-                    src="/products/iphone-pro-max.jpg"
-                    alt="Sell your Smartphone"
+                    src={heroImage}
+                    alt={heroName}
                     fill
                     priority
                     className="object-contain drop-shadow-2xl"
@@ -63,8 +84,10 @@ const HeroSection = () => {
 
               {/* Floating Price Tag */}
               <div className="absolute top-2 sm:top-4 right-0 z-30 bg-white p-3 sm:p-4 rounded-2xl shadow-xl border border-emerald-50 animate-bounce">
-                <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5 sm:mb-1">Up to</p>
-                <p className="text-xl sm:text-2xl font-black text-emerald-500">AED 3,780</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider mb-0.5 sm:mb-1">
+                  {heroProduct ? heroProduct.name : "Up to"}
+                </p>
+                <p className="text-xl sm:text-2xl font-black text-emerald-500">AED {topValuationPrice.toLocaleString()}</p>
               </div>
             </div>
           </div>

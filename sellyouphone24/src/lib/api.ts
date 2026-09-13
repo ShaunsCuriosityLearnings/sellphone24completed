@@ -126,6 +126,27 @@ export const api = {
     })) as ProductType[];
   },
 
+  async getHeroProduct(): Promise<ProductType | null> {
+    try {
+      const p = await safeFetch<any>(`${API_BASE}/products/hero`, { method: "GET" });
+      if (!p) return null;
+      return {
+        ...p,
+        id: p._id || p.id,
+        storages: p.storages,
+      } as ProductType;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  async setHeroProduct(id: string | number, token?: string): Promise<any> {
+    return safeFetch<any>(`${API_BASE}/products/set-hero/${id}`, {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    });
+  },
+
   async getProductById(id: string | number): Promise<ProductType> {
     // If ID looks like a local mock number, find it in mock data
     const mockProduct = mockProducts.find((p) => p.id === Number(id));
