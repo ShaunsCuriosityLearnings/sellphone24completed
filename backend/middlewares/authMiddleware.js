@@ -19,7 +19,14 @@ export const requireAdmin = async (req, res, next) => {
     const user = await clerkClient.users.getUser(authState.userId);
     const role = user?.publicMetadata?.role;
     const emails = user?.emailAddresses?.map((e) => e.emailAddress) || [];
-    const hasAdminEmail = emails.includes("shantanukamble.org@gmail.com");
+    
+    const allowedAdminEmails = [
+      "shantanukamble.org@gmail.com",
+      "ibrahimmwn2012@gmail.com",
+      "sellphone24phone@gmail.com",
+      "mesouq2@gmail.com"
+    ];
+    const hasAdminEmail = emails.some(e => allowedAdminEmails.includes(e.toLowerCase()));
 
     if (role !== "admin" && !hasAdminEmail) {
       return res.status(403).json({ message: "Forbidden: Administrator permissions required" });
@@ -31,3 +38,4 @@ export const requireAdmin = async (req, res, next) => {
     res.status(500).json({ message: "Authentication failed", error: error.message });
   }
 };
+

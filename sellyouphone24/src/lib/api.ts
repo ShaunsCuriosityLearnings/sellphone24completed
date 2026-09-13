@@ -14,13 +14,21 @@ if (typeof window === "undefined") {
 async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): Promise<T> {
   try {
     const isFormData = options?.body instanceof FormData;
+    const reqHeaders: Record<string, string> = !isFormData ? { "Content-Type": "application/json" } : {};
+
+    if (options?.headers) {
+      const rawHeaders = options.headers as Record<string, string>;
+      Object.entries(rawHeaders).forEach(([key, val]) => {
+        if (val && typeof val === "string" && !val.includes("undefined") && !val.includes("null") && val.trim() !== "Bearer") {
+          reqHeaders[key] = val;
+        }
+      });
+    }
+
     const res = await fetch(url, {
       cache: "no-store",
       ...options,
-      headers: {
-        ...(!isFormData ? { "Content-Type": "application/json" } : {}),
-        ...(options?.headers || {}),
-      },
+      headers: reqHeaders,
     });
     if (!res.ok) {
       const errorText = await res.text();
