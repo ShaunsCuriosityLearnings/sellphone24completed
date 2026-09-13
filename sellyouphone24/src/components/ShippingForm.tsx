@@ -29,6 +29,7 @@ import Image from "next/image";
 import useCartStore from "@/app/stores/cartStore";
 import { api } from "@/lib/api";
 import { toast } from "react-toastify";
+import { analytics } from "@/lib/analytics";
 
 const uaeLocations = [
   "Dubai Marina",
@@ -178,7 +179,15 @@ export default function ShippingForm({
         devices,
         paymentMethod: "cash" as const,
         totalPayout,
+        sessionId: analytics.getSessionId(),
+        intentScoreAtBooking: analytics.getIntentScore(),
       };
+
+      analytics.track("pickup_requested", "conversion", {
+        totalPayout,
+        deviceCount: devices.length,
+        city: data.city,
+      });
 
       const res = await api.createOrder(orderData);
 

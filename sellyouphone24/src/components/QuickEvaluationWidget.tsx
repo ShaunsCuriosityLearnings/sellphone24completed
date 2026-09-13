@@ -6,6 +6,8 @@ import { Search, ChevronDown, Zap } from "lucide-react";
 import { api } from "@/lib/api";
 import { CategoryType, BrandType, ProductType } from "@/types";
 
+import { analytics } from "@/lib/analytics";
+
 export default function QuickEvaluationWidget() {
   const router = useRouter();
 
@@ -47,6 +49,7 @@ export default function QuickEvaluationWidget() {
     if (!selectedCategory) {
       setFilteredBrands(brands);
     } else {
+      analytics.track("category_selected", "behaviour", { category: selectedCategory });
       const catObj = categories.find(c => c.slug === selectedCategory || c.id === selectedCategory);
       if (catObj) {
         const matchingBrands = brands.filter(b => {
@@ -72,6 +75,7 @@ export default function QuickEvaluationWidget() {
       prods = prods.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
     }
     if (selectedBrand) {
+      analytics.track("brand_selected", "behaviour", { brand: selectedBrand, category: selectedCategory });
       const bObj = brands.find(b => b.slug === selectedBrand || b.name.toLowerCase() === selectedBrand.toLowerCase());
       if (bObj) {
         prods = prods.filter(p => {
@@ -88,6 +92,11 @@ export default function QuickEvaluationWidget() {
   }, [selectedCategory, selectedBrand, products, brands]);
 
   const handleGetEvaluation = () => {
+    analytics.track("valuation_started", "valuation", {
+      category: selectedCategory,
+      brand: selectedBrand,
+      productId: selectedProduct,
+    });
     if (selectedProduct) {
       router.push(`/products/${selectedProduct}`);
     } else if (selectedBrand || selectedCategory) {

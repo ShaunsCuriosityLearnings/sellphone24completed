@@ -21,6 +21,7 @@ import blogRoutes from "./routes/blogRoutes.js";
 import customRequestRoutes from "./routes/customRequestRoutes.js";
 import databaseRoutes from "./routes/databaseRoutes.js";
 import testimonialRoutes from "./routes/testimonialRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
 
 if (!process.env.CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
   process.env.CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -63,6 +64,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/custom-requests", customRequestRoutes);
 app.use("/api/database", databaseRoutes);
 app.use("/api/testimonials", testimonialRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {

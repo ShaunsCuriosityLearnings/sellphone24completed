@@ -6,8 +6,9 @@ import { CategoryType, ProductType, BrandType, BlogType, TestimonialType } from 
 import { autoFormatPlainTextToMarkdown, parseMarkdownToHtml } from "@/lib/markdown";
 import { toast } from "react-toastify";
 import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import { 
-  ClipboardList, 
+  BarChart3, 
   Smartphone, 
   Layers, 
   Plus, 
@@ -152,7 +153,7 @@ export default function AdminPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   
-  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("products");
+  const [activeTab, setActiveTab] = useState<"analytics" | "orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("analytics");
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [products, setProducts] = useState<ProductType[]>([]);
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -940,8 +941,17 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 space-y-4">
         
         {/* Compact Navigation Bar */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between gap-2 overflow-x-auto bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveTab("analytics")}
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 text-xs ${
+                activeTab === "analytics" ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/20" : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80"
+              }`}
+            >
+              <BarChart3 size={14} /> 🔥 Analytics & Intelligence
+            </button>
+
             <button
               onClick={() => { setActiveTab("products"); setCurrentPage(1); }}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
@@ -1008,10 +1018,10 @@ export default function AdminPage() {
             <button
               onClick={() => setActiveTab("database")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeTab === "database" ? "bg-slate-900 text-white shadow-sm" : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
+                activeTab === "database" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
               }`}
             >
-              <Database size={13} /> Database Backup & Restore
+              <Database size={13} /> Backup & Restore
             </button>
           </div>
         </div>
@@ -1025,6 +1035,11 @@ export default function AdminPage() {
         ) : (
           <div>
             
+            {/* ANALYTICS & INTELLIGENCE TAB */}
+            {activeTab === "analytics" && (
+              <AnalyticsDashboard />
+            )}
+
             {/* DATABASE BACKUP & RESTORE TAB */}
             {activeTab === "database" && (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">

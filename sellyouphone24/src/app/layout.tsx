@@ -47,6 +47,8 @@ export const metadata: Metadata = {
   ],
 };
 
+import AnalyticsProvider from "@/components/AnalyticsProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -82,7 +84,11 @@ export default function RootLayout({
             {/* Main Content */}
             <main className="flex-1">
               <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
-                {children}
+                <Suspense fallback={null}>
+                  <AnalyticsProvider>
+                    {children}
+                  </AnalyticsProvider>
+                </Suspense>
               </div>
             </main>
 
