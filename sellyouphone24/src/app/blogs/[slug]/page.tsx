@@ -5,6 +5,7 @@ import { ArrowLeft, User, Calendar, Clock, Tag, Zap, ShieldCheck, CheckCircle2, 
 import { api } from "@/lib/api";
 import CommentsSection from "./CommentsSection";
 import { ArticleActions } from "./ArticleActions";
+import BlogTradeInCta from "@/components/BlogTradeInCta";
 import { parseMarkdownToHtml, extractTableOfContents } from "@/lib/markdown";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
@@ -236,27 +237,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
           />
 
           {/* Trade-In Call To Action Widget embedded in article */}
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-700 text-white rounded-3xl p-6 sm:p-8 space-y-4 shadow-lg">
-            <div className="space-y-1">
-              <span className="bg-white/20 text-white px-2.5 py-0.5 rounded-full text-[10px] uppercase font-black tracking-wider">
-                Ready to Sell Your Device?
-              </span>
-              <h3 className="text-xl sm:text-2xl font-black">
-                Get an Instant Cash Quote for Your Used Phone in 60 Seconds
-              </h3>
-              <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
-                No hassle, no long listings. We offer doorstep pickup anywhere in Dubai, Abu Dhabi, Sharjah & UAE with instant cash payment.
-              </p>
-            </div>
-
-            <Link
-              href="/services"
-              className="inline-flex items-center gap-2 bg-slate-950 hover:bg-slate-900 text-white font-black px-6 py-3 rounded-xl text-xs sm:text-sm transition shadow-md"
-            >
-              <Zap size={16} className="text-emerald-400" />
-              Calculate My Device Value Now
-            </Link>
-          </div>
+          <BlogTradeInCta blogSlug={blog.slug} />
 
           {/* Related Articles Section */}
           {relatedArticles.length > 0 && (

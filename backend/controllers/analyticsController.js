@@ -297,11 +297,39 @@ export const getDashboardData = async (req, res) => {
       });
     }
 
-    // 10. Blog Performance & SEO Analysis Matrix
+    // 10. Real Empirical Blog Performance & SEO Analysis Matrix
+    const referralEvents = await AnalyticsEvent.aggregate([
+      { $match: { eventName: "blog_cta_clicked", "properties.blogSlug": { $exists: true, $ne: "" } } },
+      { $group: { _id: "$properties.blogSlug", count: { $sum: 1 } } }
+    ]);
+    const referralMap = {};
+    referralEvents.forEach(r => { referralMap[r._id] = r.count; });
+
+    const allSearchLogs = await SearchQueryLog.find({}).select("query").lean();
     const blogsList = await Blog.find({}).sort({ views: -1 }).limit(10);
+
     const blogAnalytics = blogsList.map((blog, idx) => {
       const views = blog.views || 0;
-      const score = Math.min(100, Math.round((views / 15) + (blog.likes || 0) * 2 + 60));
+      const referralClicks = referralMap[blog.slug] || 0;
+      
+      // Calculate real SEO alignment against visitor search queries
+      const blogKeywords = (blog.title + " " + blog.category).toLowerCase().split(/\s+/).filter(w => w.length > 3);
+      const searchHits = allSearchLogs.filter(s => {
+        const q = (s.query || "").toLowerCase();
+        return blogKeywords.some(kw => q.includes(kw));
+      }).length;
+
+      // Real engagement score derived strictly from actual views, referral clicks & search hits
+      let rawScore = 0;
+      if (views > 0 || referralClicks > 0 || searchHits > 0) {
+        rawScore = Math.min(100, Math.round((views * 2) + (referralClicks * 10) + (searchHits * 5)));
+      }
+
+      let seoStatus = "Unranked (0 search hits)";
+      if (searchHits >= 5) seoStatus = `High Target (${searchHits} searches)`;
+      else if (searchHits > 0) seoStatus = `Matched (${searchHits} searches)`;
+      else if (views > 0) fontStatus = "Indexed";
+
       return {
         rank: idx + 1,
         id: blog._id,
@@ -311,9 +339,9 @@ export const getDashboardData = async (req, res) => {
         author: blog.author,
         views: views,
         likes: blog.likes || 0,
-        score: score,
-        productReferralClicks: Math.round(views * 0.18),
-        seoKeywordMatch: blog.category === "Price Analysis" ? "High Target" : "Optimal",
+        score: rawScore,
+        productReferralClicks: referralClicks,
+        seoKeywordMatch: searchHits > 0 ? `Matched (${searchHits} searches)` : "Unranked (0 search hits)",
       };
     });
 
