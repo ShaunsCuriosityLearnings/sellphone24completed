@@ -298,52 +298,57 @@ export const getDashboardData = async (req, res) => {
     }
 
     // 10. Real Empirical Blog Performance & SEO Analysis Matrix
-    const referralEvents = await AnalyticsEvent.aggregate([
-      { $match: { eventName: "blog_cta_clicked", "properties.blogSlug": { $exists: true, $ne: "" } } },
-      { $group: { _id: "$properties.blogSlug", count: { $sum: 1 } } }
-    ]);
-    const referralMap = {};
-    referralEvents.forEach(r => { referralMap[r._id] = r.count; });
+    let blogAnalytics = [];
+    try {
+      const referralEvents = await AnalyticsEvent.aggregate([
+        { $match: { eventName: "blog_cta_clicked", "properties.blogSlug": { $exists: true, $ne: "" } } },
+        { $group: { _id: "$properties.blogSlug", count: { $sum: 1 } } }
+      ]);
+      const referralMap = {};
+      referralEvents.forEach(r => { if (r._id) referralMap[r._id] = r.count; });
 
-    const allSearchLogs = await SearchQueryLog.find({}).select("query").lean();
-    const blogsList = await Blog.find({}).sort({ views: -1 }).limit(10);
+      const allSearchLogs = await SearchQueryLog.find({}).select("query").lean();
+      const blogsList = await Blog.find({}).sort({ views: -1 }).limit(10);
 
-    const blogAnalytics = blogsList.map((blog, idx) => {
-      const views = blog.views || 0;
-      const referralClicks = referralMap[blog.slug] || 0;
-      
-      // Calculate real SEO alignment against visitor search queries
-      const blogKeywords = (blog.title + " " + blog.category).toLowerCase().split(/\s+/).filter(w => w.length > 3);
-      const searchHits = allSearchLogs.filter(s => {
-        const q = (s.query || "").toLowerCase();
-        return blogKeywords.some(kw => q.includes(kw));
-      }).length;
+      blogAnalytics = blogsList.map((blog, idx) => {
+        const views = blog.views || 0;
+        const referralClicks = referralMap[blog.slug] || 0;
+        
+        // Calculate real SEO alignment against visitor search queries
+        const blogKeywords = ((blog.title || "") + " " + (blog.category || "")).toLowerCase().split(/\s+/).filter(w => w.length > 3);
+        const searchHits = allSearchLogs.filter(s => {
+          const q = (s.query || "").toLowerCase();
+          return blogKeywords.some(kw => q.includes(kw));
+        }).length;
 
-      // Real engagement score derived strictly from actual views, referral clicks & search hits
-      let rawScore = 0;
-      if (views > 0 || referralClicks > 0 || searchHits > 0) {
-        rawScore = Math.min(100, Math.round((views * 2) + (referralClicks * 10) + (searchHits * 5)));
-      }
+        // Real engagement score derived strictly from actual views, referral clicks & search hits
+        let rawScore = 0;
+        if (views > 0 || referralClicks > 0 || searchHits > 0) {
+          rawScore = Math.min(100, Math.round((views * 2) + (referralClicks * 10) + (searchHits * 5)));
+        }
 
-      let seoStatus = "Unranked (0 search hits)";
-      if (searchHits >= 5) seoStatus = `High Target (${searchHits} searches)`;
-      else if (searchHits > 0) seoStatus = `Matched (${searchHits} searches)`;
-      else if (views > 0) fontStatus = "Indexed";
+        let seoStatus = "Unranked (0 search hits)";
+        if (searchHits >= 5) seoStatus = `High Target (${searchHits} searches)`;
+        else if (searchHits > 0) seoStatus = `Matched (${searchHits} searches)`;
+        else if (views > 0) seoStatus = "Indexed";
 
-      return {
-        rank: idx + 1,
-        id: blog._id,
-        title: blog.title,
-        slug: blog.slug,
-        category: blog.category,
-        author: blog.author,
-        views: views,
-        likes: blog.likes || 0,
-        score: rawScore,
-        productReferralClicks: referralClicks,
-        seoKeywordMatch: searchHits > 0 ? `Matched (${searchHits} searches)` : "Unranked (0 search hits)",
-      };
-    });
+        return {
+          rank: idx + 1,
+          id: blog._id,
+          title: blog.title,
+          slug: blog.slug,
+          category: blog.category,
+          author: blog.author,
+          views: views,
+          likes: blog.likes || 0,
+          score: rawScore,
+          productReferralClicks: referralClicks,
+          seoKeywordMatch: seoStatus,
+        };
+      });
+    } catch (blogErr) {
+      console.warn("⚠️ Blog analytics aggregation warning:", blogErr.message);
+    }
 
     return res.status(200).json({
       summary: {
