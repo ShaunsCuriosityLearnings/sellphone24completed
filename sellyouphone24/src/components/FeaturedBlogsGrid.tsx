@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BlogType } from "@/types";
-import { Bookmark, Clock, User, Star } from "lucide-react";
+import { Bookmark, Clock, User, Eye } from "lucide-react";
 
 interface FeaturedBlogsGridProps {
   blogs: BlogType[];
@@ -99,12 +99,18 @@ export default function FeaturedBlogsGrid({ blogs }: FeaturedBlogsGridProps) {
                   </div>
                 </div>
 
-                <button
-                  aria-label="Bookmark article"
-                  className="p-2 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition cursor-pointer"
-                >
-                  <Bookmark className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                    <Eye className="w-3.5 h-3.5 text-emerald-500" />
+                    {(mainPost.views || 0).toLocaleString()} views
+                  </span>
+                  <button
+                    aria-label="Bookmark article"
+                    className="p-2 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition cursor-pointer"
+                  >
+                    <Bookmark className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -138,13 +144,20 @@ export default function FeaturedBlogsGrid({ blogs }: FeaturedBlogsGridProps) {
                   </Link>
                 </div>
 
-                <div className="text-[11px] text-slate-400 space-y-0.5 pt-2 border-t border-slate-50">
-                  <p className="font-semibold text-slate-600 truncate">{post.author || "Team SellPhoneCash"}</p>
-                  <div className="flex items-center gap-1.5">
-                    <span>{formatDate(post.createdAt)}</span>
-                    <span>•</span>
-                    <span>{estimateReadTime(post.content)}</span>
+                <div className="text-[11px] text-slate-400 flex items-center justify-between pt-2 border-t border-slate-50">
+                  <div className="space-y-0.5">
+                    <p className="font-semibold text-slate-600 truncate">{post.author || "Team SellPhoneCash"}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span>{formatDate(post.createdAt)}</span>
+                      <span>•</span>
+                      <span>{estimateReadTime(post.content)}</span>
+                    </div>
                   </div>
+
+                  <span className="flex items-center gap-1 text-[10px] text-slate-500 font-bold bg-slate-50 px-2 py-0.5 rounded border border-slate-100 shrink-0">
+                    <Eye className="w-3 h-3 text-emerald-500" />
+                    {(post.views || 0).toLocaleString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -156,30 +169,37 @@ export default function FeaturedBlogsGrid({ blogs }: FeaturedBlogsGridProps) {
           {compactPosts.map((post) => (
             <div
               key={post.id || post._id || post.slug}
-              className="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs hover:shadow-md transition flex items-center gap-3.5 group flex-1"
+              className="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs hover:shadow-md transition flex items-center gap-3.5 group flex-1 justify-between"
             >
-              <Link href={`/blogs/${post.slug}`} className="relative w-16 h-16 shrink-0 rounded-xl overflow-hidden bg-slate-100 block">
-                <Image
-                  src={post.img || "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=1000&auto=format&fit=crop"}
-                  alt={post.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </Link>
-
-              <div className="flex-1 min-w-0 space-y-1">
-                <Link href={`/blogs/${post.slug}`}>
-                  <h5 className="font-bold text-xs text-slate-800 group-hover:text-emerald-600 transition line-clamp-2 leading-snug">
-                    {post.title}
-                  </h5>
+              <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                <Link href={`/blogs/${post.slug}`} className="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden bg-slate-100 block">
+                  <Image
+                    src={post.img || "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=1000&auto=format&fit=crop"}
+                    alt={post.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </Link>
 
-                <div className="text-[10px] text-slate-400 flex flex-wrap items-center gap-1">
-                  <span className="font-medium text-slate-500 truncate max-w-[90px]">{post.author || "Team"}</span>
-                  <span>•</span>
-                  <span>{estimateReadTime(post.content)}</span>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <Link href={`/blogs/${post.slug}`}>
+                    <h5 className="font-bold text-xs text-slate-800 group-hover:text-emerald-600 transition line-clamp-2 leading-snug">
+                      {post.title}
+                    </h5>
+                  </Link>
+
+                  <div className="text-[10px] text-slate-400 flex flex-wrap items-center gap-1">
+                    <span className="font-medium text-slate-500 truncate max-w-[80px]">{post.author || "Team"}</span>
+                    <span>•</span>
+                    <span>{estimateReadTime(post.content)}</span>
+                  </div>
                 </div>
               </div>
+
+              <span className="flex items-center gap-1 text-[10px] text-slate-500 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 shrink-0">
+                <Eye className="w-3 h-3 text-emerald-500" />
+                {(post.views || 0).toLocaleString()}
+              </span>
             </div>
           ))}
         </div>

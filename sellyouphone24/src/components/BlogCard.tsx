@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BlogType } from "@/types";
-import { Calendar, User, Clock, ArrowRight, Bookmark } from "lucide-react";
+import { Calendar, User, Clock, ArrowRight, Eye } from "lucide-react";
 
 interface BlogCardProps {
   post: BlogType;
@@ -23,6 +23,8 @@ const BlogCard = ({ post, variant = "grid" }: BlogCardProps) => {
     const mins = Math.max(2, Math.ceil(words / 150));
     return `${mins} min read`;
   };
+
+  const formattedViews = (post.views || 0).toLocaleString();
 
   if (variant === "horizontal") {
     return (
@@ -70,13 +72,19 @@ const BlogCard = ({ post, variant = "grid" }: BlogCardProps) => {
               {post.author || "Team SellPhoneCash"}
             </span>
 
-            <Link
-              href={`/blogs/${post.slug}`}
-              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition"
-            >
-              <span>Read Story</span>
-              <ArrowRight size={14} />
-            </Link>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1 text-xs text-slate-500 font-bold bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                <Eye size={13} className="text-emerald-500" />
+                {formattedViews}
+              </span>
+              <Link
+                href={`/blogs/${post.slug}`}
+                className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition"
+              >
+                <span>Read Story</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
         </div>
       </article>
@@ -124,13 +132,19 @@ const BlogCard = ({ post, variant = "grid" }: BlogCardProps) => {
             </div>
           </div>
 
-          <Link
-            href={`/blogs/${post.slug}`}
-            className="p-2 rounded-xl bg-slate-50 group-hover:bg-emerald-500 text-slate-600 group-hover:text-slate-950 transition shrink-0"
-            aria-label="Read story"
-          >
-            <ArrowRight size={14} />
-          </Link>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1 text-[11px] text-slate-500 font-bold bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+              <Eye size={12} className="text-emerald-500" />
+              {formattedViews}
+            </span>
+            <Link
+              href={`/blogs/${post.slug}`}
+              className="p-2 rounded-xl bg-slate-50 group-hover:bg-emerald-500 text-slate-600 group-hover:text-slate-950 transition shrink-0"
+              aria-label="Read story"
+            >
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </div>
     </article>
