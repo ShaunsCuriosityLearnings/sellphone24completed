@@ -1,6 +1,9 @@
 "use client";
 
+import { cookieConsent } from "./cookieConsent";
+
 export interface AnalyticsEventPayload {
+  sessionId?: string;
   eventName: string;
   category: "acquisition" | "behaviour" | "valuation" | "conversion" | "search" | "ux";
   properties?: Record<string, any>;
@@ -9,7 +12,18 @@ export interface AnalyticsEventPayload {
 
 const SESSION_KEY = "spc_analytics_session_id";
 const INTENT_KEY = "spc_analytics_intent_score";
+const MARKETING_ATTRIBUTION_KEY = "spc_marketing_attribution";
 const BATCH_INTERVAL_MS = 3000;
+
+export interface MarketingAttribution {
+  source: string;
+  medium: string;
+  campaign: string;
+  gclid: string;
+  fbclid: string;
+  ttclid: string;
+  referrer: string;
+}
 
 class AnalyticsSDK {
   private sessionId: string = "";
@@ -22,6 +36,7 @@ class AnalyticsSDK {
   constructor() {
     if (typeof window !== "undefined") {
       this.initSession();
+      this.captureMarketingAttribution();
       this.startBatchLoop();
       this.setupExitListener();
     }
@@ -39,6 +54,51 @@ class AnalyticsSDK {
     if (savedScore) {
       this.intentScore = parseInt(savedScore, 10) || 0;
     }
+  }
+
+  private captureMarketingAttribution() {
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const utmSource = urlParams.get("utm_source");
+    const utmMedium = urlParams.get("utm_medium");
+    const utmCampaign = urlParams.get("utm_campaign");
+    const gclid = urlParams.get("gclid");
+    const fbclid = urlParams.get("fbclid");
+    const ttclid = urlParams.get("ttclid");
+
+    // Only update stored attribution if new parameters exist in URL
+    if (utmSource || gclid || fbclid || ttclid) {
+      const attribution: MarketingAttribution = {
+        source: utmSource || (gclid ? "google" : fbclid ? "facebook" : ttclid ? "tiktok" : "direct"),
+        medium: utmMedium || (gclid ? "cpc" : fbclid ? "social" : ttclid ? "social" : "none"),
+        campaign: utmCampaign || "none",
+        gclid: gclid || "",
+        fbclid: fbclid || "",
+        ttclid: ttclid || "",
+        referrer: document.referrer || "direct",
+      };
+      localStorage.setItem(MARKETING_ATTRIBUTION_KEY, JSON.stringify(attribution));
+    }
+  }
+
+  public getMarketingAttribution(): MarketingAttribution {
+    if (typeof window === "undefined") {
+      return { source: "direct", medium: "none", campaign: "none", gclid: "", fbclid: "", ttclid: "", referrer: "direct" };
+    }
+    try {
+      const raw = localStorage.getItem(MARKETING_ATTRIBUTION_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return {
+      source: "direct",
+      medium: "none",
+      campaign: "none",
+      gclid: "",
+      fbclid: "",
+      ttclid: "",
+      referrer: document.referrer || "direct",
+    };
   }
 
   public getSessionId(): string {
@@ -63,18 +123,28 @@ class AnalyticsSDK {
   public track(eventName: string, category: AnalyticsEventPayload["category"] = "behaviour", properties: Record<string, any> = {}) {
     if (typeof window === "undefined") return;
 
-    // Detect UTM and Device context if first event
+    // Respect user cookie preferences for analytics telemetry
+    if (!cookieConsent.hasAnalyticsConsent() && !["pickup_requested"].includes(eventName)) {
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
+    const attribution = this.getMarketingAttribution();
+
     const contextProps = {
       sessionId: this.getSessionId(),
       pageUrl: window.location.pathname + window.location.search,
       deviceType: window.innerWidth < 768 ? "mobile" : window.innerWidth < 1024 ? "tablet" : "desktop",
       referrer: document.referrer || "direct",
-      utmSource: urlParams.get("utm_source") || "direct",
-      utmMedium: urlParams.get("utm_medium") || "none",
-      utmCampaign: urlParams.get("utm_campaign") || "none",
+      utmSource: attribution.source || urlParams.get("utm_source") || "direct",
+      utmMedium: attribution.medium || urlParams.get("utm_medium") || "none",
+      utmCampaign: attribution.campaign || urlParams.get("utm_campaign") || "none",
       utmContent: urlParams.get("utm_content") || "none",
       utmTerm: urlParams.get("utm_term") || "none",
+      gclid: attribution.gclid || urlParams.get("gclid") || "",
+      fbclid: attribution.fbclid || urlParams.get("fbclid") || "",
+      ttclid: attribution.ttclid || urlParams.get("ttclid") || "",
+      marketingConsent: cookieConsent.hasMarketingConsent(),
       sessionDuration: Math.round((Date.now() - this.pageStartTime) / 1000),
       ...properties,
     };
@@ -83,6 +153,7 @@ class AnalyticsSDK {
     this.updateIntentScore(eventName, properties);
 
     const eventPayload: AnalyticsEventPayload = {
+      sessionId: this.getSessionId(), // Top level for backend intake
       eventName,
       category,
       properties: contextProps,

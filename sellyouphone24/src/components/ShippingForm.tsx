@@ -181,6 +181,8 @@ export default function ShippingForm({
         totalPayout,
         sessionId: analytics.getSessionId(),
         intentScoreAtBooking: analytics.getIntentScore(),
+        marketingAttribution: analytics.getMarketingAttribution(),
+        acquisitionChannel: analytics.getMarketingAttribution().source || "Organic / Direct",
       };
 
       analytics.track("pickup_requested", "conversion", {

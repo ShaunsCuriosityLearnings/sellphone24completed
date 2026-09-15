@@ -63,6 +63,16 @@ interface AnalyticsDashboardData {
     conversions: number;
     avgIntentScore: number;
   }>;
+  adCampaignStats?: Array<{
+    _id: string;
+    ordersCount: number;
+    totalPayoutAED: number;
+    campaigns: string[];
+  }>;
+  consentStats?: {
+    analyticsOptInCount: number;
+    essentialOnlyCount: number;
+  };
   alerts: Array<{
     type: "warning" | "info" | "danger";
     title: string;
@@ -393,6 +403,87 @@ export default function AnalyticsDashboard() {
             ) : (
               <p className="text-xs text-slate-400 p-4 text-center">No traffic attribution data recorded yet.</p>
             )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* 5. AD CAMPAIGN ATTRIBUTION & PRIVACY CONSENT MATRIX */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* PAID AD CAMPAIGN RETURN */}
+        <div className="lg:col-span-8 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-base font-extrabold text-slate-900">Paid Ad Campaign Performance (Google / Meta / TikTok)</h3>
+              <p className="text-xs text-slate-500">Order conversion and total trade-in cash payouts generated per ad network</p>
+            </div>
+            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              Ad ROI Tracking Active
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
+                <tr>
+                  <th className="p-3">Ad Source</th>
+                  <th className="p-3">Completed Trade-in Orders</th>
+                  <th className="p-3">Total Cash Payout (AED)</th>
+                  <th className="p-3">Active Campaigns</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {data.adCampaignStats && data.adCampaignStats.length > 0 ? (
+                  data.adCampaignStats.map((ad, idx) => (
+                    <tr key={idx} className="hover:bg-slate-50/60 transition">
+                      <td className="p-3 font-bold text-slate-900 capitalize">{ad._id || "Direct / Organic"}</td>
+                      <td className="p-3 font-semibold text-slate-800">{ad.ordersCount} orders</td>
+                      <td className="p-3 font-bold text-emerald-600">AED {ad.totalPayoutAED.toLocaleString()}</td>
+                      <td className="p-3 text-slate-500 text-[11px]">
+                        {ad.campaigns && ad.campaigns.filter(c => c && c !== "none").length > 0
+                          ? ad.campaigns.filter(c => c && c !== "none").join(", ")
+                          : "Default / Direct"}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="p-6 text-center text-slate-400">No ad campaign order attribution recorded yet.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* PRIVACY CONSENT METRICS */}
+        <div className="lg:col-span-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900">Cookie Consent Compliance</h3>
+            <p className="text-xs text-slate-500">First-party visitor privacy choices</p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 flex justify-between items-center">
+              <div>
+                <span className="font-bold text-xs text-emerald-900 block">Analytics & Marketing Opt-In</span>
+                <span className="text-[10px] text-emerald-700">Full telemetry enabled</span>
+              </div>
+              <span className="bg-emerald-600 text-white font-black text-sm px-3 py-1 rounded-xl">
+                {data.consentStats?.analyticsOptInCount || 0}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-center">
+              <div>
+                <span className="font-bold text-xs text-slate-800 block">Essential Only</span>
+                <span className="text-[10px] text-slate-500">Non-essential telemetry blocked</span>
+              </div>
+              <span className="bg-slate-800 text-white font-black text-sm px-3 py-1 rounded-xl">
+                {data.consentStats?.essentialOnlyCount || 0}
+              </span>
+            </div>
           </div>
         </div>
 

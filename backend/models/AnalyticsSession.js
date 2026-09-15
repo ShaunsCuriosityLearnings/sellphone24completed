@@ -39,6 +39,13 @@ const analyticsSessionSchema = new mongoose.Schema({
     utmContent: { type: String, default: "none" },
     utmTerm: { type: String, default: "none" },
     channel: { type: String, default: "Organic / Direct" },
+    gclid: { type: String, default: "" },
+    fbclid: { type: String, default: "" },
+    ttclid: { type: String, default: "" },
+  },
+  marketingConsent: {
+    type: Boolean,
+    default: true,
   },
   intentScore: {
     type: Number,

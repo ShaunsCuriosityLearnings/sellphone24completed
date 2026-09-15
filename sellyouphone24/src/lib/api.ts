@@ -266,6 +266,10 @@ export const api = {
     }[];
     paymentMethod: "cash";
     totalPayout: number;
+    sessionId?: string;
+    intentScoreAtBooking?: number;
+    acquisitionChannel?: string;
+    marketingAttribution?: any;
   }): Promise<{ success: boolean; message: string; order: any }> {
     return safeFetch<{ success: boolean; message: string; order: any }>(`${API_BASE}/orders`, {
       method: "POST",

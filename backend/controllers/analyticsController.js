@@ -27,14 +27,14 @@ const updateMaxStage = (currentStage, newStage) => {
 // Batch Event Ingestion Endpoint (Public API)
 export const trackEvents = async (req, res) => {
   try {
-    const payload = req.body;
-    const events = Array.isArray(payload) ? payload : [payload];
+    const rawPayload = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const events = Array.isArray(rawPayload) ? rawPayload : [rawPayload];
 
-    if (!events.length) {
+    if (!events || !events.length) {
       return res.status(400).json({ message: "No events provided" });
     }
 
-    const { sessionId } = events[0];
+    const sessionId = events[0]?.sessionId || events[0]?.properties?.sessionId;
     if (!sessionId) {
       return res.status(400).json({ message: "sessionId is required" });
     }
@@ -47,6 +47,7 @@ export const trackEvents = async (req, res) => {
         deviceType: events[0].properties?.deviceType || "desktop",
         browser: events[0].properties?.browser || "Unknown",
         os: events[0].properties?.os || "Unknown",
+        marketingConsent: events[0].properties?.marketingConsent !== false,
         acquisition: {
           referrer: events[0].properties?.referrer || "direct",
           landingPage: events[0].properties?.pageUrl || "/",
@@ -56,6 +57,9 @@ export const trackEvents = async (req, res) => {
           utmCampaign: events[0].properties?.utmCampaign || "none",
           utmContent: events[0].properties?.utmContent || "none",
           utmTerm: events[0].properties?.utmTerm || "none",
+          gclid: events[0].properties?.gclid || "",
+          fbclid: events[0].properties?.fbclid || "",
+          ttclid: events[0].properties?.ttclid || "",
           channel: events[0].properties?.utmSource ? events[0].properties.utmSource : "Organic / Direct",
         },
         geo: {
@@ -264,6 +268,25 @@ export const getDashboardData = async (req, res) => {
       });
     }
 
+    // 8. Ad Campaign & Paid Attribution Breakdown
+    const adCampaignStats = await Order.aggregate([
+      {
+        $group: {
+          _id: "$marketingAttribution.source",
+          ordersCount: { $sum: 1 },
+          totalPayoutAED: { $sum: "$totalPayout" },
+          campaigns: { $addToSet: "$marketingAttribution.campaign" }
+        }
+      },
+      { $sort: { ordersCount: -1 } }
+    ]);
+
+    // 9. Privacy & Cookie Consent Opt-in Metrics
+    const consentStats = {
+      analyticsOptInCount: await AnalyticsSession.countDocuments({ marketingConsent: true }),
+      essentialOnlyCount: await AnalyticsSession.countDocuments({ marketingConsent: false }),
+    };
+
     const conversionRate = totalSessions > 0 ? ((funnel.pickupRequested / totalSessions) * 100).toFixed(1) : "0.0";
     if (totalSessions > 20 && parseFloat(conversionRate) < 2.0) {
       alerts.push({
@@ -287,6 +310,8 @@ export const getDashboardData = async (req, res) => {
       locationStats,
       trafficSources,
       pricingElasticity,
+      adCampaignStats,
+      consentStats,
       alerts,
     });
   } catch (error) {

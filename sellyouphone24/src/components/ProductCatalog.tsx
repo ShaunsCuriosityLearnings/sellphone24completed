@@ -5,7 +5,7 @@ import { ProductType, BrandType } from "@/types";
 import ProductCard from "./ProductCard";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
+import { analytics } from "@/lib/analytics";
 
 interface ProductCatalogProps {
   initialProducts: ProductType[];
@@ -93,10 +93,21 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
         const hasColor = product.colors?.some(c => c && selectedColorsLower.includes(c.toLowerCase()));
         if (!hasColor) return false;
       }
-
       return true;
     });
   }, [initialProducts, searchQuery, selectedBrands, selectedStorages, selectedColors]);
+
+  // Track search query demand in analytics engine
+  useEffect(() => {
+    if (!searchQuery || searchQuery.trim().length < 2) return;
+    const timer = setTimeout(() => {
+      analytics.track("search_performed", "search", {
+        searchQuery: searchQuery.trim(),
+        resultCount: filteredProducts.length,
+      });
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filteredProducts.length]);
 
   const toggleBrand = (brandSlug: string) => {
     const lower = brandSlug.toLowerCase();
