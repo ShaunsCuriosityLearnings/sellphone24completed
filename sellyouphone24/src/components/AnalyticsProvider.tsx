@@ -40,41 +40,11 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 3. Plug-and-Play Script Injectors for GTM / Google Tag / Meta Pixel
+  // 3. Plug-and-Play Script Injectors for Meta Pixel (GTM is loaded via root layout)
   useEffect(() => {
-    const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
-    const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-HBS6WH2V6L";
     const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
     if (cookieConsent.hasMarketingConsent()) {
-      // Inject Google Tag (gtag.js G-HBS6WH2V6L)
-      if (gaId && !document.getElementById("gtag-script")) {
-        const script = document.createElement("script");
-        script.id = "gtag-script";
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
-        document.head.appendChild(script);
-
-        const inlineScript = document.createElement("script");
-        inlineScript.id = "gtag-inline-script";
-        inlineScript.text = `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${gaId}', { page_path: window.location.pathname });
-        `;
-        document.head.appendChild(inlineScript);
-      }
-
-      // Inject GTM if configured
-      if (gtmId && !document.getElementById("gtm-script")) {
-        const script = document.createElement("script");
-        script.id = "gtm-script";
-        script.async = true;
-        script.src = `https://www.googletagmanager.com/gtm.js?id=${gtmId}`;
-        document.head.appendChild(script);
-      }
-
       // Inject Meta Pixel if configured
       if (pixelId && !document.getElementById("meta-pixel-script")) {
         const script = document.createElement("script");
