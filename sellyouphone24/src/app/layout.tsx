@@ -5,7 +5,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
-import PageTransitionLoader from "@/components/PageTransitionLoader";
+import Script from "next/script";
+import { GTM_ID } from "@/lib/gtm";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import { ToastContainer } from "react-toastify";
@@ -57,6 +58,21 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <Script
+            id="gtm-script"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${GTM_ID}');
+              `,
+            }}
+          />
+        </head>
         <body
           className={`
             ${inter.variable} ${roboto.variable} ${poppins.variable} ${openSans.variable} ${lato.variable}
@@ -66,6 +82,14 @@ export default function RootLayout({
           `}
           style={{ fontFamily: "var(--font-inter), sans-serif" }}
         >
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
           {/* Dynamic Route Transition Loading Overlay with Blue Shadow Blur */}
           <Suspense fallback={null}>
             <PageTransitionLoader />
