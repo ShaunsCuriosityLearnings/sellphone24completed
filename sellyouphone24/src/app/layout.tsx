@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
+import PageTransitionLoader from "@/components/PageTransitionLoader";
 import Script from "next/script";
 import { GTM_ID } from "@/lib/gtm";
 import { ClerkProvider } from "@clerk/nextjs";
