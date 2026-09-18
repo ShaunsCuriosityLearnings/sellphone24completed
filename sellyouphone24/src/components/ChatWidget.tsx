@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, PhoneCall, CheckCircle2, Search, ArrowRight, ShieldCheck, Sparkles, Smartphone, Tag, RefreshCw } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "react-toastify";
+import { pushDataLayer } from "@/lib/gtm";
 
 type Message = {
   id: string;
@@ -226,11 +227,13 @@ export default function ChatWidget() {
 
   const handleActionOption = (val: string) => {
     if (val === "whatsapp") {
+      pushDataLayer({ event: "whatsapp_click", location: "chat_widget" });
       const msg = encodeURIComponent(
         `Hi SellPhoneCash Support! My name is ${userName || "Customer"}. I'd like support regarding: ${deviceModel || orderQuery || "Device Valuation"}`
       );
       window.open(`https://wa.me/971555549817?text=${msg}`, "_blank");
     } else if (val === "call") {
+      pushDataLayer({ event: "phone_click", location: "chat_widget" });
       window.open("tel:0555549817", "_self");
     } else if (val === "menu") {
       initChat();

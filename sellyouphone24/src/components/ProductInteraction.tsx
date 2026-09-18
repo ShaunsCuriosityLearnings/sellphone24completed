@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { analytics } from "@/lib/analytics";
+import { pushDataLayer } from "@/lib/gtm";
 
 const ProductInteraction = ({ product }: { product: ProductType }) => {
   const router = useRouter();
@@ -38,7 +39,23 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
       condition: activeCondition.name,
       calculatedPrice: unitPrice,
     });
-  }, [selectedStorage, selectedColor, selectedCondition, unitPrice, product]);
+
+    if (selectedStorage && selectedCondition && totalPrice > 0) {
+      pushDataLayer({
+        event: "valuation_completed",
+        device_id: product.id || (product as any)._id,
+        device_name: product.name,
+        device_brand: typeof product.brand === "string" ? product.brand : (product.brand as any)?.name,
+        device_category: product.category,
+        selected_storage: selectedStorage,
+        selected_color: selectedColor,
+        selected_condition: activeCondition.name,
+        quantity,
+        estimated_value: totalPrice,
+        currency: "AED",
+      });
+    }
+  }, [selectedStorage, selectedColor, selectedCondition, unitPrice, product, quantity, totalPrice]);
 
   const handleStorageChange = (storage: string) => {
     setSelectedStorage(storage);
@@ -66,6 +83,13 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
       condition: activeCondition.name,
       calculatedPrice: unitPrice,
     });
+    pushDataLayer({
+      event: "add_to_sell_list",
+      device_id: product.id || (product as any)._id,
+      device_name: product.name,
+      estimated_value: totalPrice,
+      currency: "AED",
+    });
     addToCart({
       id: product.id,
       name: product.name,
@@ -89,6 +113,13 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
       storage: selectedStorage,
       condition: activeCondition.name,
       calculatedPrice: unitPrice,
+    });
+    pushDataLayer({
+      event: "begin_checkout_sell_now",
+      device_id: product.id || (product as any)._id,
+      device_name: product.name,
+      estimated_value: totalPrice,
+      currency: "AED",
     });
     addToCart({
       id: product.id,

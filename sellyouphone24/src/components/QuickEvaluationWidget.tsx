@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { CategoryType, BrandType, ProductType } from "@/types";
 
 import { analytics } from "@/lib/analytics";
+import { pushDataLayer } from "@/lib/gtm";
 
 export default function QuickEvaluationWidget() {
   const router = useRouter();
@@ -50,6 +51,11 @@ export default function QuickEvaluationWidget() {
       setFilteredBrands(brands);
     } else {
       analytics.track("category_selected", "behaviour", { category: selectedCategory });
+      pushDataLayer({
+        event: "valuation_started",
+        device_category: selectedCategory,
+        location: "hero_calculator",
+      });
       const catObj = categories.find(c => c.slug === selectedCategory || c.id === selectedCategory);
       if (catObj) {
         const matchingBrands = brands.filter(b => {
@@ -96,6 +102,13 @@ export default function QuickEvaluationWidget() {
       category: selectedCategory,
       brand: selectedBrand,
       productId: selectedProduct,
+    });
+    pushDataLayer({
+      event: "valuation_searched",
+      device_category: selectedCategory || "all",
+      device_brand: selectedBrand || "all",
+      selected_product_id: selectedProduct || "",
+      location: "hero_calculator",
     });
     if (selectedProduct) {
       router.push(`/products/${selectedProduct}`);
