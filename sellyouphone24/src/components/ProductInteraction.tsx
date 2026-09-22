@@ -5,8 +5,10 @@ import { ProductType } from "@/types";
 import { conditions } from "@/data/mockData";
 import { BadgeCheck, Info, Scale, ShoppingBag, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { analytics } from "@/lib/analytics";
+import { pushDataLayer } from "@/lib/gtm";
 
 const ProductInteraction = ({ product }: { product: ProductType }) => {
   const router = useRouter();
@@ -27,7 +29,67 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
   const unitPrice = Math.round((basePrice + storageBoost) * conditionMultiplier);
   const totalPrice = unitPrice * quantity;
 
+  // Track initial valuation completion on load & on recalculations
+  useEffect(() => {
+    analytics.track("valuation_completed", "valuation", {
+      model: product.name,
+      brand: typeof product.brand === "string" ? product.brand : (product.brand as any)?.name || "Apple",
+      storage: selectedStorage,
+      color: selectedColor,
+      condition: activeCondition.name,
+      calculatedPrice: unitPrice,
+    });
+
+    if (selectedStorage && selectedCondition && totalPrice > 0) {
+      pushDataLayer({
+        event: "valuation_completed",
+        device_id: product.id || (product as any)._id,
+        device_name: product.name,
+        device_brand: typeof product.brand === "string" ? product.brand : (product.brand as any)?.name,
+        device_category: product.category,
+        selected_storage: selectedStorage,
+        selected_color: selectedColor,
+        selected_condition: activeCondition.name,
+        quantity,
+        estimated_value: totalPrice,
+        currency: "AED",
+      });
+    }
+  }, [selectedStorage, selectedColor, selectedCondition, unitPrice, product, quantity, totalPrice]);
+
+  const handleStorageChange = (storage: string) => {
+    setSelectedStorage(storage);
+    analytics.track("recalculation_performed", "behaviour", {
+      model: product.name,
+      storage,
+      condition: activeCondition.name,
+      calculatedPrice: unitPrice,
+    });
+  };
+
+  const handleConditionChange = (condSlug: string) => {
+    setSelectedCondition(condSlug);
+    analytics.track("recalculation_performed", "behaviour", {
+      model: product.name,
+      condition: condSlug,
+      calculatedPrice: unitPrice,
+    });
+  };
+
   const handleAddToSellList = () => {
+    analytics.track("offer_accepted", "conversion", {
+      model: product.name,
+      storage: selectedStorage,
+      condition: activeCondition.name,
+      calculatedPrice: unitPrice,
+    });
+    pushDataLayer({
+      event: "add_to_sell_list",
+      device_id: product.id || (product as any)._id,
+      device_name: product.name,
+      estimated_value: totalPrice,
+      currency: "AED",
+    });
     addToCart({
       id: product.id,
       name: product.name,
@@ -46,6 +108,19 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
   };
 
   const handleSellInstantly = () => {
+    analytics.track("offer_accepted", "conversion", {
+      model: product.name,
+      storage: selectedStorage,
+      condition: activeCondition.name,
+      calculatedPrice: unitPrice,
+    });
+    pushDataLayer({
+      event: "begin_checkout_sell_now",
+      device_id: product.id || (product as any)._id,
+      device_name: product.name,
+      estimated_value: totalPrice,
+      currency: "AED",
+    });
     addToCart({
       id: product.id,
       name: product.name,
@@ -76,7 +151,7 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
             return (
               <button
                 key={storage}
-                onClick={() => setSelectedStorage(storage)}
+                onClick={() => handleStorageChange(storage)}
                 className={`px-4 py-3 rounded-2xl border text-sm font-semibold transition cursor-pointer flex flex-col items-center min-w-[70px] ${
                   selectedStorage === storage
                     ? "border-emerald-500 bg-emerald-50/40 text-slate-900"
@@ -125,7 +200,7 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
             <button
               key={cond.slug}
               type="button"
-              onClick={() => setSelectedCondition(cond.slug)}
+              onClick={() => handleConditionChange(cond.slug)}
               className={`p-4 rounded-2xl border text-left transition flex flex-col gap-1 cursor-pointer ${
                 selectedCondition === cond.slug
                   ? "border-emerald-500 bg-emerald-50/30"

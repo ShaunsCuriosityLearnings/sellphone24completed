@@ -1,4 +1,4 @@
-import { CategoryType, BrandType, ProductType, BlogType, CartItemType } from "@/types";
+import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType } from "@/types";
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
 
 let API_BASE = "/api";
@@ -14,27 +14,60 @@ if (typeof window === "undefined") {
 async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): Promise<T> {
   try {
     const isFormData = options?.body instanceof FormData;
+    const reqHeaders: Record<string, string> = !isFormData ? { "Content-Type": "application/json" } : {};
+
+    if (options?.headers) {
+      const rawHeaders = options.headers as Record<string, string>;
+      Object.entries(rawHeaders).forEach(([key, val]) => {
+        if (val && typeof val === "string" && !val.includes("undefined") && !val.includes("null") && val.trim() !== "Bearer") {
+          reqHeaders[key] = val;
+        }
+      });
+    }
+
     const res = await fetch(url, {
       cache: "no-store",
       ...options,
-      headers: {
-        ...(!isFormData ? { "Content-Type": "application/json" } : {}),
-        ...(options?.headers || {}),
-      },
+      headers: reqHeaders,
     });
+
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`HTTP ${res.status}: ${errorText}`);
+      let cleanMessage = errorText;
+      try {
+        const parsed = JSON.parse(errorText);
+        if (parsed.message) cleanMessage = parsed.message;
+      } catch (e) {}
+      throw new Error(cleanMessage || `HTTP Error ${res.status}`);
     }
+
     return await res.json() as T;
   } catch (error) {
-    console.warn(`⚠️ API Request failed for ${url}. Error: ${(error as Error).message}. Using fallback data.`);
     if (fallback !== undefined) {
+      console.warn(`⚠️ API Request failed for ${url}. Error: ${(error as Error).message}. Using fallback data.`);
       return fallback;
     }
     throw error;
   }
 }
+
+const normalizeProductImages = (img: any) => {
+  const fallback = "/products/iphone-pro-max.jpg";
+  if (!img) {
+    return { frontView: fallback, sideView: fallback, backView: fallback };
+  }
+  if (typeof img === "string") {
+    const clean = img.trim() || fallback;
+    return { frontView: clean, sideView: clean, backView: clean };
+  }
+  if (typeof img === "object") {
+    const front = img.frontView || img.main || img.url || fallback;
+    const side = img.sideView || front;
+    const back = img.backView || front;
+    return { frontView: front, sideView: side, backView: back };
+  }
+  return { frontView: fallback, sideView: fallback, backView: fallback };
+};
 
 export const api = {
   // --- CATEGORIES ---
@@ -62,12 +95,15 @@ export const api = {
   },
 
   // --- BRANDS ---
-  async getBrands(params?: { category?: string }): Promise<BrandType[]> {
+  async getBrands(params?: { category?: string; featured?: boolean }): Promise<BrandType[]> {
     const fallback = mockBrands;
     try {
-      const url = params?.category
-        ? `${API_BASE}/brands?category=${params.category}`
-        : `${API_BASE}/brands`;
+      const query = new URLSearchParams();
+      if (params?.category) query.append("category", params.category);
+      if (params?.featured) query.append("featured", "true");
+
+      const queryString = query.toString();
+      const url = `${API_BASE}/brands${queryString ? `?${queryString}` : ""}`;
       const dbBrands = await safeFetch<any[]>(url, { method: "GET" }, mockBrands);
       return dbBrands.map((b) => ({
         ...b,
@@ -102,27 +138,49 @@ export const api = {
   },
 
   // --- PRODUCTS ---
-  async getProducts(params?: { category?: string; brand?: string; search?: string }): Promise<ProductType[]> {
+  async getProducts(params?: { category?: string; brand?: string; search?: string; isPopular?: boolean; isLivePrice?: boolean }): Promise<ProductType[]> {
     const query = new URLSearchParams();
     if (params?.category) query.append("category", params.category);
     if (params?.brand) query.append("brand", params.brand);
     if (params?.search) query.append("search", params.search);
+    if (params?.isPopular) query.append("isPopular", "true");
+    if (params?.isLivePrice) query.append("isLivePrice", "true");
 
     const queryString = query.toString();
     const url = `${API_BASE}/products${queryString ? `?${queryString}` : ""}`;
 
-    // Map MongoDB products returned to match frontend ProductType schema
-    // Specifically, ensuring ID mapping (mapping _id string to id number/string)
     const dbProducts = await safeFetch<any[]>(url, { method: "GET" }, mockProducts);
     return dbProducts.map((p) => ({
       ...p,
       id: p._id || p.id,
-      storages: p.storages,
+      images: normalizeProductImages(p.images),
+      storages: Array.isArray(p.storages) ? p.storages : [],
     })) as ProductType[];
   },
 
+  async getHeroProduct(): Promise<ProductType | null> {
+    try {
+      const p = await safeFetch<any>(`${API_BASE}/products/hero`, { method: "GET" });
+      if (!p) return null;
+      return {
+        ...p,
+        id: p._id || p.id,
+        images: normalizeProductImages(p.images),
+        storages: Array.isArray(p.storages) ? p.storages : [],
+      } as ProductType;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  async setHeroProduct(id: string | number, token?: string): Promise<any> {
+    return safeFetch<any>(`${API_BASE}/products/set-hero/${id}`, {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    });
+  },
+
   async getProductById(id: string | number): Promise<ProductType> {
-    // If ID looks like a local mock number, find it in mock data
     const mockProduct = mockProducts.find((p) => p.id === Number(id));
     
     try {
@@ -130,7 +188,8 @@ export const api = {
       return {
         ...p,
         id: p._id || p.id,
-        storages: p.storages,
+        images: normalizeProductImages(p.images),
+        storages: Array.isArray(p.storages) ? p.storages : [],
       } as ProductType;
     } catch (err) {
       if (mockProduct) {
@@ -207,6 +266,10 @@ export const api = {
     }[];
     paymentMethod: "cash";
     totalPayout: number;
+    sessionId?: string;
+    intentScoreAtBooking?: number;
+    acquisitionChannel?: string;
+    marketingAttribution?: any;
   }): Promise<{ success: boolean; message: string; order: any }> {
     return safeFetch<{ success: boolean; message: string; order: any }>(`${API_BASE}/orders`, {
       method: "POST",
@@ -285,6 +348,84 @@ export const api = {
 
   async deleteBlog(id: string | number, token?: string): Promise<{ message: string }> {
     return safeFetch<{ message: string }>(`${API_BASE}/blogs/${id}`, {
+      method: "DELETE",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    });
+  },
+
+  // --- DATABASE BACKUP & RESTORE ---
+  exportDatabaseUrl(): string {
+    return `${API_BASE}/database/export`;
+  },
+
+  exportProductsUrl(): string {
+    return `${API_BASE}/database/export/products`;
+  },
+
+  async restoreDatabase(backupPayload: any, token?: string): Promise<{ message: string; counts: any }> {
+    return safeFetch<{ message: string; counts: any }>(`${API_BASE}/database/restore`, {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: JSON.stringify(backupPayload),
+    });
+  },
+
+  // --- TESTIMONIALS ---
+  async getTestimonials(params?: { featured?: boolean }): Promise<TestimonialType[]> {
+    const url = params?.featured ? `${API_BASE}/testimonials?featured=true` : `${API_BASE}/testimonials`;
+    const fallback: TestimonialType[] = [
+      {
+        id: "t1",
+        name: "Ahmed R.",
+        location: "Dubai Marina",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+        quote: "Got my iPhone 15 Pro Max picked up in 1 hour and received cash instantly.",
+        rating: 5,
+      },
+      {
+        id: "t2",
+        name: "Sara K.",
+        location: "Jumeirah",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80",
+        quote: "Best price in Dubai! Very professional and trustworthy team.",
+        rating: 5,
+      },
+      {
+        id: "t3",
+        name: "Khalid M.",
+        location: "Business Bay",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80",
+        quote: "Smooth and quick process. Highly recommended!",
+        rating: 5,
+      },
+    ];
+
+    try {
+      const res = await safeFetch<any[]>(url, { method: "GET" }, fallback);
+      return res.map(t => ({ ...t, id: t._id || t.id }));
+    } catch (e) {
+      return fallback;
+    }
+  },
+
+  async createTestimonial(testimonial: any, token?: string): Promise<TestimonialType> {
+    return safeFetch<TestimonialType>(`${API_BASE}/testimonials`, {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: JSON.stringify(testimonial),
+    });
+  },
+
+  async updateTestimonial(id: string | number, testimonial: any, token?: string): Promise<TestimonialType> {
+    return safeFetch<TestimonialType>(`${API_BASE}/testimonials/${id}`, {
+      method: "PUT",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: JSON.stringify(testimonial),
+    });
+  },
+
+  async deleteTestimonial(id: string | number, token?: string): Promise<{ message: string }> {
+    return safeFetch<{ message: string }>(`${API_BASE}/testimonials/${id}`, {
       method: "DELETE",
       headers: token ? { "Authorization": `Bearer ${token}` } : {},
     });

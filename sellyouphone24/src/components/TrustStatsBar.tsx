@@ -2,7 +2,7 @@ import { ShieldCheck, Truck, Award, Calendar, PhoneCall, CheckCircle2 } from "lu
 
 export default function TrustStatsBar() {
   return (
-    <section className="bg-slate-900 text-white rounded-[28px] sm:rounded-[36px] p-5 sm:p-8 shadow-xl my-6 sm:my-10 border border-slate-800 relative overflow-hidden">
+    <section className="bg-slate-900 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-lg my-6 sm:my-8 border border-slate-800 relative overflow-hidden">
       
       {/* Background Accent Glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />

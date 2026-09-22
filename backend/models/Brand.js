@@ -24,7 +24,23 @@ const brandSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
     }
-  ]
+  ],
+  isFeaturedOnFrontpage: {
+    type: Boolean,
+    default: false,
+  },
+  frontpageDisplayName: {
+    type: String,
+    trim: true,
+  },
+  frontpageImage: {
+    type: String,
+    trim: true,
+  },
+  displayOrder: {
+    type: Number,
+    default: 0,
+  }
 }, { timestamps: true });
 
 export default mongoose.model("Brand", brandSchema);

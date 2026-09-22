@@ -104,6 +104,30 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  const getMatchingBrandsForCategory = (category: CategoryType) => {
+    const catSlug = (category.slug || "").toLowerCase();
+    const catId = (category.id || category._id || "").toString();
+    const catName = (category.name || "").toLowerCase();
+
+    const matched = brandsList.filter((brand) => {
+      if (!brand.categories || !Array.isArray(brand.categories) || brand.categories.length === 0) return true;
+      return brand.categories.some((c: any) => {
+        if (!c) return false;
+        if (typeof c === "string") {
+          const s = c.toLowerCase();
+          return s === catSlug || s === catName || c === catId;
+        }
+        if (typeof c === "object") {
+          const s = (c.slug || c.name || "").toLowerCase();
+          const id = (c._id || c.id || "").toString();
+          return s === catSlug || s === catName || (id && id === catId);
+        }
+        return false;
+      });
+    });
+    return matched.length > 0 ? matched : brandsList;
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs max-w-full">
       
@@ -289,7 +313,7 @@ const Navbar = () => {
 
       {/* MOBILE DRAWER NAVIGATION */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50">
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50 max-h-[85vh] overflow-y-auto">
           <div className="space-y-1">
             <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
               Sell Devices

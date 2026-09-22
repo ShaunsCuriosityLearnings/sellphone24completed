@@ -1,0 +1,383 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-09-11T16:22:43.637Z",
+  "counts": {
+    "categories": 8,
+    "brands": 19,
+    "products": 178,
+    "blogs": 5,
+    "orders": 41,
+    "testimonials": 0
+  },
+  "categories": [
+    {
+      "_id": "6a6ce103b5b228cea8ebce61",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:44.279Z",
+      "description": "Get the best price for your used iPads, Samsung Galaxy Tabs, Surface Pro, Xiaomi & OnePlus tablets.",
+      "image": "/products/ipad-pro-m4.webp",
+      "name": "Tablets",
+      "slug": "tablets",
+      "updatedAt": "2026-08-30T13:12:42.510Z"
+    },
+    {
+      "_id": "6a6ce103b5b228cea8ebce63",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:45.394Z",
+      "description": "Sell your used MacBooks, Dell XPS, Alienware, HP, Asus, Lenovo, Razer & Acer laptops for instant cash.",
+      "image": "/products/macbook-pro.webp",
+      "name": "Laptops",
+      "slug": "laptops",
+      "updatedAt": "2026-08-30T13:12:42.783Z"
+    },
+    {
+      "_id": "6a6ce103b5b228cea8ebce60",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:47.632Z",
+      "description": "Sell your used mobile phone for instant cash. We buy Apple, Samsung, Google, OnePlus and more.",
+      "image": "/products/iphone-pro-max.jpg",
+      "name": "Smartphones",
+      "slug": "smartphones",
+      "updatedAt": "2026-08-30T13:12:43.044Z"
+    },
+    {
+      "_id": "6a6ce103b5b228cea8ebce62",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:47.890Z",
+      "description": "Turn your old smartwatches into cash. We accept Apple Watch, Galaxy Watch, and others.",
+      "image": "/products/apple-watch-ultra.webp",
+      "name": "Smartwatches",
+      "slug": "smartwatches",
+      "updatedAt": "2026-08-30T13:12:43.305Z"
+    },
+    {
+      "_id": "6a6ce103b5b228cea8ebce66",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:48.149Z",
+      "description": "Have something else? Tell us about your device and get a custom quote.",
+      "image": "/products/iphone-pro-max.jpg",
+      "name": "Any Device",
+      "slug": "any-device",
+      "updatedAt": "2026-08-30T13:12:43.565Z"
+    },
+    {
+      "_id": "6a6ce103b5b228cea8ebce64",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:48.407Z",
+      "description": "Sell your gaming consoles, VR headsets & handhelds. PS5 Pro, PS5, Xbox, Switch OLED, Steam Deck, ROG Ally & Quest 3.",
+      "image": "/products/ps5-slim.webp",
+      "name": "Games",
+      "slug": "games",
+      "updatedAt": "2026-08-30T13:12:43.827Z"
+    },
+    {
+      "_id": "6a6ce103b5b228cea8ebce65",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:48.665Z",
+      "description": "Sell your Smart TVs, OLED, QLED & 4K TVs. Samsung, LG, Sony, TCL (2022-2026). Free doorstep pickup.",
+      "image": "/products/samsung-neo-qled.webp",
+      "name": "TVs",
+      "slug": "tvs",
+      "updatedAt": "2026-08-30T13:12:44.088Z"
+    },
+    {
+      "_id": "6a6dbeabf4d10e1d28dcaece",
+      "__v": 0,
+      "createdAt": "2026-08-30T13:05:48.922Z",
+      "description": "Sell your used mobile for top value instantly in UAE.",
+      "image": "/products/samsung logo.jpg",
+      "name": "Mobile",
+      "slug": "mobile",
+      "updatedAt": "2026-08-30T13:12:44.361Z"
+    }
+  ],
+  "brands": [
+    {
+      "_id": "6a6ce104b5b228cea8ebce6c",
+      "__v": 1,
+      "categories": [
+        "6a6ce103b5b228cea8ebce60",
+        "6a6ce103b5b228cea8ebce61",
+        "6a6dbeabf4d10e1d28dcaece"
+      ],
+      "createdAt": "2026-08-30T13:05:49.180Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786370936/sellyourphone24/oj65rpq7modtvv4zoga4.jpg",
+      "name": "OnePlus",
+      "slug": "oneplus",
+      "updatedAt": "2026-08-30T13:12:44.622Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce71",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce64",
+        "6a6ce103b5b228cea8ebce65"
+      ],
+      "createdAt": "2026-08-30T13:05:49.439Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786370945/sellyourphone24/j7cgrcgygrncb3azyfru.jpg",
+      "name": "Sony",
+      "slug": "sony",
+      "updatedAt": "2026-08-30T13:12:44.882Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce6d",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce63"
+      ],
+      "createdAt": "2026-08-30T13:05:49.697Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786370955/sellyourphone24/h61pup8kzpdoyc5rihwb.jpg",
+      "name": "Dell",
+      "slug": "dell",
+      "updatedAt": "2026-08-30T13:12:45.142Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce78",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce64",
+        "6a6ce103b5b228cea8ebce63"
+      ],
+      "createdAt": "2026-08-30T13:05:49.954Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786370963/sellyourphone24/fsiyoes0dcvtotkarknh.jpg",
+      "name": "MSI",
+      "slug": "msi",
+      "updatedAt": "2026-08-30T13:12:45.402Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce6b",
+      "__v": 1,
+      "categories": [
+        "6a6ce103b5b228cea8ebce60",
+        "6a6dbeabf4d10e1d28dcaece"
+      ],
+      "createdAt": "2026-08-30T13:05:50.212Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786370972/sellyourphone24/pgzrd61gfsj66vlktj3j.jpg",
+      "name": "Google",
+      "slug": "google",
+      "updatedAt": "2026-08-30T13:12:45.663Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce6e",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce63"
+      ],
+      "createdAt": "2026-08-30T13:05:50.470Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786370981/sellyourphone24/fhjh4zkcpm5edwddteyc.jpg",
+      "name": "HP",
+      "slug": "hp",
+      "updatedAt": "2026-08-30T13:12:45.925Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce76",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce61"
+      ],
+      "createdAt": "2026-08-30T13:05:50.728Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786370998/sellyourphone24/gzxve6rhnhaq35j6qpkh.jpg",
+      "name": "Xiaomi",
+      "slug": "xiaomi",
+      "updatedAt": "2026-08-30T13:12:46.184Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce77",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce64"
+      ],
+      "createdAt": "2026-08-30T13:05:50.985Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371007/sellyourphone24/heqg61kxjtn4gsz8cb8y.jpg",
+      "name": "Valve",
+      "slug": "valve",
+      "updatedAt": "2026-08-30T13:12:46.446Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce6a",
+      "__v": 1,
+      "categories": [
+        "6a6ce103b5b228cea8ebce60",
+        "6a6ce103b5b228cea8ebce61",
+        "6a6ce103b5b228cea8ebce62",
+        "6a6ce103b5b228cea8ebce65",
+        "6a6ce103b5b228cea8ebce63",
+        "6a6dbeabf4d10e1d28dcaece"
+      ],
+      "createdAt": "2026-08-30T13:05:51.242Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371015/sellyourphone24/wjqup2nomycq9wt8p8sy.jpg",
+      "name": "Samsung",
+      "slug": "samsung",
+      "updatedAt": "2026-08-30T13:12:46.708Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce72",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce63",
+        "6a6ce103b5b228cea8ebce61",
+        "6a6ce103b5b228cea8ebce64"
+      ],
+      "createdAt": "2026-08-30T13:05:51.500Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371035/sellyourphone24/zd9lnh2boi2sugn68mf5.jpg",
+      "name": "Microsoft",
+      "slug": "microsoft",
+      "updatedAt": "2026-08-30T13:12:46.967Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce70",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce63",
+        "6a6ce103b5b228cea8ebce61",
+        "6a6ce103b5b228cea8ebce64"
+      ],
+      "createdAt": "2026-08-30T13:05:51.758Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371046/sellyourphone24/jrqxemiy7klkh16bcyar.jpg",
+      "name": "Lenovo",
+      "slug": "lenovo",
+      "updatedAt": "2026-08-30T13:12:47.229Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce7b",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce64"
+      ],
+      "createdAt": "2026-08-30T13:05:52.016Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371053/sellyourphone24/zywp6mjgwfmyt3bgrify.jpg",
+      "name": "Meta",
+      "slug": "meta",
+      "updatedAt": "2026-08-30T13:12:47.490Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce73",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce64"
+      ],
+      "createdAt": "2026-08-30T13:05:52.274Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371059/sellyourphone24/ym6uzdhep8tkjrtsw9wh.jpg",
+      "name": "Nintendo",
+      "slug": "nintendo",
+      "updatedAt": "2026-08-30T13:12:47.751Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce7a",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce63"
+      ],
+      "createdAt": "2026-08-30T13:05:52.531Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371079/sellyourphone24/ononjeya71qtztnqdi2f.jpg",
+      "name": "Acer",
+      "slug": "acer",
+      "updatedAt": "2026-08-30T13:12:48.012Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce69",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce60",
+        "6a6ce103b5b228cea8ebce61",
+        "6a6ce103b5b228cea8ebce62",
+        "6a6ce103b5b228cea8ebce63"
+      ],
+      "createdAt": "2026-08-30T13:05:52.789Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371091/sellyourphone24/nzgbaqg9gdv0nf465nsq.jpg",
+      "name": "Apple",
+      "slug": "apple",
+      "updatedAt": "2026-08-30T13:12:48.274Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce74",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce65"
+      ],
+      "createdAt": "2026-08-30T13:05:53.046Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371103/sellyourphone24/z7dwcnnmmcwhed0xvy1w.jpg",
+      "name": "LG",
+      "slug": "lg",
+      "updatedAt": "2026-08-30T13:12:48.534Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce79",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce63"
+      ],
+      "createdAt": "2026-08-30T13:05:53.304Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371120/sellyourphone24/jrbgd36pphoycxbzmqzn.jpg",
+      "name": "Razer",
+      "slug": "razer",
+      "updatedAt": "2026-08-30T13:12:48.802Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce6f",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce63",
+        "6a6ce104b5b228cea8ebce64"
+      ],
+      "createdAt": "2026-08-30T13:05:53.561Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371133/sellyourphone24/ow21tb0nnwjure1bq2eb.jpg",
+      "name": "Asus",
+      "slug": "asus",
+      "updatedAt": "2026-08-30T13:12:49.061Z"
+    },
+    {
+      "_id": "6a6ce104b5b228cea8ebce75",
+      "__v": 0,
+      "categories": [
+        "6a6ce103b5b228cea8ebce65"
+      ],
+      "createdAt": "2026-08-30T13:05:53.818Z",
+      "displayOrder": 0,
+      "isFeaturedOnFrontpage": false,
+      "logo": "https://res.cloudinary.com/xwjzpwxq/image/upload/v1786371145/sellyourphone24/cwbljqqwh925p6ilgrqu.jpg",
+      "name": "TCL",
+      "slug": "tcl",
+      "updatedAt": "2026-08-30T13:12:49.322Z"
+    }
+  ],
+  "products": [],
+  "blogs": [],
+  "orders": []
+}

@@ -95,31 +95,31 @@ const ServicesGrid = () => {
         </span>
       </div>
 
-      {/* MOBILE HORIZONTAL SNAP CAROUSEL (SHOWS 2 CARDS IN A ROW) */}
-      <div className="sm:hidden flex overflow-x-auto snap-x snap-mandatory gap-3 pb-3 scrollbar-none px-0.5 relative">
+      {/* MOBILE 3 CARDS IN A ROW GRID */}
+      <div className="sm:hidden grid grid-cols-3 gap-2">
         {categories.map((category) => (
           <Link
             key={category.id || category.slug}
             href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-            className="w-[calc(50%-0.375rem)] shrink-0 snap-start group flex flex-col items-center justify-between bg-white border border-slate-200/70 hover:border-emerald-500 rounded-3xl p-4 shadow-xs active:scale-95 transition-all duration-200"
+            className="group flex flex-col items-center justify-between bg-white border border-slate-200/80 hover:border-emerald-500/40 rounded-2xl p-2.5 shadow-xs active:scale-95 transition-all duration-200"
           >
             {/* Image Container */}
-            <div className="relative w-16 h-16 mb-2">
+            <div className="relative w-12 h-12 mb-1.5">
               <Image 
                 src={category.image || "/products/iphone-pro-max.jpg"} 
                 alt={category.name} 
                 fill 
-                className="object-contain drop-shadow-md p-1"
+                className="object-contain p-0.5"
               />
             </div>
             
             {/* Title & CTA */}
             <div className="text-center">
-              <h3 className="font-extrabold text-slate-900 text-xs truncate max-w-[120px]">
+              <h3 className="font-extrabold text-slate-900 text-[10px] truncate max-w-[90px]">
                 {category.name}
               </h3>
-              <p className="text-[9px] text-emerald-600 font-black uppercase tracking-wider mt-1">
-                Get Quote →
+              <p className="text-[8px] text-emerald-600 font-extrabold uppercase tracking-wider mt-0.5">
+                Quote →
               </p>
             </div>
           </Link>
@@ -127,19 +127,19 @@ const ServicesGrid = () => {
       </div>
 
       {/* DESKTOP GRID (FULL 6-COLUMN GRID) */}
-      <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         {categories.map((category) => (
           <Link
             key={category.id || category.slug}
             href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-            className="group flex flex-col items-center justify-between bg-white hover:bg-emerald-50/20 border border-slate-100 hover:border-emerald-500/40 rounded-[28px] p-5 shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer"
+            className="group flex flex-col items-center justify-between bg-white hover:bg-emerald-50/20 border border-slate-200/80 hover:border-emerald-500/40 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer"
           >
-            <div className="relative w-20 h-20 mb-3 group-hover:scale-110 transition-transform duration-300">
+            <div className="relative w-16 h-16 mb-2 group-hover:scale-105 transition-transform duration-300">
               <Image 
                 src={category.image || "/products/iphone-pro-max.jpg"} 
                 alt={category.name} 
                 fill 
-                className="object-contain drop-shadow-md p-1"
+                className="object-contain p-1"
               />
             </div>
             
@@ -147,7 +147,7 @@ const ServicesGrid = () => {
               <h3 className="font-extrabold text-slate-800 group-hover:text-emerald-600 transition-colors text-xs md:text-sm">
                 Sell {category.name}
               </h3>
-              <p className="text-[9px] text-slate-400 font-semibold uppercase tracking-wider mt-1 group-hover:text-emerald-500">
+              <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 group-hover:text-emerald-500">
                 Get Top Quote →
               </p>
             </div>

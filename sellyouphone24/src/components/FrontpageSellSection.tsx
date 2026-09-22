@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { api } from "@/lib/api";
 import { 
   Banknote, 
   Truck, 
@@ -143,6 +144,68 @@ const recentPurchases = [
 
 export default function FrontpageSellSection() {
   const [mobileTab, setMobileTab] = useState<"prices" | "popular">("prices");
+  const [livePricesList, setLivePricesList] = useState(livePrices);
+  const [popularBrandsList, setPopularBrandsList] = useState(popularCategories);
+  const [testimonialsList, setTestimonialsList] = useState(customerReviews);
+  const [activeTestimonialIndex, setActiveTestimonialIndex] = useState(0);
+
+  useEffect(() => {
+    async function loadDynamicData() {
+      try {
+        const [liveProds, featBrands, testims] = await Promise.all([
+          api.getProducts({ isLivePrice: true }),
+          api.getBrands({ featured: true }),
+          api.getTestimonials({ featured: true }),
+        ]);
+
+        if (liveProds && liveProds.length > 0) {
+          setLivePricesList(
+            liveProds.map((p) => ({
+              name: p.name,
+              spec: p.storages?.[0]?.size || "Base Spec",
+              price: `AED ${p.basePrice?.toLocaleString()}`,
+              img: p.images?.frontView || "/products/iphone-pro-max.jpg",
+              id: String(p.id || p._id),
+            }))
+          );
+        }
+
+        if (featBrands && featBrands.length > 0) {
+          setPopularBrandsList(
+            featBrands.map((b) => ({
+              name: b.frontpageDisplayName || `Sell ${b.name}`,
+              slug: b.slug,
+              icon: Smartphone,
+              image: b.frontpageImage || (b.logo && b.logo.length > 5 ? b.logo : "/products/iphone-pro-max.jpg"),
+            }))
+          );
+        }
+
+        if (testims && testims.length > 0) {
+          setTestimonialsList(
+            testims.map((t) => ({
+              name: t.name,
+              location: t.location || "Dubai, UAE",
+              avatar: t.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80",
+              quote: t.quote,
+            }))
+          );
+        }
+      } catch (err) {
+        console.warn("Could not load dynamic frontpage section data:", err);
+      }
+    }
+    loadDynamicData();
+  }, []);
+
+  // Auto-shift mobile testimonials every 3.5 seconds
+  useEffect(() => {
+    if (testimonialsList.length === 0) return;
+    const timer = setInterval(() => {
+      setActiveTestimonialIndex((prev) => (prev + 1) % testimonialsList.length);
+    }, 3500);
+    return () => clearInterval(timer);
+  }, [testimonialsList]);
 
   return (
     <div className="space-y-8 md:space-y-12 my-8 md:my-12 w-full">
@@ -219,9 +282,9 @@ export default function FrontpageSellSection() {
             </div>
 
             <div className="space-y-2 w-full">
-              {livePrices.map((item) => (
+              {livePricesList.map((item, idx) => (
                 <Link
-                  key={item.id}
+                  key={item.id || idx}
                   href="/services"
                   className="flex items-center justify-between p-2.5 rounded-2xl border border-slate-100 bg-slate-50/40 active:bg-slate-100 transition w-full"
                 >
@@ -257,7 +320,7 @@ export default function FrontpageSellSection() {
             <h3 className="font-extrabold text-slate-900 text-sm mb-2">Select Brand to Trade-in</h3>
 
             <div className="grid grid-cols-2 gap-2 w-full">
-              {popularCategories.map((cat, idx) => (
+              {popularBrandsList.map((cat, idx) => (
                 <Link
                   key={idx}
                   href={cat.slug === "other" ? "/sell-any-device" : `/services?brand=${cat.slug}`}
@@ -286,40 +349,40 @@ export default function FrontpageSellSection() {
       {/* ========================================================================= */}
       {/* DESKTOP TWO-COLUMN: TODAY'S LIVE PRICES + POPULAR DEVICES */}
       {/* ========================================================================= */}
-      <div className="hidden lg:grid lg:grid-cols-12 gap-8 items-stretch w-full">
+      <div className="hidden lg:grid lg:grid-cols-12 gap-6 items-stretch w-full">
         
         {/* Left Box: Today's Live Buying Prices */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6 w-full">
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between space-y-5 w-full">
           <div className="space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-              <h3 className="font-extrabold text-slate-900 text-base md:text-lg">
+              <h3 className="font-extrabold text-slate-900 text-base">
                 Today&apos;s Live Buying Prices
               </h3>
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Updated 5 mins ago
               </span>
             </div>
 
-            <div className="space-y-3">
-              {livePrices.map((item) => (
+            <div className="space-y-2.5">
+              {livePricesList.map((item, idx) => (
                 <Link
-                  key={item.id}
+                  key={item.id || idx}
                   href="/services"
-                  className="flex items-center justify-between p-3 rounded-2xl border border-slate-50 hover:border-emerald-200 hover:bg-slate-50/60 transition group"
+                  className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:border-emerald-300 hover:bg-emerald-50/20 transition group"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-slate-100 shrink-0 border border-slate-100">
                       <Image src={item.img} alt={item.name} fill className="object-contain p-1" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-800 text-xs md:text-sm group-hover:text-emerald-600 transition-colors">
+                      <h4 className="font-bold text-slate-800 text-xs group-hover:text-emerald-600 transition-colors">
                         {item.name}
                       </h4>
-                      <p className="text-[10px] font-medium text-slate-400">{item.spec}</p>
+                      <p className="text-[9px] font-medium text-slate-400">{item.spec}</p>
                     </div>
                   </div>
-                  <span className="font-extrabold text-emerald-600 text-xs md:text-sm">
+                  <span className="font-extrabold text-emerald-600 text-xs">
                     {item.price}
                   </span>
                 </Link>
@@ -337,29 +400,29 @@ export default function FrontpageSellSection() {
         </div>
 
         {/* Right Box: Popular Devices We Buy */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between space-y-6 w-full">
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between space-y-5 w-full">
           <div>
-            <h3 className="font-extrabold text-slate-900 text-base md:text-lg mb-4">
+            <h3 className="font-extrabold text-slate-900 text-base mb-3">
               Popular Devices We Buy
             </h3>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
-              {popularCategories.map((cat, idx) => (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 w-full">
+              {popularBrandsList.map((cat, idx) => (
                 <Link
                   key={idx}
                   href={cat.slug === "other" ? "/sell-any-device" : `/services?brand=${cat.slug}`}
-                  className="bg-slate-50/80 hover:bg-white border border-slate-100 hover:border-emerald-500/40 rounded-2xl p-4 flex flex-col items-center text-center justify-center hover:shadow-md transition-all duration-200 group cursor-pointer w-full"
+                  className="bg-slate-50/80 hover:bg-white border border-slate-200/80 hover:border-emerald-500/40 rounded-xl p-3.5 flex flex-col items-center text-center justify-center hover:shadow-sm transition-all duration-200 group cursor-pointer w-full"
                 >
-                  <div className="w-12 h-12 relative flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform">
+                  <div className="w-10 h-10 relative flex items-center justify-center mb-1.5 group-hover:scale-105 transition-transform">
                     {cat.image ? (
                       <Image src={cat.image} alt={cat.name} fill className="object-contain" />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                        <MoreHorizontal size={20} />
+                      <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                        <MoreHorizontal size={16} />
                       </div>
                     )}
                   </div>
-                  <span className="font-bold text-slate-800 text-xs group-hover:text-emerald-600 transition-colors">
+                  <span className="font-bold text-slate-800 text-[11px] group-hover:text-emerald-600 transition-colors">
                     {cat.name}
                   </span>
                 </Link>
@@ -407,18 +470,19 @@ export default function FrontpageSellSection() {
               <h3 className="font-extrabold text-slate-900 text-sm md:text-lg">
                 What Our Customers Say
               </h3>
-              <Link href="/about" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-                <span>View All</span>
+              <Link href="/about#testimonials" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+                <span>View All Reviews</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
 
-            {/* Mobile Carousel / Desktop Grid */}
-            <div className="flex lg:grid lg:grid-cols-3 gap-3 overflow-x-auto snap-x scrollbar-none pb-2 lg:pb-0 w-full">
-              {customerReviews.map((rev, idx) => (
-                <div 
+            {/* DESKTOP View (3-Column Grid) */}
+            <div className="hidden lg:grid lg:grid-cols-3 gap-3 w-full">
+              {testimonialsList.slice(0, 3).map((rev, idx) => (
+                <Link 
                   key={idx} 
-                  className="w-[260px] sm:w-[280px] lg:w-auto shrink-0 snap-start bg-slate-50/80 border border-slate-100 rounded-2xl p-3.5 flex flex-col justify-between space-y-2.5"
+                  href="/about#testimonials"
+                  className="bg-slate-50/80 border border-slate-100 hover:border-emerald-300 rounded-2xl p-3.5 flex flex-col justify-between space-y-2.5 transition cursor-pointer"
                 >
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full overflow-hidden relative bg-slate-200 shrink-0">
@@ -440,9 +504,55 @@ export default function FrontpageSellSection() {
                       <Star key={i} size={11} fill="currentColor" />
                     ))}
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
+
+            {/* MOBILE View (Minimalist Auto-Shifting Card Carousel) */}
+            <div className="lg:hidden space-y-2.5">
+              {testimonialsList.length > 0 && (
+                <Link
+                  href="/about#testimonials"
+                  className="bg-slate-50/90 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between min-h-[140px] space-y-2 block"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full overflow-hidden relative bg-slate-200 shrink-0 border border-slate-200">
+                      <Image src={testimonialsList[activeTestimonialIndex].avatar} alt={testimonialsList[activeTestimonialIndex].name} fill className="object-cover" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-xs">{testimonialsList[activeTestimonialIndex].name}</h4>
+                      <p className="text-[9px] text-slate-400">{testimonialsList[activeTestimonialIndex].location}</p>
+                    </div>
+                    <span className="ml-auto text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                      Verified
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-600 italic leading-relaxed line-clamp-2">
+                    &quot;{testimonialsList[activeTestimonialIndex].quote}&quot;
+                  </p>
+
+                  <div className="flex items-center justify-between border-t border-slate-100/60 pt-2">
+                    <div className="flex text-amber-400 text-xs">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={11} fill="currentColor" />
+                      ))}
+                    </div>
+                    <div className="flex gap-1">
+                      {testimonialsList.map((_, i) => (
+                        <span
+                          key={i}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            i === activeTestimonialIndex ? "w-4 bg-emerald-500" : "w-1.5 bg-slate-300"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+              )}
+            </div>
+
           </div>
         </div>
 

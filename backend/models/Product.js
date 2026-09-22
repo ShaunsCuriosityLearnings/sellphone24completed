@@ -41,6 +41,18 @@ const productSchema = new mongoose.Schema({
     frontView: { type: String, required: true },
     sideView: { type: String },
     backView: { type: String }
+  },
+  isPopular: {
+    type: Boolean,
+    default: false,
+  },
+  isLivePrice: {
+    type: Boolean,
+    default: false,
+  },
+  isHeroProduct: {
+    type: Boolean,
+    default: false,
   }
 }, { timestamps: true });
 

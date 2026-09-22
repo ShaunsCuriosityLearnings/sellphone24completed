@@ -25,8 +25,12 @@ const getCategoryAliases = (slug) => {
 // @access  Public
 export const getBrands = async (req, res) => {
   try {
-    const { category } = req.query;
+    const { category, featured } = req.query;
     const filter = {};
+
+    if (featured === "true") {
+      filter.isFeaturedOnFrontpage = true;
+    }
 
     if (category) {
       const aliases = getCategoryAliases(category);
@@ -46,11 +50,11 @@ export const getBrands = async (req, res) => {
       ];
     }
 
-    let brands = await Brand.find(filter).populate("categories", "name slug");
+    let brands = await Brand.find(filter).sort({ displayOrder: 1, createdAt: -1 }).populate("categories", "name slug");
     
-    // Fallback: If category specific brand query produced empty list, return all active brands so sidebar is never empty
+    // Fallback: If featured or category specific brand query produced empty list, return all active brands so frontend is never empty
     if (!brands || brands.length === 0) {
-      brands = await Brand.find({}).populate("categories", "name slug");
+      brands = await Brand.find({}).sort({ displayOrder: 1, createdAt: -1 }).populate("categories", "name slug");
     }
 
     res.status(200).json(brands);
@@ -64,7 +68,7 @@ export const getBrands = async (req, res) => {
 // @access  Admin
 export const createBrand = async (req, res) => {
   try {
-    let { name, slug, logo, categories } = req.body;
+    let { name, slug, logo, categories, isFeaturedOnFrontpage, frontpageDisplayName, frontpageImage, displayOrder } = req.body;
     
     if (req.file) {
       logo = req.file.path;
@@ -81,7 +85,11 @@ export const createBrand = async (req, res) => {
       name,
       slug: brandSlug,
       logo,
-      categories: categories || []
+      categories: categories || [],
+      isFeaturedOnFrontpage: isFeaturedOnFrontpage !== undefined ? Boolean(isFeaturedOnFrontpage) : false,
+      frontpageDisplayName: frontpageDisplayName || "",
+      frontpageImage: frontpageImage || "",
+      displayOrder: displayOrder ? Number(displayOrder) : 0,
     });
 
     const populatedBrand = await Brand.findById(newBrand._id).populate("categories", "name slug");
@@ -97,7 +105,7 @@ export const createBrand = async (req, res) => {
 export const updateBrand = async (req, res) => {
   try {
     const { id } = req.params;
-    let { name, slug, logo, categories } = req.body;
+    let { name, slug, logo, categories, isFeaturedOnFrontpage, frontpageDisplayName, frontpageImage, displayOrder } = req.body;
 
     const brand = await Brand.findById(id);
     if (!brand) {
@@ -115,6 +123,10 @@ export const updateBrand = async (req, res) => {
     if (slug) brand.slug = slug;
     if (logo) brand.logo = logo;
     if (categories) brand.categories = categories;
+    if (isFeaturedOnFrontpage !== undefined) brand.isFeaturedOnFrontpage = Boolean(isFeaturedOnFrontpage);
+    if (frontpageDisplayName !== undefined) brand.frontpageDisplayName = frontpageDisplayName;
+    if (frontpageImage !== undefined) brand.frontpageImage = frontpageImage;
+    if (displayOrder !== undefined) brand.displayOrder = Number(displayOrder);
 
     await brand.save();
 

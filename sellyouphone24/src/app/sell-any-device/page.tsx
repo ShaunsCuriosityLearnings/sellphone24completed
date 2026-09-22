@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { Send, Smartphone } from "lucide-react";
+import { pushDataLayer } from "@/lib/gtm";
 
 // Form Schema
 const customDeviceSchema = z.object({
@@ -39,6 +40,16 @@ export default function SellAnyDevicePage() {
     setIsSubmitting(true);
     try {
       await api.submitCustomDeviceRequest(data);
+      pushDataLayer({
+        event: "custom_quote_requested",
+        device_brand: data.deviceBrand,
+        device_model: data.deviceModel,
+        device_condition: data.condition,
+        user_data: {
+          phone_number: data.phone,
+          email: data.email,
+        },
+      });
       toast.success("Request submitted successfully! We will contact you soon.");
       reset();
     } catch (error) {

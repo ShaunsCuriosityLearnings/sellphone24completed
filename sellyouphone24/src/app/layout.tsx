@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatWidget from "@/components/ChatWidget";
+import PageTransitionLoader from "@/components/PageTransitionLoader";
+import Script from "next/script";
+import { GTM_ID } from "@/lib/gtm";
 import { ClerkProvider } from "@clerk/nextjs";
 
 import { ToastContainer } from "react-toastify";
@@ -11,11 +15,11 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Inter, Roboto, Poppins, Open_Sans, Lato } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-roboto" });
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins" });
-const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans" });
-const lato = Lato({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-lato" });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-roboto", display: "swap" });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins", display: "swap" });
+const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans", display: "swap" });
+const lato = Lato({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-lato", display: "swap" });
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
 const isBeta = baseUrl.includes("beta");
@@ -45,6 +49,8 @@ export const metadata: Metadata = {
   ],
 };
 
+import AnalyticsProvider from "@/components/AnalyticsProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -53,6 +59,21 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <Script
+            id="gtm-script"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','${GTM_ID}');
+              `,
+            }}
+          />
+        </head>
         <body
           className={`
             ${inter.variable} ${roboto.variable} ${poppins.variable} ${openSans.variable} ${lato.variable}
@@ -62,6 +83,19 @@ export default function RootLayout({
           `}
           style={{ fontFamily: "var(--font-inter), sans-serif" }}
         >
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+          {/* Dynamic Route Transition Loading Overlay with Blue Shadow Blur */}
+          <Suspense fallback={null}>
+            <PageTransitionLoader />
+          </Suspense>
+
           <div className="min-h-screen flex flex-col">
             {/* Decorative Modern Tech Gradient Background */}
             <div className="fixed inset-0 pointer-events-none -z-10">
@@ -75,7 +109,11 @@ export default function RootLayout({
             {/* Main Content */}
             <main className="flex-1">
               <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
-                {children}
+                <Suspense fallback={null}>
+                  <AnalyticsProvider>
+                    {children}
+                  </AnalyticsProvider>
+                </Suspense>
               </div>
             </main>
 
@@ -98,3 +136,4 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
+

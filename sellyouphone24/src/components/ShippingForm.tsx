@@ -29,6 +29,8 @@ import Image from "next/image";
 import useCartStore from "@/app/stores/cartStore";
 import { api } from "@/lib/api";
 import { toast } from "react-toastify";
+import { analytics } from "@/lib/analytics";
+import { pushDataLayer } from "@/lib/gtm";
 
 const uaeLocations = [
   "Dubai Marina",
@@ -178,11 +180,38 @@ export default function ShippingForm({
         devices,
         paymentMethod: "cash" as const,
         totalPayout,
+        sessionId: analytics.getSessionId(),
+        intentScoreAtBooking: analytics.getIntentScore(),
+        marketingAttribution: analytics.getMarketingAttribution(),
+        acquisitionChannel: analytics.getMarketingAttribution().source || "Organic / Direct",
       };
+
+      analytics.track("pickup_requested", "conversion", {
+        totalPayout,
+        deviceCount: devices.length,
+        city: data.city,
+      });
 
       const res = await api.createOrder(orderData);
 
       if (res.success || res.order) {
+        pushDataLayer({
+          event: "lead_submitted",
+          order_id: res.order?._id || "ORDER-" + Date.now(),
+          lead_type: pickupOption === "3_hours" ? "doorstep_pickup_3h" : "doorstep_pickup_scheduled",
+          total_payout: totalPayout,
+          currency: "AED",
+          items_count: cart.length,
+          user_data: {
+            phone_number: data.phone,
+            email: data.email || "",
+            address: {
+              city: data.city,
+              country: "AE",
+            },
+          },
+        });
+
         toast.success("Valuation pickup booked successfully!");
         onOrderCreated({
           order: res.order,

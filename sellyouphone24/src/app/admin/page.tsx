@@ -2,11 +2,16 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { api } from "@/lib/api";
-import { CategoryType, ProductType, BrandType, BlogType } from "@/types";
+import { CategoryType, ProductType, BrandType, BlogType, TestimonialType } from "@/types";
+import { autoFormatPlainTextToMarkdown, parseMarkdownToHtml } from "@/lib/markdown";
 import { toast } from "react-toastify";
 import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import ShowcaseManager from "@/components/ShowcaseManager";
 import { 
-  ClipboardList, 
+  LayoutGrid,
+  ClipboardList,
+  BarChart3, 
   Smartphone, 
   Layers, 
   Plus, 
@@ -27,7 +32,15 @@ import {
   Laptop,
   Watch,
   Tablet,
-  Cpu
+  Cpu,
+  Database,
+  Download,
+  Upload,
+  Star,
+  TrendingUp,
+  Sparkles,
+  MessageSquare,
+  Home
 } from "lucide-react";
 import Image from "next/image";
 
@@ -143,19 +156,64 @@ export default function AdminPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   
-  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add-product" | "brands" | "categories" | "blogs">("products");
+  const [activeTab, setActiveTab] = useState<"showcase" | "analytics" | "orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("showcase");
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [products, setProducts] = useState<ProductType[]>([]);
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [brands, setBrands] = useState<BrandType[]>([]);
   const [blogs, setBlogs] = useState<BlogType[]>([]);
+  const [testimonials, setTestimonials] = useState<TestimonialType[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [submittingProduct, setSubmittingProduct] = useState(false);
+  const [restoringDb, setRestoringDb] = useState(false);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all");
   const [productSearch, setProductSearch] = useState<string>("");
   const [selectedBrandFilter, setSelectedBrandFilter] = useState<string>("all");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
+
+  const handleDownloadBackup = () => {
+    window.location.href = api.exportDatabaseUrl();
+  };
+
+  const handleDownloadProducts = () => {
+    window.location.href = api.exportProductsUrl();
+  };
+
+  const handleRestoreBackupFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm("⚠️ Restore database from this backup file? Existing documents with matching IDs will be updated.")) {
+      e.target.value = "";
+      return;
+    }
+
+    setRestoringDb(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const content = event.target?.result as string;
+          const backupPayload = JSON.parse(content);
+          const token = await getToken();
+          const res = await api.restoreDatabase(backupPayload, token || undefined);
+          toast.success(`🎉 ${res.message || "Database restored successfully!"}`);
+          await loadData(false);
+        } catch (err: any) {
+          toast.error(`Failed to parse or restore file: ${err.message}`);
+        } finally {
+          setRestoringDb(false);
+          e.target.value = "";
+        }
+      };
+      reader.readAsText(file);
+    } catch (err: any) {
+      toast.error(`Restore error: ${err.message}`);
+      setRestoringDb(false);
+      e.target.value = "";
+    }
+  };
 
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
 
@@ -212,6 +270,8 @@ export default function AdminPage() {
       sideView: "" as string | File,
       backView: "" as string | File,
     },
+    isPopular: false,
+    isLivePrice: false,
   });
 
   // RAM & Custom Spec Builder state
@@ -221,7 +281,25 @@ export default function AdminPage() {
 
   const [newCategory, setNewCategory] = useState({ name: "", slug: "", description: "", image: "" as string | File });
   const [editingBrandId, setEditingBrandId] = useState<string | number | null>(null);
-  const [newBrand, setNewBrand] = useState<{ name: string; slug: string; logo: string | File; categories: string[] }>({ name: "", slug: "", logo: "", categories: [] });
+  const [newBrand, setNewBrand] = useState<{ 
+    name: string; 
+    slug: string; 
+    logo: string | File; 
+    categories: string[];
+    isFeaturedOnFrontpage: boolean;
+    frontpageDisplayName: string;
+    frontpageImage: string | File;
+    displayOrder: number;
+  }>({ 
+    name: "", 
+    slug: "", 
+    logo: "", 
+    categories: [],
+    isFeaturedOnFrontpage: false,
+    frontpageDisplayName: "",
+    frontpageImage: "",
+    displayOrder: 0,
+  });
   
   const [editingBlogId, setEditingBlogId] = useState<string | number | null>(null);
   const [newBlog, setNewBlog] = useState({
@@ -233,16 +311,29 @@ export default function AdminPage() {
     category: "Buying Guides",
     author: "Team SellPhoneCash",
   });
+  const [blogPreviewMode, setBlogPreviewMode] = useState(false);
+
+  const [editingTestimonialId, setEditingTestimonialId] = useState<string | number | null>(null);
+  const [newTestimonial, setNewTestimonial] = useState({
+    name: "",
+    location: "Dubai, UAE",
+    avatar: "",
+    quote: "",
+    rating: 5,
+    isFeatured: true,
+    displayOrder: 0,
+  });
 
   const loadData = async (showSpinner = false) => {
     if (showSpinner) setLoading(true);
     try {
-      const [fetchedOrders, fetchedProducts, fetchedCategories, fetchedBrands, fetchedBlogs] = await Promise.all([
+      const [fetchedOrders, fetchedProducts, fetchedCategories, fetchedBrands, fetchedBlogs, fetchedTestimonials] = await Promise.all([
         api.getOrders(),
         api.getProducts(),
         api.getCategories(),
         api.getBrands(),
-        api.getBlogs()
+        api.getBlogs(),
+        api.getTestimonials()
       ]);
       
       setOrders(fetchedOrders);
@@ -250,6 +341,7 @@ export default function AdminPage() {
       setCategories(fetchedCategories);
       setBrands(fetchedBrands);
       setBlogs(fetchedBlogs);
+      setTestimonials(fetchedTestimonials);
     } catch (error) {
       toast.error("Failed to sync backend data.");
     } finally {
@@ -317,6 +409,32 @@ export default function AdminPage() {
     }
   };
 
+  const handleBatchImageUpload = (filesList: FileList | File[] | null) => {
+    if (!filesList || filesList.length === 0) return;
+
+    const fileArray = Array.from(filesList).slice(0, 3);
+    const updatedImages = { ...newProduct.images };
+
+    if (fileArray[0]) updatedImages.frontView = fileArray[0];
+    if (fileArray[1]) updatedImages.sideView = fileArray[1];
+    if (fileArray[2]) updatedImages.backView = fileArray[2];
+
+    setNewProduct((prev) => ({ ...prev, images: updatedImages }));
+    toast.success(`🎉 Allocated ${fileArray.length} image(s): 1st → Front, 2nd → Side, 3rd → Back!`);
+  };
+
+  const getPreviewUrl = (imgSrc: string | File): string => {
+    if (!imgSrc) return "";
+    if (imgSrc instanceof File) {
+      try {
+        return URL.createObjectURL(imgSrc);
+      } catch (e) {
+        return "";
+      }
+    }
+    return imgSrc;
+  };
+
   const openAddProductForCategory = (catSlug: string) => {
     setEditingProductId(null);
     const presets = CATEGORY_SPEC_PRESETS[catSlug.toLowerCase()] || DEFAULT_PRESETS;
@@ -330,6 +448,8 @@ export default function AdminPage() {
       description: "",
       shortDescription: "",
       images: { frontView: "", sideView: "", backView: "" },
+      isPopular: false,
+      isLivePrice: false,
     });
     setActiveTab("add-product");
   };
@@ -348,6 +468,8 @@ export default function AdminPage() {
       description: product.description || "",
       shortDescription: product.shortDescription || "",
       images: product.images || { frontView: "", sideView: "", backView: "" },
+      isPopular: Boolean(product.isPopular),
+      isLivePrice: Boolean(product.isLivePrice),
     });
 
     setActiveTab("add-product");
@@ -365,8 +487,34 @@ export default function AdminPage() {
       description: "",
       shortDescription: "",
       images: { frontView: "", sideView: "", backView: "" },
+      isPopular: false,
+      isLivePrice: false,
     });
     setActiveTab("products");
+  };
+
+  const handleToggleProductFlag = async (product: ProductType, flag: "isPopular" | "isLivePrice") => {
+    try {
+      const token = await getToken();
+      const pId = product.id || product._id;
+      if (!pId) return;
+
+      const updatedVal = !product[flag];
+
+      if (flag === "isLivePrice" && updatedVal) {
+        const currentLiveCount = products.filter(p => p.isLivePrice && (p.id || p._id) !== pId).length;
+        if (currentLiveCount >= 6) {
+          toast.error("Maximum 6 devices allowed in Today's Live Buying Prices section. Remove an existing device first.");
+          return;
+        }
+      }
+
+      await api.updateProduct(pId, { [flag]: updatedVal }, token || undefined);
+      toast.success(`${product.name}: ${flag === 'isPopular' ? 'Homepage Popular' : 'Live Price'} set to ${updatedVal ? 'ENABLED' : 'DISABLED'}`);
+      setProducts(products.map(p => (p.id === pId || p._id === pId) ? { ...p, [flag]: updatedVal } : p));
+    } catch (err: any) {
+      toast.error(err.message || `Failed to toggle ${flag}`);
+    }
   };
 
   const handleCreateProduct = async (e: React.FormEvent) => {
@@ -393,6 +541,8 @@ export default function AdminPage() {
       
       fd.append("description", newProduct.description.trim());
       fd.append("shortDescription", newProduct.shortDescription.trim());
+      fd.append("isPopular", String(newProduct.isPopular));
+      fd.append("isLivePrice", String(newProduct.isLivePrice));
       
       if (newProduct.images.frontView instanceof File) fd.append("images[frontView]", newProduct.images.frontView);
       else if (newProduct.images.frontView) fd.append("images[frontView]", newProduct.images.frontView);
@@ -482,12 +632,25 @@ export default function AdminPage() {
       slug: brand.slug,
       logo: brand.logo || "",
       categories: catIds,
+      isFeaturedOnFrontpage: Boolean(brand.isFeaturedOnFrontpage),
+      frontpageDisplayName: brand.frontpageDisplayName || "",
+      frontpageImage: brand.frontpageImage || "",
+      displayOrder: brand.displayOrder || 0,
     });
   };
 
   const handleCancelBrandEdit = () => {
     setEditingBrandId(null);
-    setNewBrand({ name: "", slug: "", logo: "", categories: [] });
+    setNewBrand({ 
+      name: "", 
+      slug: "", 
+      logo: "", 
+      categories: [],
+      isFeaturedOnFrontpage: false,
+      frontpageDisplayName: "",
+      frontpageImage: "",
+      displayOrder: 0,
+    });
   };
 
   const handleCreateBrand = async (e: React.FormEvent) => {
@@ -501,6 +664,11 @@ export default function AdminPage() {
       if (newBrand.logo instanceof File) fd.append("logo", newBrand.logo);
       else if (newBrand.logo) fd.append("logo", newBrand.logo);
       fd.append("categories", JSON.stringify(newBrand.categories));
+      fd.append("isFeaturedOnFrontpage", String(newBrand.isFeaturedOnFrontpage));
+      fd.append("frontpageDisplayName", newBrand.frontpageDisplayName.trim());
+      if (newBrand.frontpageImage instanceof File) fd.append("frontpageImage", newBrand.frontpageImage);
+      else if (newBrand.frontpageImage) fd.append("frontpageImage", newBrand.frontpageImage);
+      fd.append("displayOrder", String(newBrand.displayOrder));
 
       if (editingBrandId) {
         await api.updateBrand(editingBrandId, fd, token || undefined);
@@ -527,6 +695,70 @@ export default function AdminPage() {
       await loadData(false);
     } catch (error) {
       toast.error("Failed to delete brand");
+    }
+  };
+
+  // Testimonials Handlers
+  const handleEditTestimonialClick = (t: TestimonialType) => {
+    setEditingTestimonialId(t.id || t._id || "");
+    setNewTestimonial({
+      name: t.name,
+      location: t.location || "Dubai, UAE",
+      avatar: t.avatar || "",
+      quote: t.quote,
+      rating: t.rating || 5,
+      isFeatured: t.isFeatured !== undefined ? Boolean(t.isFeatured) : true,
+      displayOrder: t.displayOrder || 0,
+    });
+  };
+
+  const handleCancelTestimonialEdit = () => {
+    setEditingTestimonialId(null);
+    setNewTestimonial({
+      name: "",
+      location: "Dubai, UAE",
+      avatar: "",
+      quote: "",
+      rating: 5,
+      isFeatured: true,
+      displayOrder: 0,
+    });
+  };
+
+  const handleCreateTestimonial = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTestimonial.name || !newTestimonial.quote) {
+      toast.error("Required: Customer Name and Review Quote");
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      if (editingTestimonialId !== null) {
+        await api.updateTestimonial(editingTestimonialId, newTestimonial, token || undefined);
+        toast.success("Testimonial updated");
+      } else {
+        await api.createTestimonial(newTestimonial, token || undefined);
+        toast.success("Testimonial created");
+      }
+
+      handleCancelTestimonialEdit();
+      await loadData(false);
+    } catch (err: any) {
+      toast.error(editingTestimonialId !== null ? "Failed to update testimonial" : "Failed to create testimonial");
+    }
+  };
+
+  const handleDeleteTestimonial = async (id: string | number) => {
+    if (!confirm("Delete customer testimonial?")) return;
+    try {
+      const token = await getToken();
+      await api.deleteTestimonial(id, token || undefined);
+      toast.success("Testimonial deleted");
+      if (editingTestimonialId === id) handleCancelTestimonialEdit();
+      await loadData(false);
+    } catch (err: any) {
+      toast.error("Failed to delete testimonial");
     }
   };
 
@@ -721,8 +953,26 @@ export default function AdminPage() {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4 space-y-4">
         
         {/* Compact Navigation Bar */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center justify-between gap-2 overflow-x-auto bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveTab("showcase")}
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 text-xs ${
+                activeTab === "showcase" ? "bg-slate-900 text-white shadow-md" : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80"
+              }`}
+            >
+              <LayoutGrid size={14} /> Homepage Showcase
+            </button>
+
+            <button
+              onClick={() => setActiveTab("analytics")}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
+                activeTab === "analytics" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <BarChart3 size={13} /> Analytics & Intelligence
+            </button>
+
             <button
               onClick={() => { setActiveTab("products"); setCurrentPage(1); }}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
@@ -776,6 +1026,24 @@ export default function AdminPage() {
             >
               <BookOpen size={13} /> Blogs <span className="text-[10px] opacity-75">({blogs.length})</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab("testimonials")}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
+                activeTab === "testimonials" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Star size={13} /> Testimonials <span className="text-[10px] opacity-75">({testimonials.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("database")}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
+                activeTab === "database" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Database size={13} /> Backup & Restore
+            </button>
           </div>
         </div>
 
@@ -788,6 +1056,92 @@ export default function AdminPage() {
         ) : (
           <div>
             
+            {/* HOMEPAGE SHOWCASE MANAGER TAB */}
+            {activeTab === "showcase" && (
+              <ShowcaseManager products={products} token={user ? undefined : undefined} onRefreshData={() => loadData(false)} />
+            )}
+
+            {/* ANALYTICS & INTELLIGENCE TAB */}
+            {activeTab === "analytics" && (
+              <AnalyticsDashboard />
+            )}
+
+            {/* DATABASE BACKUP & RESTORE TAB */}
+            {activeTab === "database" && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-6 shadow-sm">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Database className="text-emerald-500" size={18} />
+                    Database Snapshot, Export & 1-Click Restore
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Export your complete product catalog, categories, brands, orders, and blog posts to a local JSON file on your machine.
+                    If your VPS restarts or flushes data, simply upload your backup file here to instantly restore your entire database!
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  {/* EXPORT CARD */}
+                  <div className="border border-slate-200 bg-slate-50 rounded-xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                      <Download className="text-emerald-600" size={18} />
+                      <span>Download Local Database Backups</span>
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Download a complete snapshot of all products, categories, brands, blogs, and customer orders to store safely on your computer.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                      <button
+                        onClick={handleDownloadBackup}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm text-xs cursor-pointer"
+                      >
+                        <Download size={15} />
+                        <span>Download Full Database (.json)</span>
+                      </button>
+                      
+                      <button
+                        onClick={handleDownloadProducts}
+                        className="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold px-3 py-2.5 rounded-xl transition flex items-center justify-center gap-1.5 text-xs cursor-pointer"
+                      >
+                        <Smartphone size={14} />
+                        <span>Products Only (.json)</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* RESTORE CARD */}
+                  <div className="border border-emerald-200 bg-emerald-50/40 rounded-xl p-5 space-y-4">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                      <Upload className="text-emerald-600" size={18} />
+                      <span>Restore Database from Snapshot File</span>
+                    </div>
+                    <p className="text-xs text-slate-600 leading-relaxed">
+                      Select a previously downloaded backup JSON file from your computer to populate or recover your VPS database in seconds.
+                    </p>
+
+                    <div className="pt-2">
+                      <label className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow-md text-xs cursor-pointer">
+                        {restoringDb ? (
+                          <RefreshCw className="animate-spin" size={16} />
+                        ) : (
+                          <Upload size={16} />
+                        )}
+                        <span>{restoringDb ? "Restoring Database..." : "Upload & Restore Backup (.json)"}</span>
+                        <input
+                          type="file"
+                          accept=".json"
+                          onChange={handleRestoreBackupFile}
+                          disabled={restoringDb}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* PRODUCTS TAB */}
             {activeTab === "products" && (
               <div className="space-y-3">
@@ -846,8 +1200,8 @@ export default function AdminPage() {
                             <th className="py-2.5 px-4 w-12 text-center">Image</th>
                             <th className="py-2.5 px-4">Device Product</th>
                             <th className="py-2.5 px-4">Brand</th>
-                            <th className="py-2.5 px-4">Category</th>
                             <th className="py-2.5 px-4">Base Price</th>
+                            <th className="py-2.5 px-4 text-center">Frontpage Display</th>
                             <th className="py-2.5 px-4">Specs & Variants</th>
                             <th className="py-2.5 px-4 text-right">Actions</th>
                           </tr>
@@ -877,11 +1231,37 @@ export default function AdminPage() {
                                   {product.brand}
                                 </span>
                               </td>
-                              <td className="py-2 px-4 text-slate-600 font-mono text-[11px]">
-                                {product.category}
-                              </td>
                               <td className="py-2 px-4 font-bold text-emerald-600">
                                 AED {product.basePrice.toLocaleString()}
+                              </td>
+                              <td className="py-2 px-4 text-center">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleProductFlag(product, "isPopular")}
+                                    className={`px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer flex items-center gap-1 ${
+                                      product.isPopular
+                                        ? "bg-amber-50 text-amber-700 border-amber-300"
+                                        : "bg-slate-100 text-slate-400 border-slate-200 opacity-60 hover:opacity-100"
+                                    }`}
+                                    title="Toggle ⭐ Popular Device on Homepage"
+                                  >
+                                    ⭐ {product.isPopular ? "Popular" : "Off"}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleProductFlag(product, "isLivePrice")}
+                                    className={`px-2 py-0.5 rounded text-[10px] font-bold border transition cursor-pointer flex items-center gap-1 ${
+                                      product.isLivePrice
+                                        ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                                        : "bg-slate-100 text-slate-400 border-slate-200 opacity-60 hover:opacity-100"
+                                    }`}
+                                    title="Toggle 📈 Today's Live Buying Price"
+                                  >
+                                    📈 {product.isLivePrice ? "Live" : "Off"}
+                                  </button>
+                                </div>
                               </td>
                               <td className="py-2 px-4">
                                 <div className="flex flex-wrap gap-1">
@@ -1289,39 +1669,193 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="font-bold text-slate-600 block mb-1">Front Image *</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, frontView: e.target.files[0] } });
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
-                      />
+                  {/* Product Images: 3-in-1 Batch Upload & Automatic Slot Allocation */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                          <Upload size={14} className="text-emerald-500" />
+                          <span>Product Images (Batch Select 3 Images At Once or Single Slots)</span>
+                        </span>
+                        <p className="text-[10px] text-slate-500">
+                          Select 3 images together in one go — the 1st photo allocates to <strong>Front View</strong>, 2nd to <strong>Side View</strong>, and 3rd to <strong>Back View</strong>.
+                        </p>
+                      </div>
+
+                      <label className="cursor-pointer px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs flex items-center gap-1.5 shadow-sm transition">
+                        <Upload size={13} />
+                        <span>⚡ Batch Select 3 Images At Once</span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            handleBatchImageUpload(e.target.files);
+                            e.target.value = "";
+                          }}
+                          className="hidden"
+                        />
+                      </label>
                     </div>
-                    <div>
-                      <label className="font-bold text-slate-600 block mb-1">Side Image</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, sideView: e.target.files[0] } });
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
-                      />
+
+                    {/* Drag and Drop Zone */}
+                    <div
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (e.dataTransfer.files) {
+                          handleBatchImageUpload(e.dataTransfer.files);
+                        }
+                      }}
+                      className="border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-white/80 rounded-xl p-3 text-center transition cursor-pointer"
+                    >
+                      <p className="text-[11px] text-slate-600 font-semibold">
+                        📸 Drag & drop 3 image files here, or click the green button above to auto-allocate to Front, Side & Back views.
+                      </p>
                     </div>
-                    <div>
-                      <label className="font-bold text-slate-600 block mb-1">Back Image</label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, backView: e.target.files[0] } });
-                        }}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
-                      />
+
+                    {/* 3 Allocated Image Slot Preview Cards */}
+                    <div className="grid grid-cols-3 gap-3 pt-1">
+                      {/* Slot 1: Front View (Main) */}
+                      <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2 text-center flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-extrabold text-[11px] text-slate-800">1. Front View (Main) *</span>
+                            {newProduct.images.frontView && (
+                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Allocated</span>
+                            )}
+                          </div>
+                          
+                          {newProduct.images.frontView ? (
+                            <div className="relative w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group">
+                              <img
+                                src={getPreviewUrl(newProduct.images.frontView)}
+                                alt="Front View"
+                                className="w-full h-full object-contain p-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewProduct({ ...newProduct, images: { ...newProduct.images, frontView: "" } })}
+                                className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition shadow"
+                                title="Remove Image"
+                              >
+                                <XCircle size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-full h-24 bg-slate-100/70 border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 gap-1">
+                              <Smartphone size={20} />
+                              <span className="text-[10px]">No Front Image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-1">
+                          <label className="text-[10px] text-slate-500 font-medium block text-left mb-0.5">Replace Single File:</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, frontView: e.target.files[0] } });
+                            }}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Slot 2: Side View */}
+                      <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2 text-center flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-extrabold text-[11px] text-slate-800">2. Side View</span>
+                            {newProduct.images.sideView && (
+                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Allocated</span>
+                            )}
+                          </div>
+
+                          {newProduct.images.sideView ? (
+                            <div className="relative w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group">
+                              <img
+                                src={getPreviewUrl(newProduct.images.sideView)}
+                                alt="Side View"
+                                className="w-full h-full object-contain p-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewProduct({ ...newProduct, images: { ...newProduct.images, sideView: "" } })}
+                                className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition shadow"
+                                title="Remove Image"
+                              >
+                                <XCircle size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-full h-24 bg-slate-100/70 border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 gap-1">
+                              <Smartphone size={20} />
+                              <span className="text-[10px]">No Side Image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-1">
+                          <label className="text-[10px] text-slate-500 font-medium block text-left mb-0.5">Replace Single File:</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, sideView: e.target.files[0] } });
+                            }}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Slot 3: Back View */}
+                      <div className="bg-white border border-slate-200 rounded-xl p-2.5 space-y-2 text-center flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-extrabold text-[11px] text-slate-800">3. Back View</span>
+                            {newProduct.images.backView && (
+                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">Allocated</span>
+                            )}
+                          </div>
+
+                          {newProduct.images.backView ? (
+                            <div className="relative w-full h-24 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 group">
+                              <img
+                                src={getPreviewUrl(newProduct.images.backView)}
+                                alt="Back View"
+                                className="w-full h-full object-contain p-1"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setNewProduct({ ...newProduct, images: { ...newProduct.images, backView: "" } })}
+                                className="absolute top-1 right-1 bg-rose-600 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition shadow"
+                                title="Remove Image"
+                              >
+                                <XCircle size={12} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="w-full h-24 bg-slate-100/70 border border-slate-200 rounded-lg flex flex-col items-center justify-center text-slate-400 gap-1">
+                              <Smartphone size={20} />
+                              <span className="text-[10px]">No Back Image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-1">
+                          <label className="text-[10px] text-slate-500 font-medium block text-left mb-0.5">Replace Single File:</label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) setNewProduct({ ...newProduct, images: { ...newProduct.images, backView: e.target.files[0] } });
+                            }}
+                            className="w-full bg-slate-50 border border-slate-200 rounded p-1 text-[10px] text-slate-600"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1459,23 +1993,27 @@ export default function AdminPage() {
               <div className="grid sm:grid-cols-12 gap-4">
                 <div className="sm:col-span-7 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-slate-900 text-xs">Brands & Category Allocations ({brands.length})</h3>
-                    <p className="text-[10px] text-slate-400">Click Pencil icon to Edit & Allocate Categories</p>
+                    <h3 className="font-bold text-slate-900 text-xs">Brands & Frontpage Cards ({brands.length})</h3>
+                    <p className="text-[10px] text-slate-400">Click Pencil icon to Edit & Curation</p>
                   </div>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {brands.map((b) => (
                       <div key={b.id || b._id} className="bg-slate-50 border border-slate-200 p-2.5 rounded-lg flex flex-col justify-between gap-2 hover:border-emerald-300 transition">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex items-center gap-1.5">
                             <p className="font-bold text-slate-900 text-xs truncate">{b.name}</p>
-                            <p className="text-[10px] text-slate-500 font-mono truncate">{b.slug}</p>
+                            {b.isFeaturedOnFrontpage && (
+                              <span className="bg-amber-100 text-amber-800 text-[8px] font-bold px-1.5 py-0.5 rounded border border-amber-300">
+                                🏠 Frontpage
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => handleEditBrandClick(b)}
                               className="text-emerald-600 p-1 hover:bg-emerald-50 rounded cursor-pointer"
-                              title="Edit Brand & Allocate Categories"
+                              title="Edit Brand & Frontpage Settings"
                             >
                               <Pencil size={12} />
                             </button>
@@ -1488,6 +2026,10 @@ export default function AdminPage() {
                             </button>
                           </div>
                         </div>
+
+                        {b.frontpageDisplayName && (
+                          <p className="text-[9px] text-emerald-700 font-semibold italic">Display Name: "{b.frontpageDisplayName}"</p>
+                        )}
 
                         {b.categories && b.categories.length > 0 ? (
                           <div className="flex flex-wrap gap-1 border-t border-slate-200 pt-1.5">
@@ -1510,7 +2052,7 @@ export default function AdminPage() {
                 <div className="sm:col-span-5 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-slate-900 text-xs">
-                      {editingBrandId ? "Edit Brand & Allocations" : "Add New Brand"}
+                      {editingBrandId ? "Edit Brand & Curation" : "Add New Brand"}
                     </h3>
                     {editingBrandId && (
                       <button
@@ -1546,6 +2088,45 @@ export default function AdminPage() {
                       />
                     </div>
 
+                    {/* Frontpage Curation Controls */}
+                    <div className="bg-amber-50/60 border border-amber-200 p-2.5 rounded-xl space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={newBrand.isFeaturedOnFrontpage}
+                          onChange={(e) => setNewBrand({ ...newBrand, isFeaturedOnFrontpage: e.target.checked })}
+                          className="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 cursor-pointer"
+                        />
+                        <span className="font-bold text-slate-900 text-xs">🏠 Display on Frontpage ("Popular Devices We Buy")</span>
+                      </label>
+
+                      {newBrand.isFeaturedOnFrontpage && (
+                        <div className="space-y-2 pt-1 border-t border-amber-200">
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-0.5 text-[10px]">Frontpage Display Name (Optional override)</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Sell iPhone / Sell Samsung"
+                              value={newBrand.frontpageDisplayName}
+                              onChange={(e) => setNewBrand({ ...newBrand, frontpageDisplayName: e.target.value })}
+                              className="w-full bg-white border border-slate-200 rounded p-1.5 text-slate-900 text-xs outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="font-bold text-slate-700 block mb-0.5 text-[10px]">Sort Order (Display Order)</label>
+                            <input
+                              type="number"
+                              placeholder="0"
+                              value={newBrand.displayOrder}
+                              onChange={(e) => setNewBrand({ ...newBrand, displayOrder: Number(e.target.value) })}
+                              className="w-full bg-white border border-slate-200 rounded p-1.5 text-slate-900 text-xs outline-none"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <div>
                       <label className="font-bold text-slate-700 block mb-1">Logo File or Emoji</label>
                       <input
@@ -1558,7 +2139,7 @@ export default function AdminPage() {
 
                     <div>
                       <label className="font-bold text-slate-700 block mb-1">Allocate to Service Categories</label>
-                      <p className="text-[10px] text-slate-400 mb-1.5">Select which service categories this brand belongs to (e.g. Mobile, Laptops, Tablets, Smartwatches):</p>
+                      <p className="text-[10px] text-slate-400 mb-1.5">Select which service categories this brand belongs to:</p>
                       <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto border border-slate-200 p-2.5 rounded bg-slate-50">
                         {categories.map((cat) => {
                           const catId = (cat._id || cat.id || "").toString();
@@ -1592,7 +2173,7 @@ export default function AdminPage() {
                         type="submit"
                         className={`${editingBrandId ? "w-2/3" : "w-full"} bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer`}
                       >
-                        {editingBrandId ? "Save Allocations" : "Add Brand"}
+                        {editingBrandId ? "Save Curation & Allocations" : "Add Brand"}
                       </button>
                     </div>
                   </form>
@@ -1798,20 +2379,264 @@ export default function AdminPage() {
                       />
                     </div>
 
-                    <div>
-                      <label className="font-bold text-slate-700 block mb-1">Full Content (Markdown) *</label>
-                      <textarea
-                        rows={5}
-                        required
-                        placeholder="Markdown content..."
-                        value={newBlog.content}
-                        onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
-                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none font-mono text-[11px] focus:border-emerald-500 focus:bg-white"
-                      />
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between flex-wrap gap-1">
+                        <label className="font-bold text-slate-700 block">Full Article Content (Markdown) *</label>
+                        <button
+                          type="button"
+                          onClick={() => setBlogPreviewMode(!blogPreviewMode)}
+                          className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition"
+                        >
+                          {blogPreviewMode ? "✏️ Edit Markdown" : "👁️ Live Preview"}
+                        </button>
+                      </div>
+
+                      {/* Toolbar Quick Formatting Buttons */}
+                      <div className="flex flex-wrap gap-1 p-1.5 bg-slate-100 border border-slate-200 rounded-lg text-[10px]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const formatted = autoFormatPlainTextToMarkdown(newBlog.content);
+                            setNewBlog({ ...newBlog, content: formatted });
+                            toast.success("Auto-formatted plain text into Markdown!");
+                          }}
+                          className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded shadow-2xs transition flex items-center gap-1"
+                          title="Convert plain text draft paragraphs to formatted markdown headings & lists"
+                        >
+                          ⚡ Auto-Format Plain Text
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n## Section Heading\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + H2 Heading
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n### Subheading\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + H3 Subheading
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n* List Point 1\n* List Point 2\n* List Point 3\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + Bullet List
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n1. Step 1\n2. Step 2\n3. Step 3\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + Numbered List
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + "\n\n> Key takeaway quote or note box\n" })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          + Quote Box
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewBlog({ ...newBlog, content: newBlog.content + " **bold text** " })}
+                          className="px-1.5 py-0.5 bg-white border border-slate-200 hover:bg-slate-50 font-bold rounded text-slate-700"
+                        >
+                          **Bold**
+                        </button>
+                      </div>
+
+                      {blogPreviewMode ? (
+                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 max-h-80 overflow-y-auto article-content text-xs">
+                          <div dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(newBlog.content || "") }} />
+                        </div>
+                      ) : (
+                        <textarea
+                          rows={8}
+                          required
+                          placeholder="Paste or write article content here. Use '⚡ Auto-Format Plain Text' button above to format plain text into headings and lists!"
+                          value={newBlog.content}
+                          onChange={(e) => setNewBlog({ ...newBlog, content: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none font-mono text-[11px] focus:border-emerald-500 focus:bg-white"
+                        />
+                      )}
                     </div>
 
                     <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer">
                       {editingBlogId !== null ? "Update Blog Post" : "Publish Article"}
+                    </button>
+                  </form>
+                </div>
+
+              </div>
+            )}
+
+            {/* TESTIMONIALS TAB */}
+            {activeTab === "testimonials" && (
+              <div className="grid sm:grid-cols-12 gap-4">
+                
+                {/* Testimonials List */}
+                <div className="sm:col-span-7 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-slate-900 text-xs">Customer Testimonials & Reviews ({testimonials.length})</h3>
+                    <p className="text-[10px] text-slate-400">Featured reviews display on Home & About pages</p>
+                  </div>
+
+                  {testimonials.length === 0 ? (
+                    <p className="text-slate-500 text-[11px] text-center py-6">No customer reviews added yet.</p>
+                  ) : (
+                    <div className="divide-y divide-slate-100">
+                      {testimonials.map((t) => (
+                        <div key={t.id || t._id} className="py-3 flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-slate-900 text-xs">{t.name}</h4>
+                              <span className="text-[10px] text-slate-400 font-medium">({t.location || "Dubai, UAE"})</span>
+                              {t.isFeatured && (
+                                <span className="bg-amber-100 text-amber-800 text-[8px] font-bold px-1.5 py-0.5 rounded border border-amber-300">
+                                  ⭐ Featured
+                                </span>
+                              )}
+                            </div>
+                            
+                            <p className="text-[11px] text-slate-600 italic line-clamp-2">"{t.quote}"</p>
+                            
+                            <div className="flex items-center gap-2 pt-0.5">
+                              <div className="text-amber-400 text-xs flex">
+                                {[...Array(t.rating || 5)].map((_, i) => (
+                                  <Star key={i} size={11} fill="currentColor" />
+                                ))}
+                              </div>
+                              {t.displayOrder !== undefined && (
+                                <span className="text-[9px] text-slate-400 font-mono">Order: {t.displayOrder}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => handleEditTestimonialClick(t)}
+                              className="p-1.5 text-slate-700 hover:bg-slate-100 rounded border border-slate-200 cursor-pointer"
+                              title="Edit Review"
+                            >
+                              <Pencil size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTestimonial(t.id || t._id || "")}
+                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded border border-rose-200 cursor-pointer"
+                              title="Delete Review"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Add / Edit Testimonial Form */}
+                <div className="sm:col-span-5 bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-slate-900 text-xs">
+                      {editingTestimonialId !== null ? "Edit Customer Review" : "Add New Customer Review"}
+                    </h3>
+                    {editingTestimonialId !== null && (
+                      <button onClick={handleCancelTestimonialEdit} className="text-[10px] text-rose-600 hover:underline font-semibold">
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+
+                  <form onSubmit={handleCreateTestimonial} className="space-y-3 text-xs">
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Customer Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Ahmed R."
+                        value={newTestimonial.name}
+                        onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">Location / Area</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Dubai Marina"
+                          value={newTestimonial.location}
+                          onChange={(e) => setNewTestimonial({ ...newTestimonial, location: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="font-bold text-slate-700 block mb-1">Star Rating (1 - 5)</label>
+                        <select
+                          value={newTestimonial.rating}
+                          onChange={(e) => setNewTestimonial({ ...newTestimonial, rating: Number(e.target.value) })}
+                          className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none cursor-pointer focus:bg-white"
+                        >
+                          <option value={5}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                          <option value={4}>⭐⭐⭐⭐ (4 Stars)</option>
+                          <option value={3}>⭐⭐⭐ (3 Stars)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Avatar Image URL (Optional)</label>
+                      <input
+                        type="text"
+                        placeholder="https://..."
+                        value={newTestimonial.avatar}
+                        onChange={(e) => setNewTestimonial({ ...newTestimonial, avatar: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white font-mono text-[11px]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 block mb-1">Review Quote / Feedback *</label>
+                      <textarea
+                        rows={3}
+                        required
+                        placeholder="e.g. Got my phone picked up in 1 hour and received cash instantly..."
+                        value={newTestimonial.quote}
+                        onChange={(e) => setNewTestimonial({ ...newTestimonial, quote: e.target.value })}
+                        className="w-full bg-slate-50 border border-slate-200 rounded p-2 text-slate-900 outline-none resize-none focus:border-emerald-500 focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={newTestimonial.isFeatured}
+                          onChange={(e) => setNewTestimonial({ ...newTestimonial, isFeatured: e.target.checked })}
+                          className="w-3.5 h-3.5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 cursor-pointer"
+                        />
+                        <span className="font-bold text-slate-900 text-[11px]">Feature on Home / About</span>
+                      </label>
+
+                      <div>
+                        <input
+                          type="number"
+                          placeholder="Display Order"
+                          value={newTestimonial.displayOrder}
+                          onChange={(e) => setNewTestimonial({ ...newTestimonial, displayOrder: Number(e.target.value) })}
+                          className="w-full bg-white border border-slate-200 rounded p-1 text-[11px] text-slate-900 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded transition shadow-sm cursor-pointer">
+                      {editingTestimonialId !== null ? "Update Review" : "Publish Customer Review"}
                     </button>
                   </form>
                 </div>

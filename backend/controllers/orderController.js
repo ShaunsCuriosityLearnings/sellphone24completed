@@ -7,7 +7,18 @@ import { sendOrderWhatsAppNotification } from "../utils/whatsappService.js";
 // @access  Public
 export const createOrder = async (req, res) => {
   try {
-    const { customerDetails, pickupSchedule, devices, paymentMethod, totalPayout } = req.body;
+    const {
+      customerDetails,
+      pickupSchedule,
+      devices,
+      paymentMethod,
+      totalPayout,
+      sessionId,
+      intentScoreAtBooking,
+      acquisitionChannel,
+      utmCampaign,
+      marketingAttribution,
+    } = req.body;
 
     // Enforce cash payout option based on client request
     if (paymentMethod !== "cash") {
@@ -20,6 +31,19 @@ export const createOrder = async (req, res) => {
       devices,
       paymentMethod,
       totalPayout,
+      sessionId: sessionId || "",
+      intentScoreAtBooking: intentScoreAtBooking || 0,
+      acquisitionChannel: acquisitionChannel || "Organic / Direct",
+      utmCampaign: utmCampaign || "none",
+      marketingAttribution: marketingAttribution || {
+        source: "direct",
+        medium: "none",
+        campaign: "none",
+        gclid: "",
+        fbclid: "",
+        ttclid: "",
+        referrer: "direct",
+      },
       status: "pending",
     });
 

@@ -82,7 +82,33 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ["pending", "pickup_assigned", "inspected", "completed", "cancelled"],
     default: "pending",
-  }
+  },
+  sessionId: {
+    type: String,
+    default: "",
+    index: true,
+  },
+  intentScoreAtBooking: {
+    type: Number,
+    default: 0,
+  },
+  acquisitionChannel: {
+    type: String,
+    default: "Organic / Direct",
+  },
+  utmCampaign: {
+    type: String,
+    default: "none",
+  },
+  marketingAttribution: {
+    source: { type: String, default: "direct" },
+    medium: { type: String, default: "none" },
+    campaign: { type: String, default: "none" },
+    gclid: { type: String, default: "" },
+    fbclid: { type: String, default: "" },
+    ttclid: { type: String, default: "" },
+    referrer: { type: String, default: "direct" },
+  },
 }, { timestamps: true });
 
 export default mongoose.model("Order", orderSchema);

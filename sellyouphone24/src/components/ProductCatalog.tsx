@@ -5,7 +5,7 @@ import { ProductType, BrandType } from "@/types";
 import ProductCard from "./ProductCard";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
+import { analytics } from "@/lib/analytics";
 
 interface ProductCatalogProps {
   initialProducts: ProductType[];
@@ -93,10 +93,21 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
         const hasColor = product.colors?.some(c => c && selectedColorsLower.includes(c.toLowerCase()));
         if (!hasColor) return false;
       }
-
       return true;
     });
   }, [initialProducts, searchQuery, selectedBrands, selectedStorages, selectedColors]);
+
+  // Track search query demand in analytics engine
+  useEffect(() => {
+    if (!searchQuery || searchQuery.trim().length < 2) return;
+    const timer = setTimeout(() => {
+      analytics.track("search_performed", "search", {
+        searchQuery: searchQuery.trim(),
+        resultCount: filteredProducts.length,
+      });
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filteredProducts.length]);
 
   const toggleBrand = (brandSlug: string) => {
     const lower = brandSlug.toLowerCase();
@@ -124,71 +135,73 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
     setSearchQuery("");
   };
 
+  const activeFilterCount = selectedBrands.length + selectedStorages.length + selectedColors.length + (searchQuery ? 1 : 0);
+
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-start">
+    <div className="flex flex-col lg:flex-row gap-8 items-start relative">
       
-      {/* Mobile Filter Trigger Button */}
-      <div className="lg:hidden w-full flex gap-3 mb-4">
+      {/* Mobile Filter Trigger & Search Bar */}
+      <div className="lg:hidden w-full flex gap-2.5 mb-2">
         <div className="relative flex-1">
           <input
             type="text"
             placeholder="Search device models..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-emerald-500"
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs focus:outline-none focus:border-emerald-500 shadow-xs"
           />
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
         </div>
         <button
-          onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
-          className="px-4 py-3 bg-slate-900 text-white font-bold text-sm rounded-2xl flex items-center gap-2"
+          onClick={() => setIsMobileFiltersOpen(true)}
+          className="px-3.5 py-2.5 bg-slate-900 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shrink-0 active:scale-95 transition cursor-pointer shadow-xs"
         >
-          <SlidersHorizontal size={16} />
-          Filters
+          <SlidersHorizontal size={14} />
+          <span>Filters</span>
+          {activeFilterCount > 0 && (
+            <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 text-[9px] font-black flex items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* Sidebar Filters */}
-      <div className={`w-full lg:w-64 bg-white border border-slate-100 rounded-3xl p-6 shadow-sm space-y-6 shrink-0 ${isMobileFiltersOpen ? 'block' : 'hidden lg:block'}`}>
+      {/* DESKTOP Sidebar Filters */}
+      <div className="hidden lg:block w-64 bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs space-y-5 shrink-0">
         <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-          <h3 className="font-extrabold text-slate-900 text-base">Filters</h3>
-          {isMobileFiltersOpen && (
-            <button onClick={() => setIsMobileFiltersOpen(false)} className="text-slate-400 hover:text-slate-600">
-              <X size={20} />
-            </button>
-          )}
+          <h3 className="font-extrabold text-slate-900 text-sm">Filters</h3>
         </div>
 
         {/* Search */}
-        <div className="hidden lg:block">
-          <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Search Model</label>
+        <div>
+          <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Search Model</label>
           <div className="relative">
             <input
               type="text"
               placeholder="e.g. iPhone 15 Pro..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500"
+              className="w-full pl-8 pr-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
           </div>
         </div>
 
         {/* Brand Filter */}
         {brands && brands.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Brands</h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {brands.map(brand => {
                 const isSelected = selectedBrands.includes(brand.slug.toLowerCase());
                 return (
                   <button
                     key={brand.id || brand.slug}
                     onClick={() => toggleBrand(brand.slug)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 border ${
                       isSelected 
-                        ? "bg-emerald-500 text-slate-950 border-emerald-500 shadow-md shadow-emerald-500/20" 
-                        : "bg-slate-50 text-slate-700 border-slate-100 hover:border-slate-300"
+                        ? "bg-emerald-500 text-slate-950 border-emerald-500 shadow-xs" 
+                        : "bg-slate-50 text-slate-700 border-slate-200/80 hover:border-slate-300"
                     }`}
                   >
                     <span>{brand.name}</span>
@@ -201,17 +214,17 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
 
         {/* Storage Filter */}
         {availableStorages.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-slate-100">
+          <div className="space-y-2.5 pt-3 border-t border-slate-100">
             <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Storage Capacity</h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {availableStorages.map(storage => (
                 <button
                   key={storage}
                   onClick={() => toggleStorage(storage)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all border ${
                     selectedStorages.includes(storage) 
-                      ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20" 
-                      : "bg-slate-50 text-slate-700 border-slate-100 hover:border-slate-300"
+                      ? "bg-slate-900 text-white border-slate-900 shadow-xs" 
+                      : "bg-slate-50 text-slate-700 border-slate-200/80 hover:border-slate-300"
                   }`}
                 >
                   {storage}
@@ -223,17 +236,17 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
 
         {/* Color Filter */}
         {availableColors.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-slate-100">
+          <div className="space-y-2.5 pt-3 border-t border-slate-100">
             <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Available Colors</h4>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {availableColors.map(color => (
                 <button
                   key={color}
                   onClick={() => toggleColor(color)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all border ${
                     selectedColors.includes(color) 
-                      ? "bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20" 
-                      : "bg-slate-50 text-slate-700 border-slate-100 hover:border-slate-300"
+                      ? "bg-slate-900 text-white border-slate-900 shadow-xs" 
+                      : "bg-slate-50 text-slate-700 border-slate-200/80 hover:border-slate-300"
                   }`}
                 >
                   {color}
@@ -244,43 +257,186 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
         )}
 
         {/* Clear Filters */}
-        {(selectedBrands.length > 0 || selectedStorages.length > 0 || selectedColors.length > 0 || searchQuery) && (
+        {activeFilterCount > 0 && (
           <button 
             onClick={clearAllFilters}
-            className="w-full py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 transition cursor-pointer"
+            className="w-full py-2 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 transition cursor-pointer"
           >
             Clear All Filters
           </button>
         )}
       </div>
 
-      {/* Main Content (Product Grid - 5 Cards per row on Desktop) */}
+      {/* MOBILE BOTTOM DRAWER FILTER FEATURE */}
+      {isMobileFiltersOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end">
+          {/* Backdrop Overlay */}
+          <div 
+            onClick={() => setIsMobileFiltersOpen(false)}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300"
+          />
+
+          {/* Bottom Sheet Modal Container */}
+          <div className="relative z-10 bg-white rounded-t-3xl border-t border-slate-200/80 p-5 shadow-2xl max-h-[85vh] overflow-y-auto flex flex-col justify-between space-y-5 animate-in slide-in-from-bottom duration-300 w-full">
+            
+            {/* Sheet Handle */}
+            <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto shrink-0 mb-1" />
+
+            {/* Sheet Header */}
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-slate-900 text-base">Filter Devices</h3>
+                {activeFilterCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+                    {activeFilterCount} Active
+                  </span>
+                )}
+              </div>
+              <button 
+                onClick={() => setIsMobileFiltersOpen(false)} 
+                className="p-1 rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Sheet Options */}
+            <div className="space-y-4 overflow-y-auto max-h-[55vh] pr-1">
+              
+              {/* Search */}
+              <div>
+                <label className="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Search Model</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="e.g. iPhone 15 Pro..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-emerald-500"
+                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5" />
+                </div>
+              </div>
+
+              {/* Brands */}
+              {brands && brands.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Brands</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {brands.map(brand => {
+                      const isSelected = selectedBrands.includes(brand.slug.toLowerCase());
+                      return (
+                        <button
+                          key={brand.id || brand.slug}
+                          onClick={() => toggleBrand(brand.slug)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                            isSelected 
+                              ? "bg-emerald-500 text-slate-950 border-emerald-500 shadow-xs" 
+                              : "bg-slate-50 text-slate-700 border-slate-200/80"
+                          }`}
+                        >
+                          {brand.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Storage */}
+              {availableStorages.length > 0 && (
+                <div className="space-y-2 pt-3 border-t border-slate-100">
+                  <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Storage Capacity</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableStorages.map(storage => (
+                      <button
+                        key={storage}
+                        onClick={() => toggleStorage(storage)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                          selectedStorages.includes(storage) 
+                            ? "bg-slate-900 text-white border-slate-900 shadow-xs" 
+                            : "bg-slate-50 text-slate-700 border-slate-200/80"
+                        }`}
+                      >
+                        {storage}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Colors */}
+              {availableColors.length > 0 && (
+                <div className="space-y-2 pt-3 border-t border-slate-100">
+                  <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Available Colors</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableColors.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => toggleColor(color)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                          selectedColors.includes(color) 
+                            ? "bg-slate-900 text-white border-slate-900 shadow-xs" 
+                            : "bg-slate-50 text-slate-700 border-slate-200/80"
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sheet Footer Action Buttons */}
+            <div className="pt-3 border-t border-slate-100 flex items-center gap-3">
+              {activeFilterCount > 0 && (
+                <button 
+                  onClick={clearAllFilters}
+                  className="py-3 px-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition"
+                >
+                  Reset
+                </button>
+              )}
+              <button
+                onClick={() => setIsMobileFiltersOpen(false)}
+                className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold text-xs rounded-xl transition shadow-md flex items-center justify-center gap-1.5"
+              >
+                <span>Show {filteredProducts.length} Results</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Main Content (Product Grid - 2 Cards per row on Mobile, 4 Cards per row on Desktop) */}
       <div className="flex-1 w-full">
-        <div className="hidden lg:flex justify-between items-end mb-6">
-          <p className="text-sm font-semibold text-slate-500">
+        <div className="hidden lg:flex justify-between items-end mb-4">
+          <p className="text-xs font-semibold text-slate-500">
             Showing <span className="text-slate-900 font-extrabold">{filteredProducts.length}</span> devices
           </p>
         </div>
 
         {filteredProducts.length === 0 ? (
-          <div className="bg-white border border-slate-100 rounded-3xl p-12 text-center shadow-sm">
-            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="text-slate-300 w-8 h-8" />
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-8 text-center shadow-xs">
+            <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Search className="text-slate-400 w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-800 mb-2">No Devices Found</h3>
-            <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">
+            <h3 className="text-base font-bold text-slate-800 mb-1">No Devices Found</h3>
+            <p className="text-xs text-slate-500 max-w-md mx-auto mb-4">
               We couldn&apos;t find any devices matching your selected filters. Try removing some filters to see more results.
             </p>
             <button 
               onClick={clearAllFilters}
-              className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition shadow-lg shadow-emerald-500/20"
+              className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl transition shadow-sm"
             >
               Clear Filters
             </button>
           </div>
         ) : (
-          /* Desktop: 5 Cards in a row (grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5) */
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          /* Mobile: 2 Cards per row (grid-cols-2), Desktop: 4 Cards per row (lg:grid-cols-4 xl:grid-cols-4) */
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
             {filteredProducts.map(product => (
               <ProductCard key={product.id || product._id} product={product} />
             ))}
