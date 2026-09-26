@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { api } from "@/lib/api";
+import { SERVICE_SLUGS, MODEL_SLUGS, LOCATION_SLUGS } from "@/lib/seoData";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,12 +16,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/privacy-policy",
     "/services",
     "/blogs",
+    "/sell",
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: "daily" as const,
-    priority: route === "" ? 1.0 : 0.8,
+    priority: route === "" ? 1.0 : route === "/sell" ? 0.9 : 0.8,
   }));
+
+  // Programmatic SEO landing pages (Services, Models, Locations)
+  const seoRoutes: MetadataRoute.Sitemap = [
+    ...SERVICE_SLUGS.map((slug) => ({
+      url: `${baseUrl}/sell/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.85,
+    })),
+    ...MODEL_SLUGS.map((slug) => ({
+      url: `${baseUrl}/sell/model/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
+    ...LOCATION_SLUGS.map((slug) => ({
+      url: `${baseUrl}/sell/location/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
+  ];
 
   let dynamicRoutes: MetadataRoute.Sitemap = [];
 
@@ -80,5 +104,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("⚠️ Dynamic sitemap blogs query failed:", error);
   }
 
-  return [...staticRoutes, ...dynamicRoutes];
+  return [...staticRoutes, ...seoRoutes, ...dynamicRoutes];
 }

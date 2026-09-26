@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Product from "../models/Product.js";
 import Brand from "../models/Brand.js";
 import Category from "../models/Category.js";
@@ -108,13 +109,30 @@ export const getProducts = async (req, res) => {
   }
 };
 
-// @desc    Get product details by ID
+// @desc    Get product details by ID or Slug/Name
 // @route   GET /api/products/:id
 // @access  Public
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findById(id).populate("brand");
+    let product = null;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      product = await Product.findById(id).populate("brand");
+    }
+
+    // If not found by ObjectId or if param is a slug (e.g. "iphone-16-pro-max")
+    if (!product && typeof id === "string") {
+      const cleanSlug = id.replace(/-/g, " ").trim();
+      const words = cleanSlug.split(/\s+/).filter(Boolean);
+      if (words.length > 0) {
+        const regexPattern = words.join(".*");
+        product = await Product.findOne({
+          name: { $regex: new RegExp(regexPattern, "i") }
+        }).populate("brand");
+      }
+    }
+
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }

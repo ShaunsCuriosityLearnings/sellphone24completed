@@ -8,7 +8,9 @@ import { toast } from "react-toastify";
 import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import ShowcaseManager from "@/components/ShowcaseManager";
+import SeoPagesManager from "@/components/SeoPagesManager";
 import { 
+  Globe,
   LayoutGrid,
   ClipboardList,
   BarChart3, 
@@ -156,7 +158,7 @@ export default function AdminPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   
-  const [activeTab, setActiveTab] = useState<"showcase" | "analytics" | "orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("showcase");
+  const [activeTab, setActiveTab] = useState<"showcase" | "seo-pages" | "analytics" | "orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("showcase");
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [products, setProducts] = useState<ProductType[]>([]);
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -965,6 +967,15 @@ export default function AdminPage() {
             </button>
 
             <button
+              onClick={() => setActiveTab("seo-pages")}
+              className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 text-xs ${
+                activeTab === "seo-pages" ? "bg-slate-900 text-white shadow-sm" : "text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200"
+              }`}
+            >
+              <Globe size={13} /> SEO Engine &amp; Rankings <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-600 text-white">93</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab("analytics")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 ${
                 activeTab === "analytics" ? "bg-slate-900 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
@@ -1059,6 +1070,11 @@ export default function AdminPage() {
             {/* HOMEPAGE SHOWCASE MANAGER TAB */}
             {activeTab === "showcase" && (
               <ShowcaseManager products={products} token={user ? undefined : undefined} onRefreshData={() => loadData(false)} />
+            )}
+
+            {/* SEO ENGINE & RANKINGS TAB */}
+            {activeTab === "seo-pages" && (
+              <SeoPagesManager products={products} token={user ? undefined : undefined} />
             )}
 
             {/* ANALYTICS & INTELLIGENCE TAB */}
