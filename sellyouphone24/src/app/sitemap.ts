@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next";
 import { api } from "@/lib/api";
+import { SERVICE_SLUGS, MODEL_SLUGS, LOCATION_SLUGS } from "@/lib/seoData";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -9,18 +10,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 1. Static base pages
   const staticRoutes = [
-    "",
-    "/about",
-    "/contact",
-    "/privacy-policy",
-    "/services",
-    "/blogs",
-  ].map((route) => ({
-    url: `${baseUrl}${route}`,
+    { route: "", priority: 1.0, changeFrequency: "daily" as const },
+    { route: "/sell", priority: 0.95, changeFrequency: "daily" as const },
+    { route: "/sell-any-device", priority: 0.9, changeFrequency: "daily" as const },
+    { route: "/services", priority: 0.85, changeFrequency: "daily" as const },
+    { route: "/products", priority: 0.85, changeFrequency: "daily" as const },
+    { route: "/blogs", priority: 0.8, changeFrequency: "daily" as const },
+    { route: "/about", priority: 0.7, changeFrequency: "monthly" as const },
+    { route: "/contact", priority: 0.7, changeFrequency: "monthly" as const },
+    { route: "/privacy-policy", priority: 0.5, changeFrequency: "yearly" as const },
+  ].map((item) => ({
+    url: `${baseUrl}${item.route}`,
     lastModified: new Date(),
-    changeFrequency: "daily" as const,
-    priority: route === "" ? 1.0 : 0.8,
+    changeFrequency: item.changeFrequency,
+    priority: item.priority,
   }));
+
+  // Programmatic SEO landing pages (Services, Models, Locations) - deduplicated with Set
+  const uniqueServiceSlugs = Array.from(new Set(SERVICE_SLUGS));
+  const uniqueModelSlugs = Array.from(new Set(MODEL_SLUGS));
+  const uniqueLocationSlugs = Array.from(new Set(LOCATION_SLUGS));
+
+  const seoRoutes: MetadataRoute.Sitemap = [
+    ...uniqueServiceSlugs.map((slug) => ({
+      url: `${baseUrl}/sell/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.9,
+    })),
+    ...uniqueModelSlugs.map((slug) => ({
+      url: `${baseUrl}/sell/model/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    })),
+    ...uniqueLocationSlugs.map((slug) => ({
+      url: `${baseUrl}/sell/location/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    })),
+  ];
 
   let dynamicRoutes: MetadataRoute.Sitemap = [];
 
@@ -80,5 +110,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("⚠️ Dynamic sitemap blogs query failed:", error);
   }
 
-  return [...staticRoutes, ...dynamicRoutes];
+  return [...staticRoutes, ...seoRoutes, ...dynamicRoutes];
 }

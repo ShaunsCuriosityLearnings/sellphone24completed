@@ -217,3 +217,12 @@ h6 {
   will-change: backdrop-filter;
 }
 
+/* Hide scrollbar for horizontal swipe carousels on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

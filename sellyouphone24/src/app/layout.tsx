@@ -108,7 +108,7 @@ export default function RootLayout({
 
             {/* Main Content */}
             <main className="flex-1">
-              <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
+              <div className="mx-auto w-full max-w-[1440px] px-2 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-6">
                 <Suspense fallback={null}>
                   <AnalyticsProvider>
                     {children}

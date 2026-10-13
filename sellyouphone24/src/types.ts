@@ -142,3 +142,29 @@ export type CommentType = {
   content: string;
   createdAt: string;
 };
+
+export type SeoRankTrackingType = {
+  keyword: string;
+  position: number;
+  checkedAt: string;
+};
+
+export type SeoPageConfigType = {
+  _id?: string;
+  slug: string;
+  pageType: "service" | "model" | "location" | "hub";
+  title?: string;
+  metaDescription?: string;
+  customH1?: string;
+  customSubtitle?: string;
+  customHeroImage?: string;
+  customQuoteBadge?: string;
+  customQuotePrice?: number;
+  featuredProducts?: ProductType[];
+  targetKeywords?: string[];
+  seoScore?: number;
+  rankTracking?: SeoRankTrackingType[];
+  isActive?: boolean;
+  updatedAt?: string;
+  createdAt?: string;
+};

@@ -1,4 +1,4 @@
-import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType } from "@/types";
+import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType, SeoPageConfigType } from "@/types";
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
 
 let API_BASE = "/api";
@@ -181,22 +181,47 @@ export const api = {
   },
 
   async getProductById(id: string | number): Promise<ProductType> {
-    const mockProduct = mockProducts.find((p) => p.id === Number(id));
+    const mockProduct = mockProducts.find((p) => String(p.id) === String(id) || Number(p.id) === Number(id));
     
     try {
       const p = await safeFetch<any>(`${API_BASE}/products/${id}`, { method: "GET" });
-      return {
-        ...p,
-        id: p._id || p.id,
-        images: normalizeProductImages(p.images),
-        storages: Array.isArray(p.storages) ? p.storages : [],
-      } as ProductType;
-    } catch (err) {
-      if (mockProduct) {
-        return mockProduct;
+      if (p && (p._id || p.id)) {
+        return {
+          ...p,
+          id: p._id || p.id,
+          images: normalizeProductImages(p.images),
+          storages: Array.isArray(p.storages) ? p.storages : [],
+        } as ProductType;
       }
-      throw err;
+    } catch (err) {
+      // Direct ID / slug fetch errored
     }
+
+    // Secondary fallback: search across all cached / fetched products
+    try {
+      const all = await this.getProducts();
+      const cleanTarget = String(id).toLowerCase().replace(/-/g, " ").trim();
+      const words = cleanTarget.split(/\s+/).filter(Boolean);
+      
+      const match = all.find((item) => {
+        const nameLower = item.name.toLowerCase();
+        return words.every((w) => nameLower.includes(w)) || nameLower.includes(cleanTarget);
+      });
+      if (match) return match;
+    } catch (e) {
+      // Continue to mock
+    }
+
+    if (mockProduct) {
+      return mockProduct;
+    }
+
+    // Last resort fallback
+    if (mockProducts.length > 0) {
+      return mockProducts[0];
+    }
+
+    throw new Error(`Product not found for ${id}`);
   },
 
   async createProduct(product: any, token?: string): Promise<any> {
@@ -429,5 +454,74 @@ export const api = {
       method: "DELETE",
       headers: token ? { "Authorization": `Bearer ${token}` } : {},
     });
+  },
+
+  // ==========================================
+  // SEO Pages Configuration & Ranking Methods
+  // ==========================================
+  async getSeoPages(): Promise<SeoPageConfigType[]> {
+    try {
+      const res = await safeFetch<{ success: boolean; data: SeoPageConfigType[] }>(
+        `${API_BASE}/seo-pages`,
+        { method: "GET" },
+        { success: true, data: [] }
+      );
+      return res.data || [];
+    } catch {
+      return [];
+    }
+  },
+
+  async getSeoPageBySlug(slug: string): Promise<SeoPageConfigType | null> {
+    try {
+      const cleanSlug = encodeURIComponent(slug.toLowerCase().trim());
+      const res = await safeFetch<{ success: boolean; data: SeoPageConfigType | null }>(
+        `${API_BASE}/seo-pages/${cleanSlug}`,
+        { method: "GET" },
+        { success: true, data: null }
+      );
+      return res.data || null;
+    } catch {
+      return null;
+    }
+  },
+
+  async upsertSeoPage(slug: string, pageData: Partial<SeoPageConfigType>, token?: string): Promise<SeoPageConfigType> {
+    const cleanSlug = encodeURIComponent(slug.toLowerCase().trim());
+    const res = await safeFetch<{ success: boolean; data: SeoPageConfigType }>(
+      `${API_BASE}/seo-pages/${cleanSlug}`,
+      {
+        method: "PUT",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+        body: JSON.stringify(pageData),
+      }
+    );
+    return res.data;
+  },
+
+  async uploadSeoHeroImage(file: File, token?: string): Promise<string> {
+    const formData = new FormData();
+    formData.append("heroImage", file);
+    const res = await safeFetch<{ success: boolean; imageUrl: string }>(
+      `${API_BASE}/seo-pages/upload-hero`,
+      {
+        method: "POST",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+        body: formData,
+      }
+    );
+    return res.imageUrl;
+  },
+
+  async deleteSeoPage(slug: string, token?: string): Promise<boolean> {
+    const cleanSlug = encodeURIComponent(slug.toLowerCase().trim());
+    const res = await safeFetch<{ success: boolean }>(
+      `${API_BASE}/seo-pages/${cleanSlug}`,
+      {
+        method: "DELETE",
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      }
+    );
+    return res.success;
   },
 };

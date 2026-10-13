@@ -27,21 +27,75 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-12">
             <div>
               <h3 className="font-semibold text-white mb-4">Sell Devices</h3>
               <ul className="space-y-3 text-sm">
                 <li>
-                  <Link href="/services/smartphones/apple" className="hover:text-emerald-400 transition">Sell iPhone</Link>
+                  <Link href="/sell/iphone-dubai" className="hover:text-emerald-400 transition">Sell iPhone Dubai</Link>
                 </li>
                 <li>
-                  <Link href="/services/smartphones/samsung" className="hover:text-emerald-400 transition">Sell Samsung</Link>
+                  <Link href="/sell/samsung-dubai" className="hover:text-emerald-400 transition">Sell Samsung Dubai</Link>
                 </li>
                 <li>
-                  <Link href="/services/smartphones/google" className="hover:text-emerald-400 transition">Sell Google Pixel</Link>
+                  <Link href="/sell/used-phone-dubai" className="hover:text-emerald-400 transition">Sell Used Phone</Link>
                 </li>
                 <li>
-                  <Link href="/services" className="hover:text-emerald-400 transition">All Services</Link>
+                  <Link href="/sell/broken-phone-dubai" className="hover:text-emerald-400 transition">Sell Broken Phone</Link>
+                </li>
+                <li>
+                  <Link href="/sell/phone-buyback-dubai" className="hover:text-emerald-400 transition">Phone Buyback</Link>
+                </li>
+                <li>
+                  <Link href="/sell" className="hover:text-emerald-400 transition font-medium">All Services →</Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-white mb-4">Popular Models</h3>
+              <ul className="space-y-3 text-sm">
+                <li>
+                  <Link href="/sell/model/iphone-pro-max" className="hover:text-emerald-400 transition">iPhone Pro Max</Link>
+                </li>
+                <li>
+                  <Link href="/sell/model/iphone-16" className="hover:text-emerald-400 transition">iPhone 16</Link>
+                </li>
+                <li>
+                  <Link href="/sell/model/samsung-s25" className="hover:text-emerald-400 transition">Galaxy S25</Link>
+                </li>
+                <li>
+                  <Link href="/sell/model/samsung-fold" className="hover:text-emerald-400 transition">Galaxy Z Fold</Link>
+                </li>
+                <li>
+                  <Link href="/sell/model/macbook-pro" className="hover:text-emerald-400 transition">MacBook Pro</Link>
+                </li>
+                <li>
+                  <Link href="/sell/model/apple-watch" className="hover:text-emerald-400 transition">Apple Watch</Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-white mb-4">Dubai Pickup</h3>
+              <ul className="space-y-3 text-sm">
+                <li>
+                  <Link href="/sell/location/dubai-marina" className="hover:text-emerald-400 transition">Dubai Marina</Link>
+                </li>
+                <li>
+                  <Link href="/sell/location/downtown-dubai" className="hover:text-emerald-400 transition">Downtown Dubai</Link>
+                </li>
+                <li>
+                  <Link href="/sell/location/jlt" className="hover:text-emerald-400 transition">JLT</Link>
+                </li>
+                <li>
+                  <Link href="/sell/location/business-bay" className="hover:text-emerald-400 transition">Business Bay</Link>
+                </li>
+                <li>
+                  <Link href="/sell/location/deira" className="hover:text-emerald-400 transition">Deira</Link>
+                </li>
+                <li>
+                  <Link href="/sell/location/al-barsha" className="hover:text-emerald-400 transition">Al Barsha</Link>
                 </li>
               </ul>
             </div>

@@ -180,9 +180,54 @@ export const trackEvents = async (req, res) => {
 // Admin Dashboard Analytics Aggregator (Admin API)
 export const getDashboardData = async (req, res) => {
   try {
+    const { timeRange = "all", startDate, endDate } = req.query;
+
+    let start = null;
+    let end = new Date();
+    const now = new Date();
+
+    if (timeRange === "today") {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    } else if (timeRange === "yesterday") {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 0, 0, 0, 0);
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+    } else if (timeRange === "7d") {
+      start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (timeRange === "30d") {
+      start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (timeRange === "this_month") {
+      start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    } else if (timeRange === "last_month") {
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0);
+      end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    } else if ((timeRange === "custom" || !timeRange) && startDate) {
+      start = new Date(startDate);
+      if (endDate) {
+        const parsedEnd = new Date(endDate);
+        parsedEnd.setHours(23, 59, 59, 999);
+        end = parsedEnd;
+      }
+    } else if (startDate) {
+      start = new Date(startDate);
+      if (endDate) {
+        const parsedEnd = new Date(endDate);
+        parsedEnd.setHours(23, 59, 59, 999);
+        end = parsedEnd;
+      }
+    }
+
+    // Build filter objects
+    const sessionDateQuery = start ? { createdAt: { $gte: start, $lte: end } } : {};
+    const eventDateQuery = start ? { timestamp: { $gte: start, $lte: end } } : {};
+    const orderDateQuery = start ? { createdAt: { $gte: start, $lte: end } } : {};
+    const searchDateQuery = start ? { createdAt: { $gte: start, $lte: end } } : {};
+
     // 1. Funnel Aggregation
-    const totalSessions = await AnalyticsSession.countDocuments();
+    const totalSessions = await AnalyticsSession.countDocuments(sessionDateQuery);
     const stageCounts = await AnalyticsSession.aggregate([
+      { $match: sessionDateQuery },
       { $group: { _id: "$maxStageReached", count: { $sum: 1 } } }
     ]);
 
@@ -196,13 +241,19 @@ export const getDashboardData = async (req, res) => {
       valuationCompleted: (stageMap["valuation_completed"] || 0) + (stageMap["offer_viewed"] || 0) + (stageMap["offer_accepted"] || 0) + (stageMap["pickup_requested"] || 0),
       offerViewed: (stageMap["offer_viewed"] || 0) + (stageMap["offer_accepted"] || 0) + (stageMap["pickup_requested"] || 0),
       offerAccepted: (stageMap["offer_accepted"] || 0) + (stageMap["pickup_requested"] || 0),
-      pickupRequested: await Order.countDocuments(),
-      completedSales: await Order.countDocuments({ status: "completed" }),
+      pickupRequested: await Order.countDocuments(orderDateQuery),
+      completedSales: await Order.countDocuments({ ...orderDateQuery, status: "completed" }),
     };
 
     // 2. Top Devices Performance Matrix
     const topDevices = await AnalyticsEvent.aggregate([
-      { $match: { eventName: { $in: ["valuation_completed", "offer_accepted", "pickup_requested"] }, "properties.model": { $exists: true, $ne: "" } } },
+      { 
+        $match: { 
+          ...eventDateQuery, 
+          eventName: { $in: ["valuation_completed", "offer_accepted", "pickup_requested"] }, 
+          "properties.model": { $exists: true, $ne: "" } 
+        } 
+      },
       {
         $group: {
           _id: "$properties.model",
@@ -219,7 +270,7 @@ export const getDashboardData = async (req, res) => {
 
     // 3. Unlisted / Missing Model Search Demand (Sourcing Radar)
     const missingModelSearches = await SearchQueryLog.aggregate([
-      { $match: { hasResults: false } },
+      { $match: { ...searchDateQuery, hasResults: false } },
       { $group: { _id: "$query", count: { $sum: 1 }, lastSearched: { $max: "$createdAt" } } },
       { $sort: { count: -1 } },
       { $limit: 10 }
@@ -227,6 +278,7 @@ export const getDashboardData = async (req, res) => {
 
     // 4. UAE Location Heatmap
     const locationStats = await AnalyticsSession.aggregate([
+      { $match: sessionDateQuery },
       { $group: { _id: "$geo.city", sessions: { $sum: 1 }, converted: { $sum: { $cond: ["$isConverted", 1, 0] } } } },
       { $sort: { sessions: -1 } },
       { $limit: 8 }
@@ -234,6 +286,7 @@ export const getDashboardData = async (req, res) => {
 
     // 5. Traffic Channel & UTM Source Performance
     const trafficSources = await AnalyticsSession.aggregate([
+      { $match: sessionDateQuery },
       {
         $group: {
           _id: "$acquisition.utmSource",
@@ -249,7 +302,7 @@ export const getDashboardData = async (req, res) => {
 
     // 6. Pricing Elasticity Diagnostics
     const pricingElasticity = await AnalyticsEvent.aggregate([
-      { $match: { eventName: "valuation_completed", "properties.calculatedPrice": { $exists: true } } },
+      { $match: { ...eventDateQuery, eventName: "valuation_completed", "properties.calculatedPrice": { $exists: true } } },
       {
         $group: {
           _id: "$properties.condition",
@@ -265,12 +318,13 @@ export const getDashboardData = async (req, res) => {
       alerts.push({
         type: "warning",
         title: "High Unlisted Model Search Demand",
-        message: `Users searched "${missingModelSearches[0]._id}" ${missingModelSearches[0].count} times recently. Consider adding this product model.`,
+        message: `Users searched "${missingModelSearches[0]._id}" ${missingModelSearches[0].count} times in this period. Consider adding this product model.`,
       });
     }
 
     // 8. Ad Campaign & Paid Attribution Breakdown
     const adCampaignStats = await Order.aggregate([
+      { $match: orderDateQuery },
       {
         $group: {
           _id: "$marketingAttribution.source",
@@ -284,9 +338,24 @@ export const getDashboardData = async (req, res) => {
 
     // 9. Privacy & Cookie Consent Opt-in Metrics
     const consentStats = {
-      analyticsOptInCount: await AnalyticsSession.countDocuments({ marketingConsent: true }),
-      essentialOnlyCount: await AnalyticsSession.countDocuments({ marketingConsent: false }),
+      analyticsOptInCount: await AnalyticsSession.countDocuments({ ...sessionDateQuery, marketingConsent: true }),
+      essentialOnlyCount: await AnalyticsSession.countDocuments({ ...sessionDateQuery, marketingConsent: false }),
     };
+
+    // 10. Date-wise Trend Metrics (Daily Timeline Breakdown)
+    const dailyTrend = await AnalyticsSession.aggregate([
+      { $match: sessionDateQuery },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          sessions: { $sum: 1 },
+          leads: { $sum: { $cond: ["$isConverted", 1, 0] } },
+          valuationVolume: { $sum: "$totalPayoutOffered" },
+          avgIntent: { $avg: "$intentScore" }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
 
     const conversionRate = totalSessions > 0 ? ((funnel.pickupRequested / totalSessions) * 100).toFixed(1) : "0.0";
     if (totalSessions > 20 && parseFloat(conversionRate) < 2.0) {
@@ -297,17 +366,17 @@ export const getDashboardData = async (req, res) => {
       });
     }
 
-    // 10. Real Empirical Blog Performance & SEO Analysis Matrix
+    // 11. Real Empirical Blog Performance & SEO Analysis Matrix
     let blogAnalytics = [];
     try {
       const referralEvents = await AnalyticsEvent.aggregate([
-        { $match: { eventName: "blog_cta_clicked", "properties.blogSlug": { $exists: true, $ne: "" } } },
+        { $match: { ...eventDateQuery, eventName: "blog_cta_clicked", "properties.blogSlug": { $exists: true, $ne: "" } } },
         { $group: { _id: "$properties.blogSlug", count: { $sum: 1 } } }
       ]);
       const referralMap = {};
       referralEvents.forEach(r => { if (r._id) referralMap[r._id] = r.count; });
 
-      const allSearchLogs = await SearchQueryLog.find({}).select("query").lean();
+      const allSearchLogs = await SearchQueryLog.find(searchDateQuery).select("query").lean();
       const blogsList = await Blog.find({}).sort({ views: -1 }).limit(10);
 
       blogAnalytics = blogsList.map((blog, idx) => {
@@ -350,14 +419,25 @@ export const getDashboardData = async (req, res) => {
       console.warn("⚠️ Blog analytics aggregation warning:", blogErr.message);
     }
 
+    const valuationVolumeAgg = await AnalyticsSession.aggregate([
+      { $match: sessionDateQuery },
+      { $group: { _id: null, sum: { $sum: "$totalPayoutOffered" } } }
+    ]);
+
     return res.status(200).json({
+      filter: {
+        timeRange,
+        startDate: start ? start.toISOString() : null,
+        endDate: end ? end.toISOString() : null,
+      },
       summary: {
         totalSessions,
         conversionRate: `${conversionRate}%`,
         totalOrders: funnel.pickupRequested,
         completedSales: funnel.completedSales,
-        totalValuationVolumeAED: (await AnalyticsSession.aggregate([{ $group: { _id: null, sum: { $sum: "$totalPayoutOffered" } } }]))[0]?.sum || 0,
+        totalValuationVolumeAED: valuationVolumeAgg[0]?.sum || 0,
       },
+      dailyTrend,
       funnel,
       topDevices,
       missingModelSearches,

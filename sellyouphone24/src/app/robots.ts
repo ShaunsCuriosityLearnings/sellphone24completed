@@ -20,7 +20,15 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/cart/"],
+      disallow: [
+        "/admin",
+        "/admin/",
+        "/cart",
+        "/cart/",
+        "/analytics",
+        "/analytics/",
+        "/api/",
+      ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };

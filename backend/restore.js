@@ -9,6 +9,7 @@ import Product from "./models/Product.js";
 import Blog from "./models/Blog.js";
 import Order from "./models/Order.js";
 import Testimonial from "./models/Testimonial.js";
+import SeoPage from "./models/SeoPage.js";
 
 async function restoreDatabase() {
   console.log("🔄 Starting Clean Hard MongoDB Database Restore from Backup...");
@@ -40,7 +41,8 @@ async function restoreDatabase() {
       Product.deleteMany({}),
       Blog.deleteMany({}),
       Order.deleteMany({}),
-      Testimonial.deleteMany({})
+      Testimonial.deleteMany({}),
+      SeoPage.deleteMany({})
     ]);
 
     // STEP 2: RE-INSERT EXACT BACKUP DATA
@@ -67,6 +69,10 @@ async function restoreDatabase() {
 
     if (Array.isArray(backupData.testimonials) && backupData.testimonials.length > 0) {
       await Testimonial.insertMany(backupData.testimonials);
+    }
+
+    if (Array.isArray(backupData.seoPages) && backupData.seoPages.length > 0) {
+      await SeoPage.insertMany(backupData.seoPages);
     }
 
     const finalCount = await Product.countDocuments();

@@ -20,7 +20,12 @@ import {
   Clock,
   BookOpen,
   Eye,
-  FileText
+  FileText,
+  Calendar,
+  Filter,
+  CalendarDays,
+  Activity,
+  ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 
@@ -38,7 +43,20 @@ interface BlogAnalyticItem {
   seoKeywordMatch: string;
 }
 
+interface DailyTrendItem {
+  _id: string; // "YYYY-MM-DD"
+  sessions: number;
+  leads: number;
+  valuationVolume: number;
+  avgIntent?: number;
+}
+
 interface AnalyticsDashboardData {
+  filter?: {
+    timeRange: string;
+    startDate: string | null;
+    endDate: string | null;
+  };
   summary: {
     totalSessions: number;
     conversionRate: string;
@@ -46,6 +64,7 @@ interface AnalyticsDashboardData {
     completedSales: number;
     totalValuationVolumeAED: number;
   };
+  dailyTrend?: DailyTrendItem[];
   funnel: {
     visitors: number;
     browsed: number;
@@ -99,16 +118,43 @@ interface AnalyticsDashboardData {
   }>;
 }
 
+const DATE_PRESETS = [
+  { id: "all", label: "All Time" },
+  { id: "today", label: "Today" },
+  { id: "yesterday", label: "Yesterday" },
+  { id: "7d", label: "Last 7 Days" },
+  { id: "30d", label: "Last 30 Days" },
+  { id: "this_month", label: "This Month" },
+  { id: "last_month", label: "Last Month" },
+  { id: "custom", label: "Custom Range" },
+];
+
 export default function AnalyticsDashboard() {
   const [data, setData] = useState<AnalyticsDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAnalytics = async () => {
+  // Date Filter State
+  const [timeRange, setTimeRange] = useState<string>("all");
+  const [customStart, setCustomStart] = useState<string>("");
+  const [customEnd, setCustomEnd] = useState<string>("");
+  const [showCustomPicker, setShowCustomPicker] = useState<boolean>(false);
+
+  const fetchAnalytics = async (selectedRange = timeRange, start = customStart, end = customEnd) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/analytics/dashboard", { cache: "no-store" });
+      const params = new URLSearchParams();
+      if (selectedRange && selectedRange !== "all") {
+        params.append("timeRange", selectedRange);
+      }
+      if (selectedRange === "custom" && start) {
+        params.append("startDate", start);
+        if (end) params.append("endDate", end);
+      }
+
+      const queryString = params.toString() ? `?${params.toString()}` : "";
+      const res = await fetch(`/api/analytics/dashboard${queryString}`, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setData(json);
@@ -121,10 +167,26 @@ export default function AnalyticsDashboard() {
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    fetchAnalytics("all");
   }, []);
 
-  if (loading) {
+  const handleRangeChange = (presetId: string) => {
+    setTimeRange(presetId);
+    if (presetId === "custom") {
+      setShowCustomPicker(true);
+    } else {
+      setShowCustomPicker(false);
+      fetchAnalytics(presetId);
+    }
+  };
+
+  const handleApplyCustomDate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customStart) return;
+    fetchAnalytics("custom", customStart, customEnd);
+  };
+
+  if (loading && !data) {
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-4">
         <RefreshCw className="w-8 h-8 text-emerald-500 animate-spin" />
@@ -139,7 +201,7 @@ export default function AnalyticsDashboard() {
         <AlertTriangle className="w-10 h-10 text-rose-500 mx-auto" />
         <p className="text-sm font-bold text-rose-700">{error || "No analytics data available."}</p>
         <button
-          onClick={fetchAnalytics}
+          onClick={() => fetchAnalytics()}
           className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 transition cursor-pointer"
         >
           Retry Connection
@@ -148,7 +210,7 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  const { summary, funnel, topDevices, missingModelSearches, locationStats, trafficSources, blogAnalytics, alerts } = data;
+  const { summary, funnel, topDevices, missingModelSearches, locationStats, trafficSources, blogAnalytics, alerts, dailyTrend } = data;
 
   const funnelSteps = [
     { label: "1. Unique Visitors", count: funnel.visitors, color: "bg-slate-800" },
@@ -160,6 +222,13 @@ export default function AnalyticsDashboard() {
     { label: "7. Pickup Requested", count: funnel.pickupRequested, color: "bg-amber-500" },
     { label: "8. Completed Payout", count: funnel.completedSales, color: "bg-emerald-500" },
   ];
+
+  // Calculate max values for daily trend visualization
+  const maxDailySessions = dailyTrend && dailyTrend.length > 0 
+    ? Math.max(...dailyTrend.map(d => d.sessions), 1) 
+    : 1;
+
+  const activeRangeLabel = DATE_PRESETS.find(p => p.id === timeRange)?.label || "Custom Date Window";
 
   return (
     <div className="space-y-8 w-full text-slate-800">
@@ -173,16 +242,90 @@ export default function AnalyticsDashboard() {
           </div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tight">Analytics & Intelligence Hub</h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Full conversion funnel, blog SEO traction, pricing elasticity, and device demand insights for SellPhoneCash.com
+            Full conversion funnel, date-wise performance, blog SEO traction, and device demand for SellPhoneCash.com
           </p>
         </div>
-        <button
-          onClick={fetchAnalytics}
-          className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md"
-        >
-          <RefreshCw size={14} />
-          Refresh Metrics
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => fetchAnalytics()}
+            disabled={loading}
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer shadow-md disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            {loading ? "Refreshing..." : "Refresh Metrics"}
+          </button>
+        </div>
+      </div>
+
+      {/* DATE FILTER & TIMEFRAME CONTROL BAR */}
+      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+            <Filter size={16} className="text-emerald-600" />
+            <span>Date Range Filter:</span>
+            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full font-extrabold text-[11px]">
+              {activeRangeLabel}
+            </span>
+            {data.filter?.startDate && (
+              <span className="text-slate-400 font-medium text-[11px] hidden lg:inline">
+                ({new Date(data.filter.startDate).toLocaleDateString()} - {data.filter.endDate ? new Date(data.filter.endDate).toLocaleDateString() : "Now"})
+              </span>
+            )}
+          </div>
+
+          {/* PRESETS BUTTONS */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {DATE_PRESETS.map((preset) => {
+              const isActive = timeRange === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  onClick={() => handleRangeChange(preset.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    isActive
+                      ? "bg-slate-900 text-white shadow-xs"
+                      : "bg-slate-100 hover:bg-slate-200/80 text-slate-600"
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* CUSTOM DATE PICKER ROW */}
+        {showCustomPicker && (
+          <form onSubmit={handleApplyCustomDate} className="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Calendar size={14} className="text-slate-400" />
+              <label className="text-xs font-bold text-slate-600">From:</label>
+              <input
+                type="date"
+                value={customStart}
+                onChange={(e) => setCustomStart(e.target.value)}
+                required
+                className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-bold text-slate-600">To:</label>
+              <input
+                type="date"
+                value={customEnd}
+                onChange={(e) => setCustomEnd(e.target.value)}
+                className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !customStart}
+              className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs disabled:opacity-50"
+            >
+              Apply Filter
+            </button>
+          </form>
+        )}
       </div>
 
       {/* SYSTEM ALERTS PANEL */}
@@ -252,7 +395,87 @@ export default function AnalyticsDashboard() {
 
       </div>
 
-      {/* 2. BLOG PERFORMANCE & SEO ANALYSIS MATRIX */}
+      {/* 2. DATE-WISE DAILY METRICS & TIMELINE BREAKDOWN */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-indigo-50 text-indigo-600 shrink-0">
+              <CalendarDays size={22} />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold text-slate-900">Date-wise Daily Activity & Trend Metrics</h3>
+              <p className="text-xs text-slate-500">Day-by-day distribution of traffic sessions, leads converted, and valuation volume</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200 self-start sm:self-auto">
+            {dailyTrend ? `${dailyTrend.length} Days in View` : "0 Days"}
+          </span>
+        </div>
+
+        {dailyTrend && dailyTrend.length > 0 ? (
+          <div className="space-y-4">
+            {/* Table Breakdown */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="p-3">Date</th>
+                    <th className="p-3">Traffic Sessions</th>
+                    <th className="p-3">Session Share Bar</th>
+                    <th className="p-3">Leads / Conversions</th>
+                    <th className="p-3">Valuation Volume</th>
+                    <th className="p-3">Conv. Rate</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  {dailyTrend.map((day) => {
+                    const pct = Math.round((day.sessions / maxDailySessions) * 100);
+                    const dayConvRate = day.sessions > 0 ? ((day.leads / day.sessions) * 100).toFixed(1) : "0.0";
+                    return (
+                      <tr key={day._id} className="hover:bg-slate-50/60 transition">
+                        <td className="p-3 font-bold text-slate-900">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Calendar size={13} className="text-slate-400" />
+                            {day._id}
+                          </span>
+                        </td>
+                        <td className="p-3 font-extrabold text-slate-800">{day.sessions.toLocaleString()}</td>
+                        <td className="p-3 w-44">
+                          <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div
+                              className="bg-indigo-500 h-full rounded-full transition-all duration-500"
+                              style={{ width: `${Math.max(pct, 4)}%` }}
+                            />
+                          </div>
+                        </td>
+                        <td className="p-3 font-bold text-emerald-600">
+                          <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md font-extrabold border border-emerald-100">
+                            {day.leads} leads
+                          </span>
+                        </td>
+                        <td className="p-3 font-bold text-slate-900">
+                          AED {Math.round(day.valuationVolume || 0).toLocaleString()}
+                        </td>
+                        <td className="p-3 font-bold text-slate-600">
+                          {dayConvRate}%
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <Activity className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+            <p className="text-xs font-bold text-slate-600">No session activity recorded for this date window.</p>
+            <p className="text-[11px] text-slate-400 mt-1">Try selecting &quot;All Time&quot; or widening your custom date filter.</p>
+          </div>
+        )}
+      </div>
+
+      {/* 3. BLOG PERFORMANCE & SEO ANALYSIS MATRIX */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
@@ -337,7 +560,7 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* 3. MASTER CONVERSION FUNNEL DIAGRAM */}
+      {/* 4. MASTER CONVERSION FUNNEL DIAGRAM */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -374,7 +597,7 @@ export default function AnalyticsDashboard() {
         </div>
       </div>
 
-      {/* 4. TWO COLUMNS: TOP DEVICES MATRIX & SOURCING RADAR */}
+      {/* 5. TWO COLUMNS: TOP DEVICES MATRIX & SOURCING RADAR */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* TOP DEVICES TABLE */}
@@ -450,7 +673,7 @@ export default function AnalyticsDashboard() {
 
       </div>
 
-      {/* 5. TWO COLUMNS: LOCATION HEAT & TRAFFIC ACQUISITION */}
+      {/* 6. TWO COLUMNS: LOCATION HEAT & TRAFFIC ACQUISITION */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* UAE LOCATION HEATMAP */}
@@ -486,7 +709,7 @@ export default function AnalyticsDashboard() {
             <BarChart3 className="w-5 h-5 text-indigo-500" />
             <div>
               <h3 className="text-base font-extrabold text-slate-900">Acquisition Channel Attribution</h3>
-              <p className="text-xs text-slate-500">Traffic source $\rightarrow$ Valuation $\rightarrow$ Lead conversion</p>
+              <p className="text-xs text-slate-500">Traffic source → Valuation → Lead conversion</p>
             </div>
           </div>
 

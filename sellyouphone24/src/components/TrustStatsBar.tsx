@@ -2,46 +2,46 @@ import { ShieldCheck, Truck, Award, Calendar, PhoneCall, CheckCircle2 } from "lu
 
 export default function TrustStatsBar() {
   return (
-    <section className="bg-slate-900 text-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 shadow-lg my-6 sm:my-8 border border-slate-800 relative overflow-hidden">
+    <section className="bg-slate-900 text-white rounded-2xl sm:rounded-3xl p-3 sm:p-7 shadow-md my-2 sm:my-6 border border-slate-800 relative overflow-hidden">
       
       {/* Background Accent Glow */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* MOBILE LAYOUT (2-Column Grid + Full Width Banner) */}
-      <div className="md:hidden space-y-3">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="md:hidden space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           
           {/* Card 1 */}
-          <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3.5 flex flex-col items-center text-center space-y-1.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-              <PhoneCall size={18} />
+          <div className="bg-slate-800/80 border border-slate-700/60 rounded-xl sm:rounded-2xl p-2.5 flex flex-col items-center text-center space-y-1">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+              <PhoneCall size={16} />
             </div>
-            <h4 className="text-lg font-black text-white">25,000+</h4>
+            <h4 className="text-base font-black text-white">25,000+</h4>
             <p className="text-[10px] text-slate-300 font-semibold leading-tight">Phones Purchased</p>
           </div>
 
           {/* Card 2 */}
-          <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3.5 flex flex-col items-center text-center space-y-1.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-              <Calendar size={18} />
+          <div className="bg-slate-800/80 border border-slate-700/60 rounded-xl sm:rounded-2xl p-2.5 flex flex-col items-center text-center space-y-1">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+              <Calendar size={16} />
             </div>
-            <h4 className="text-lg font-black text-white">Since 2014</h4>
+            <h4 className="text-base font-black text-white">Since 2014</h4>
             <p className="text-[10px] text-slate-300 font-semibold leading-tight">10+ Years Trust</p>
           </div>
 
           {/* Card 3 */}
-          <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3.5 flex flex-col items-center text-center space-y-1.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-              <Award size={18} />
+          <div className="bg-slate-800/80 border border-slate-700/60 rounded-xl sm:rounded-2xl p-2.5 flex flex-col items-center text-center space-y-1">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+              <Award size={16} />
             </div>
             <h4 className="text-xs font-bold text-emerald-400">They&apos;ve Survived</h4>
             <p className="text-[10px] text-slate-300 font-semibold leading-tight">Built on Reliability</p>
           </div>
 
           {/* Card 4 */}
-          <div className="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-3.5 flex flex-col items-center text-center space-y-1.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-              <ShieldCheck size={18} />
+          <div className="bg-slate-800/80 border border-slate-700/60 rounded-xl sm:rounded-2xl p-2.5 flex flex-col items-center text-center space-y-1">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+              <ShieldCheck size={16} />
             </div>
             <h4 className="text-xs font-bold text-white">Licensed UAE</h4>
             <p className="text-[10px] text-slate-300 font-semibold leading-tight">Official Business</p>
@@ -50,9 +50,9 @@ export default function TrustStatsBar() {
         </div>
 
         {/* Card 5: Full Width Mobile Feature Banner */}
-        <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-2xl p-3.5 flex items-center justify-center gap-3 text-center">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0 font-bold">
-            <Truck size={16} />
+        <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl sm:rounded-2xl p-2.5 flex items-center justify-center gap-2.5 text-center">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0 font-bold">
+            <Truck size={14} />
           </div>
           <div className="text-left">
             <h4 className="text-xs font-extrabold text-white">Free Doorstep Pickup</h4>
