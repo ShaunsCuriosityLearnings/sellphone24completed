@@ -207,7 +207,7 @@ export default function ModelValuationWidget({ product, modelName, brand }: Prop
               </button>
             )}
 
-            {product.images?.sideView && (
+            {imagesMap.sideView && (
               <button
                 type="button"
                 onClick={() => setActiveImageKey("sideView")}
