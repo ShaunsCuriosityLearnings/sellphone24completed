@@ -18,6 +18,8 @@ import SeoInternalLinks from "@/components/SeoInternalLinks";
 import TrustStatsBar from "@/components/TrustStatsBar";
 import WhyPeopleChooseSection from "@/components/WhyPeopleChooseSection";
 import ModelValuationWidget from "@/components/ModelValuationWidget";
+import ProductSpecificationTabs from "@/components/ProductSpecificationTabs";
+import DeviceCategoryCards from "@/components/DeviceCategoryCards";
 import {
   ShieldCheck,
   Truck,
@@ -197,7 +199,16 @@ export default async function ModelPage({ params }: Props) {
       {/* 2. TRUST STATS BAR */}
       <TrustStatsBar />
 
-      {/* 3. CONDITION PAYOUT BREAKDOWN TABLE (2-CARDS VISIBLE ON MOBILE) */}
+      {/* 3. PRODUCT SPECIFICATIONS & TECHNICAL DETAILS (MATCHES REFERENCE IMAGE) */}
+      <ProductSpecificationTabs
+        modelName={page.modelName}
+        brand={page.brand}
+        category={page.categorySlug}
+        description={page.subtitle}
+        faqs={page.faqs}
+      />
+
+      {/* 4. CONDITION PAYOUT BREAKDOWN TABLE (2-CARDS VISIBLE ON MOBILE) */}
       <section className="bg-white border border-slate-200/80 rounded-2xl sm:rounded-3xl p-3 sm:p-6 shadow-xs space-y-2 sm:space-y-4">
         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
           <div>
@@ -209,8 +220,9 @@ export default async function ModelPage({ params }: Props) {
               How We Value Your {page.modelName}
             </h2>
           </div>
-          <span className="sm:hidden text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold shrink-0">
-            Swipe →
+          <span className="sm:hidden text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold shrink-0 inline-flex items-center gap-0.5">
+            <span>Swipe</span>
+            <ArrowRight size={10} />
           </span>
         </div>
 
@@ -390,7 +402,10 @@ export default async function ModelPage({ params }: Props) {
         </section>
       )}
 
-      {/* 6. FAQ ACCORDION SECTION */}
+      {/* 6. MORE DEVICE CATEGORIES CARDS SECTION (MATCHES USER REQUEST) */}
+      <DeviceCategoryCards currentCategory={page.categorySlug} />
+
+      {/* 7. FAQ ACCORDION SECTION */}
       <SeoFaqSection
         faqs={page.faqs}
         title={`Frequently Asked Questions About Selling ${page.modelName}`}

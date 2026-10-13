@@ -3,19 +3,51 @@
 import useCartStore from "@/app/stores/cartStore";
 import { ProductType } from "@/types";
 import { conditions } from "@/data/mockData";
-import { BadgeCheck, Info, Scale, ShoppingBag, Zap } from "lucide-react";
+import { 
+  BadgeCheck, 
+  Info, 
+  Scale, 
+  ShoppingBag, 
+  Zap, 
+  CheckCircle2, 
+  Minus, 
+  Plus, 
+  MessageCircle, 
+  Check, 
+  Clock 
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { analytics } from "@/lib/analytics";
 import { pushDataLayer } from "@/lib/gtm";
 
+const COLOR_SWATCH_MAP: Record<string, string> = {
+  black: "bg-slate-900",
+  "space black": "bg-slate-900",
+  "space gray": "bg-slate-700",
+  gray: "bg-slate-600",
+  silver: "bg-slate-200 border-slate-300",
+  white: "bg-white border-slate-300",
+  gold: "bg-amber-200",
+  blue: "bg-blue-600",
+  "sky blue": "bg-sky-400",
+  "deep purple": "bg-purple-900",
+  purple: "bg-purple-600",
+  green: "bg-emerald-600",
+  pink: "bg-pink-300",
+  red: "bg-rose-600",
+  titanium: "bg-stone-400",
+  "natural titanium": "bg-stone-300",
+  "desert titanium": "bg-amber-100 border-amber-300",
+};
+
 const ProductInteraction = ({ product }: { product: ProductType }) => {
   const router = useRouter();
   const { addToCart } = useCartStore();
 
   const [selectedStorage, setSelectedStorage] = useState(product.storages[0]?.size || "");
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
+  const [selectedColor, setSelectedColor] = useState(product.colors[0] || "Standard");
   const [selectedCondition, setSelectedCondition] = useState(conditions[0].slug);
   const [quantity, setQuantity] = useState(1);
 
@@ -25,7 +57,7 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
 
   // Calculate live expected payout quote
   const basePrice = product.basePrice;
-  const storageBoost = product.storages.find(s => s.size === selectedStorage)?.priceBoost || 0;
+  const storageBoost = product.storages.find((s) => s.size === selectedStorage)?.priceBoost || 0;
   const unitPrice = Math.round((basePrice + storageBoost) * conditionMultiplier);
   const totalPrice = unitPrice * quantity;
 
@@ -55,7 +87,7 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
         currency: "AED",
       });
     }
-  }, [selectedStorage, selectedColor, selectedCondition, unitPrice, product, quantity, totalPrice]);
+  }, [selectedStorage, selectedColor, selectedCondition, unitPrice, product, quantity, totalPrice, activeCondition.name]);
 
   const handleStorageChange = (storage: string) => {
     setSelectedStorage(storage);
@@ -138,132 +170,217 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
     router.push("/cart?step=1");
   };
 
+  const whatsappMessage = encodeURIComponent(
+    `Hi SellPhoneCash! I want to sell my ${product.brand} ${product.name} (${selectedStorage}, Color: ${selectedColor}, Condition: ${activeCondition.name}, Qty: ${quantity}) for the locked price of AED ${totalPrice.toLocaleString()} in Dubai. Please schedule my free 3-hour doorstep collection.`
+  );
+
   return (
     <div className="flex flex-col gap-6 text-slate-800">
       
-      {/* 1. SELECT SPECIFICATION */}
-      <div>
-        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">1. Select Variant / Specification</h3>
+      {/* 1. SELECT SPECIFICATION / STORAGE */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-xs">
+          <h3 className="font-bold text-slate-800 uppercase tracking-wider">
+            1. Select Storage / Variant
+          </h3>
+          <span className="font-semibold text-slate-500">{selectedStorage}</span>
+        </div>
+
         <div className="flex flex-wrap gap-2.5">
           {product.storages.map((storageObj) => {
             const storage = storageObj.size;
             const boost = storageObj.priceBoost || 0;
+            const isSelected = selectedStorage === storage;
+
             return (
               <button
                 key={storage}
+                type="button"
                 onClick={() => handleStorageChange(storage)}
-                className={`px-4 py-3 rounded-2xl border text-sm font-semibold transition cursor-pointer flex flex-col items-center min-w-[70px] ${
-                  selectedStorage === storage
-                    ? "border-emerald-500 bg-emerald-50/40 text-slate-900"
-                    : "border-slate-200 bg-white hover:border-slate-300 text-slate-600"
+                className={`px-4 py-3 rounded-2xl border text-sm font-semibold transition cursor-pointer flex flex-col items-center min-w-[76px] ${
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50 text-slate-950 font-black shadow-xs ring-1 ring-emerald-500/20"
+                    : "border-slate-200 bg-white hover:border-slate-300 text-slate-700"
                 }`}
               >
                 <span>{storage}</span>
-                {boost > 0 && <span className="text-[9px] text-emerald-600 font-bold mt-0.5">+AED {boost}</span>}
+                {boost > 0 ? (
+                  <span className="text-[10px] text-emerald-600 font-bold mt-0.5">+AED {boost}</span>
+                ) : (
+                  <span className="text-[10px] text-slate-400 mt-0.5">Base</span>
+                )}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 2. SELECT COLOR */}
-      <div>
-        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">2. Select Color</h3>
+      {/* 2. PICK A COLOR (SWATCHES MATCHING REFERENCE IMAGE) */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-xs">
+          <h3 className="font-bold text-slate-800 uppercase tracking-wider">
+            2. Pick a Color
+          </h3>
+          <span className="font-semibold text-emerald-600">{selectedColor}</span>
+        </div>
+
         <div className="flex flex-wrap gap-2">
-          {product.colors.map((color) => (
-            <button
-              key={color}
-              onClick={() => setSelectedColor(color)}
-              className={`px-4 py-2.5 rounded-xl border text-xs font-semibold transition cursor-pointer ${
-                selectedColor === color
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-200 bg-white hover:border-slate-300 text-slate-600"
-              }`}
-            >
-              {color}
-            </button>
-          ))}
+          {product.colors.map((color) => {
+            const isSelected = selectedColor === color;
+            const lower = color.toLowerCase();
+            const swatchClass = COLOR_SWATCH_MAP[lower] || "bg-slate-400";
+
+            return (
+              <button
+                key={color}
+                type="button"
+                onClick={() => setSelectedColor(color)}
+                className={`group flex items-center gap-2 px-3.5 py-2 rounded-xl border text-xs font-semibold transition cursor-pointer ${
+                  isSelected
+                    ? "border-slate-900 bg-slate-900 text-white shadow-xs"
+                    : "border-slate-200 bg-white hover:border-slate-300 text-slate-700"
+                }`}
+              >
+                <span
+                  className={`w-3.5 h-3.5 rounded-full border ${swatchClass} shadow-xs shrink-0`}
+                />
+                <span>{color}</span>
+                {isSelected && <Check size={12} className="text-white shrink-0 ml-0.5" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* 3. SELECT CONDITION */}
-      <div>
-        <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-          3. Device Condition
+      <div className="space-y-2">
+        <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+          <span>3. Device Condition</span>
           <span className="text-[10px] text-slate-400 font-normal normal-case flex items-center gap-0.5">
             <Info size={12} />
-            Affects overall valuation
+            Affects overall payout value
           </span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {conditions.map((cond) => (
-            <button
-              key={cond.slug}
-              type="button"
-              onClick={() => handleConditionChange(cond.slug)}
-              className={`p-4 rounded-2xl border text-left transition flex flex-col gap-1 cursor-pointer ${
-                selectedCondition === cond.slug
-                  ? "border-emerald-500 bg-emerald-50/30"
-                  : "border-slate-200 bg-white hover:border-slate-300"
-              }`}
-            >
-              <div className="flex justify-between items-center w-full">
-                <span className="font-bold text-sm text-slate-800">{cond.name}</span>
-                <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-500">
-                  {Math.round(cond.multiplier * 100)}% Value
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 leading-normal">{cond.description}</p>
-            </button>
-          ))}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {conditions.map((cond) => {
+            const isSelected = selectedCondition === cond.slug;
+            return (
+              <button
+                key={cond.slug}
+                type="button"
+                onClick={() => handleConditionChange(cond.slug)}
+                className={`p-3.5 rounded-2xl border text-left transition flex flex-col gap-1 cursor-pointer ${
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50/50 ring-1 ring-emerald-500/20"
+                    : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                <div className="flex justify-between items-center w-full">
+                  <span className="font-bold text-xs sm:text-sm text-slate-900 flex items-center gap-1.5">
+                    {cond.name}
+                    {isSelected && <CheckCircle2 size={13} className="text-emerald-600" />}
+                  </span>
+                  <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-600">
+                    {Math.round(cond.multiplier * 100)}% Value
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 leading-normal">{cond.description}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* LIVE VALUATION BLOCK */}
-      <div className="border-2 border-emerald-500/20 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 rounded-3xl p-6 space-y-4">
-        <div className="flex justify-between items-center">
+      {/* 4. LIVE VALUATION BANNER & QUANTITY STEPPER */}
+      <div className="border border-emerald-500/30 bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white rounded-3xl p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Estimated Valuation</p>
-            <h2 className="text-3xl font-extrabold text-emerald-600 mt-1">
-              AED {totalPrice.toLocaleString()}
-            </h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">Price locked for 7 days after request</p>
-          </div>
-          <div className="hidden sm:block text-right">
-            <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-100/50 px-2.5 py-1 rounded-full">
-              <BadgeCheck size={12} />
-              Best Value Guarantee
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Estimated Valuation</p>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <h2 className="text-3xl sm:text-4xl font-black text-emerald-600 tracking-tight">
+                AED {totalPrice.toLocaleString()}
+              </h2>
+              <span className="text-xs font-semibold text-slate-400 line-through">
+                AED {Math.round(totalPrice * 1.18).toLocaleString()}
+              </span>
             </div>
           </div>
+
+          <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/60 px-3 py-1 rounded-full">
+            <Clock size={12} />
+            <span>Price Locked for 7 Days</span>
+          </div>
         </div>
 
-        {/* QUANTITY SELECTOR */}
-        <div className="flex items-center gap-3 pt-2">
-          <span className="text-xs font-semibold text-slate-500">Quantity to Sell:</span>
-          <select
-            value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
-            className="border border-slate-200 rounded-xl px-3 py-1.5 text-xs bg-white text-slate-800"
+        {/* Quantity Stepper matching Reference Design */}
+        <div className="flex items-center justify-between pt-2 border-t border-emerald-200/50">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-slate-700">Quantity to Sell:</span>
+            <div className="flex items-center border border-slate-200 rounded-xl bg-white overflow-hidden shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+                className="p-2 hover:bg-slate-50 text-slate-600 disabled:opacity-40 transition cursor-pointer"
+                aria-label="Decrease quantity"
+              >
+                <Minus size={14} />
+              </button>
+              <span className="px-3 py-1 font-bold text-xs text-slate-900 min-w-[28px] text-center">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                disabled={quantity >= 10}
+                className="p-2 hover:bg-slate-50 text-slate-600 disabled:opacity-40 transition cursor-pointer"
+                aria-label="Increase quantity"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+          </div>
+
+          <span className="text-[11px] font-medium text-slate-500 hidden sm:inline">
+            Free collection for all quantities
+          </span>
+        </div>
+      </div>
+
+      {/* 5. DUAL ACTION BUTTONS + WHATSAPP */}
+      <div className="space-y-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={handleSellInstantly}
+            className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 py-3.5 rounded-2xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-500/15"
           >
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
+            <Zap size={16} />
+            <span>Sell Now &amp; Book Pickup</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleAddToSellList}
+            className="w-full bg-white hover:bg-slate-50 border-2 border-slate-900 text-slate-900 py-3.5 rounded-2xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <ShoppingBag size={16} />
+            <span>Add to Sell List</span>
+          </button>
         </div>
+
+        <a
+          href={`https://wa.me/971555549817?text=${whatsappMessage}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+        >
+          <MessageCircle size={15} className="text-emerald-600" />
+          <span>Need help? Chat on WhatsApp for instant quote</span>
+        </a>
       </div>
 
-      {/* ACTION BUTTONS */}
-      <div className="pt-2">
-        <button
-          onClick={handleSellInstantly}
-          className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-4 rounded-2xl font-bold transition flex items-center justify-center gap-2 cursor-pointer text-sm shadow-lg shadow-emerald-500/10"
-        >
-          <Zap size={18} />
-          Sell Now & Book Pickup
-        </button>
-      </div>
     </div>
   );
 };

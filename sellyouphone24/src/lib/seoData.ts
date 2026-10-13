@@ -510,12 +510,26 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     metaDescription: "Sell your iPhone 17 in Dubai for the highest cash payout. Free 3-hour doorstep collection across Dubai, instant cash in hand or bank transfer.",
     h1: "Sell iPhone 17 in Dubai for Top Cash",
     subtitle: "Upgrade or liquidate your Apple iPhone 17. Instant valuation with zero hidden fees and free doorstep pickup anywhere in Dubai.",
-    targetKeywords: ["sell iphone 17 dubai", "iphone 17 buyback dubai", "trade in iphone 17 uae", "cash for iphone 17 dubai"],
+    targetKeywords: [
+      "sell iphone 17 dubai",
+      "iphone 17 buyback dubai",
+      "trade in iphone 17 uae",
+      "cash for iphone 17 dubai",
+      "sell used iphone 17 price uae",
+      "sell broken iphone 17 dubai marina",
+      "instant cash for iphone 17 abu dhabi"
+    ],
     categorySlug: "smartphones",
     catalogLink: "/services/smartphones/apple",
     heroBadge: "Flagship Buyback Program",
     estimatedPriceRange: "AED 2,800 - AED 4,600",
-    specsSummary: ["A19 Bionic Processor", "ProMotion 120Hz Display", "Advanced Dual/Triple Camera", "USB-C Fast Charging", "Titanium Frame"],
+    specsSummary: [
+      "A19 Bionic Processor with Neural AI Engine",
+      "ProMotion 120Hz Super Retina XDR OLED",
+      "Advanced 48MP Fusion Triple Camera System",
+      "Fast MagSafe & USB-C 30W Charging",
+      "Aerospace-Grade Titanium Frame & Ceramic Shield"
+    ],
     conditionPrices: [
       { condition: "Brand New Sealed", estimate: "AED 3,800 - 4,600", notes: "Original box unopened with factory seal intact." },
       { condition: "Flawless / Like New", estimate: "AED 3,400 - 4,100", notes: "No scratches, 100% battery capacity, all sensors perfect." },
@@ -524,9 +538,34 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     ],
     whySellWithUs: ["Guaranteed 7-day price lock", "Free 3-hour doorstep collection in Dubai", "Instant cash or bank transfer", "100% certified data wipe"],
     faqs: [
-      { question: "How much is my iPhone 17 worth in Dubai?", answer: "Valuation depends on storage capacity (128GB, 256GB, 512GB) and cosmetic condition. Payouts range from AED 2,800 up to AED 4,600." },
-      { question: "Can I sell a sealed iPhone 17 received as a gift?", answer: "Yes! Brand new sealed devices fetch top market premiums on SellPhoneCash." },
-      { question: "Do you pick up in Dubai Marina or Downtown?", answer: "Yes, our couriers reach anywhere in Dubai within 3 hours of booking." }
+      { 
+        question: "How much cash will I get when selling my iPhone 17 in Dubai?", 
+        answer: "Valuation for an iPhone 17 in Dubai depends on your storage capacity (128GB, 256GB, 512GB, or 1TB) and cosmetic grade (Sealed, Flawless, Good, or Cracked). Payouts currently range between AED 2,800 up to AED 4,600. Lock your price online today for 7 days guaranteed." 
+      },
+      { 
+        question: "Can I sell a brand new sealed iPhone 17 or gifted device?", 
+        answer: "Yes! Brand new factory-sealed Apple iPhone 17 models command the highest buyback premium in the UAE. Our technician checks the serial number and hands over instant cash on the spot." 
+      },
+      { 
+        question: "Can I sell an iPhone 17 with a cracked screen or damaged back glass in UAE?", 
+        answer: "Absolutely. Select the 'Cracked / Damaged' condition in our online valuation tool. As long as the device powers on and the motherboard is intact, we provide a fair, transparent cash buyout with zero haggling." 
+      },
+      { 
+        question: "How does the free 3-hour doorstep pickup work in Dubai and Abu Dhabi?", 
+        answer: "Once you lock your quote online, our licensed field technician contacts you via WhatsApp or call and reaches your home, office, or coffee shop anywhere in Dubai (Dubai Marina, Downtown, Business Bay, JLT, Deira, Silicon Oasis) or Abu Dhabi within 3 hours." 
+      },
+      { 
+        question: "How will I be paid for my iPhone 17 upon collection?", 
+        answer: "Payment is issued immediately on the spot upon a quick 2-minute diagnostic review. You can choose physical UAE Dirhams (AED) cash in hand or an instant local bank transfer directly to your UAE bank account." 
+      },
+      { 
+        question: "What should I do before handing over my iPhone 17?", 
+        answer: "Before pickup: 1) Back up your data to iCloud or computer, 2) Sign out of your Apple ID / iCloud and turn off 'Find My iPhone', and 3) Perform a factory reset. Our technician can also guide you safely through this at your doorstep." 
+      },
+      { 
+        question: "Why choose SellPhoneCash over Dubizzle or Apple Trade-in for iPhone 17?", 
+        answer: "Unlike Dubizzle, you avoid endless bargaining, time wasters, fake note risks, and meeting strangers. Unlike Apple Trade-In which pays store credits for future purchases, SellPhoneCash gives you instant spendable cash or direct bank wire with free home pickup." 
+      }
     ],
     relatedModels: ["iphone-pro-max", "iphone-16", "iphone-15", "samsung-s26"],
     relatedLocations: ["dubai-marina", "downtown-dubai", "business-bay", "jlt"]
@@ -1338,9 +1377,30 @@ export function resolveModelPage(rawSlug: string): ModelPageData {
     ],
     whySellWithUs: ["Guaranteed 7-day price lock", "Free 3-hour doorstep collection in Dubai", "Instant cash or bank transfer", "100% certified data wipe"],
     faqs: [
-      { question: `How much can I get when selling my ${formatted} in Dubai?`, answer: `Valuations depend on storage capacity and cosmetic grade. SellPhoneCash checks real-time Dubai secondary market demand to guarantee you the top rate.` },
-      { question: `How fast is collection in Dubai?`, answer: `Our licensed field technician meets you at your home, office, or coffee shop anywhere in Dubai within 3 hours.` },
-      { question: `How will I be paid?`, answer: `Choose immediate physical cash in UAE Dirhams (AED) or an instant bank wire directly to your UAE account upon diagnostic review.` }
+      { 
+        question: `How much cash can I get when selling my ${formatted} in Dubai & UAE?`, 
+        answer: `Valuations depend on your device storage capacity, cosmetic grade, and operational condition. SellPhoneCash checks live UAE secondary market rates to ensure you receive the top cash payout with a guaranteed 7-day price lock.` 
+      },
+      { 
+        question: `Can I sell a broken, scratched, or cracked ${formatted} in Dubai?`, 
+        answer: `Yes, we buy devices in any state—including cracked screens, scratched bezels, back glass damage, or degraded batteries. As long as the motherboard functions, we will provide an immediate cash offer.` 
+      },
+      { 
+        question: `How fast is doorstep collection for ${formatted} across Dubai?`, 
+        answer: `Our certified field technician meets you at your home, workplace, or cafe anywhere in Dubai (Dubai Marina, Downtown, Business Bay, Deira, JLT) or Abu Dhabi in under 3 hours.` 
+      },
+      { 
+        question: `How will I be paid for my ${formatted} on the spot?`, 
+        answer: `Choose immediate physical AED cash in hand or an instant direct bank transfer to your UAE account immediately following a 2-minute diagnostic review.` 
+      },
+      { 
+        question: `What steps should I take before selling my ${formatted}?`, 
+        answer: `Please back up your personal files, log out of your iCloud or Google account, remove all lock screen passcodes, and perform a factory reset. Our technician can also assist you on the spot.` 
+      },
+      { 
+        question: `Why choose SellPhoneCash over Dubizzle or retail store trade-in?`, 
+        answer: `With SellPhoneCash, you avoid lowball bargainers, fake banknote hazards, and meeting random strangers. You receive verified instant cash at your doorstep with zero inspection fees.` 
+      }
     ],
     relatedModels: ["iphone-16-pro-max", "iphone-17", "samsung-s26", "macbook-pro"],
     relatedLocations: ["dubai-marina", "downtown-dubai", "business-bay", "jlt"]
