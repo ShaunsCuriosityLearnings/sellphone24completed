@@ -175,43 +175,25 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
   );
 
   return (
-    <div className="flex flex-col gap-6 text-slate-800">
+    <div className="flex flex-col gap-5 text-slate-800">
       
-      {/* 1. SELECT SPECIFICATION / STORAGE */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-center text-xs">
-          <h3 className="font-bold text-slate-800 uppercase tracking-wider">
-            1. Select Storage / Variant
-          </h3>
-          <span className="font-semibold text-slate-500">{selectedStorage}</span>
+      {/* 1. LIVE VALUATION PRICE BANNER (MATCHING REFERENCE IMAGE AT TOP) */}
+      <div className="border border-emerald-500/30 bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Instant Guaranteed Cash Offer</p>
+          <div className="flex items-baseline gap-2.5 mt-0.5">
+            <h2 className="text-3xl sm:text-4xl font-black text-emerald-600 tracking-tight">
+              AED {totalPrice.toLocaleString()}
+            </h2>
+            <span className="text-sm font-semibold text-slate-400 line-through">
+              AED {Math.round(totalPrice * 1.18).toLocaleString()}
+            </span>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-2.5">
-          {product.storages.map((storageObj) => {
-            const storage = storageObj.size;
-            const boost = storageObj.priceBoost || 0;
-            const isSelected = selectedStorage === storage;
-
-            return (
-              <button
-                key={storage}
-                type="button"
-                onClick={() => handleStorageChange(storage)}
-                className={`px-4 py-3 rounded-2xl border text-sm font-semibold transition cursor-pointer flex flex-col items-center min-w-[76px] ${
-                  isSelected
-                    ? "border-emerald-500 bg-emerald-50 text-slate-950 font-black shadow-xs ring-1 ring-emerald-500/20"
-                    : "border-slate-200 bg-white hover:border-slate-300 text-slate-700"
-                }`}
-              >
-                <span>{storage}</span>
-                {boost > 0 ? (
-                  <span className="text-[10px] text-emerald-600 font-bold mt-0.5">+AED {boost}</span>
-                ) : (
-                  <span className="text-[10px] text-slate-400 mt-0.5">Base</span>
-                )}
-              </button>
-            );
-          })}
+        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-100/70 px-3 py-1.5 rounded-xl shadow-2xs">
+          <Clock size={13} />
+          <span>Price Locked for 7 Days</span>
         </div>
       </div>
 
@@ -219,7 +201,7 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
       <div className="space-y-2">
         <div className="flex justify-between items-center text-xs">
           <h3 className="font-bold text-slate-800 uppercase tracking-wider">
-            2. Pick a Color
+            Pick a Color
           </h3>
           <span className="font-semibold text-emerald-600">{selectedColor}</span>
         </div>
@@ -252,17 +234,54 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
         </div>
       </div>
 
-      {/* 3. SELECT CONDITION */}
+      {/* 3. SELECT SPECIFICATION / STORAGE */}
       <div className="space-y-2">
-        <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-          <span>3. Device Condition</span>
-          <span className="text-[10px] text-slate-400 font-normal normal-case flex items-center gap-0.5">
-            <Info size={12} />
-            Affects overall payout value
-          </span>
-        </h3>
+        <div className="flex justify-between items-center text-xs">
+          <h3 className="font-bold text-slate-800 uppercase tracking-wider">
+            Storage Capacity
+          </h3>
+          <span className="font-semibold text-slate-500">{selectedStorage}</span>
+        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {product.storages.map((storageObj) => {
+            const storage = storageObj.size;
+            const boost = storageObj.priceBoost || 0;
+            const isSelected = selectedStorage === storage;
+
+            return (
+              <button
+                key={storage}
+                type="button"
+                onClick={() => handleStorageChange(storage)}
+                className={`py-2.5 px-3 rounded-2xl border text-center transition cursor-pointer font-bold text-xs sm:text-sm ${
+                  isSelected
+                    ? "border-emerald-500 bg-emerald-50 text-slate-950 font-black shadow-xs ring-1 ring-emerald-500/20"
+                    : "border-slate-200 bg-white hover:border-slate-300 text-slate-700"
+                }`}
+              >
+                <div>{storage}</div>
+                {boost > 0 ? (
+                  <span className="text-[10px] text-emerald-600 font-bold mt-0.5 block">+AED {boost}</span>
+                ) : (
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">Standard</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 4. SELECT CONDITION */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-xs">
+          <h3 className="font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+            <span>Device Condition</span>
+          </h3>
+          <span className="text-xs font-bold text-emerald-600">{activeCondition.name}</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {conditions.map((cond) => {
             const isSelected = selectedCondition === cond.slug;
             return (
@@ -270,82 +289,65 @@ const ProductInteraction = ({ product }: { product: ProductType }) => {
                 key={cond.slug}
                 type="button"
                 onClick={() => handleConditionChange(cond.slug)}
-                className={`p-3.5 rounded-2xl border text-left transition flex flex-col gap-1 cursor-pointer ${
+                className={`p-2.5 rounded-2xl border text-left transition flex flex-col justify-between cursor-pointer ${
                   isSelected
                     ? "border-emerald-500 bg-emerald-50/50 ring-1 ring-emerald-500/20"
                     : "border-slate-200 bg-white hover:border-slate-300"
                 }`}
               >
-                <div className="flex justify-between items-center w-full">
-                  <span className="font-bold text-xs sm:text-sm text-slate-900 flex items-center gap-1.5">
-                    {cond.name}
-                    {isSelected && <CheckCircle2 size={13} className="text-emerald-600" />}
-                  </span>
-                  <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-bold text-slate-600">
+                <div>
+                  <div className="font-bold text-xs text-slate-900 flex items-center justify-between">
+                    <span className="truncate">{cond.name}</span>
+                    {isSelected && <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">
                     {Math.round(cond.multiplier * 100)}% Value
-                  </span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-500 leading-normal">{cond.description}</p>
               </button>
             );
           })}
         </div>
+
+        {/* Condition hint */}
+        <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 flex items-start gap-2 text-xs text-slate-600">
+          <Info size={14} className="text-emerald-600 shrink-0 mt-0.5" />
+          <span>{activeCondition.description}</span>
+        </div>
       </div>
 
-      {/* 4. LIVE VALUATION BANNER & QUANTITY STEPPER */}
-      <div className="border border-emerald-500/30 bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white rounded-3xl p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Estimated Valuation</p>
-            <div className="flex items-baseline gap-2 mt-0.5">
-              <h2 className="text-3xl sm:text-4xl font-black text-emerald-600 tracking-tight">
-                AED {totalPrice.toLocaleString()}
-              </h2>
-              <span className="text-xs font-semibold text-slate-400 line-through">
-                AED {Math.round(totalPrice * 1.18).toLocaleString()}
-              </span>
-            </div>
-          </div>
-
-          <div className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-100/60 px-3 py-1 rounded-full">
-            <Clock size={12} />
-            <span>Price Locked for 7 Days</span>
+      {/* 5. QUANTITY STEPPER */}
+      <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-700">Quantity:</span>
+          <div className="flex items-center border border-slate-200 rounded-xl bg-white overflow-hidden shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+              className="p-2 hover:bg-slate-50 text-slate-600 disabled:opacity-40 transition cursor-pointer"
+              aria-label="Decrease quantity"
+            >
+              <Minus size={14} />
+            </button>
+            <span className="px-3 py-1 font-bold text-xs text-slate-900 min-w-[28px] text-center">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+              disabled={quantity >= 10}
+              className="p-2 hover:bg-slate-50 text-slate-600 disabled:opacity-40 transition cursor-pointer"
+              aria-label="Increase quantity"
+            >
+              <Plus size={14} />
+            </button>
           </div>
         </div>
 
-        {/* Quantity Stepper matching Reference Design */}
-        <div className="flex items-center justify-between pt-2 border-t border-emerald-200/50">
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-slate-700">Quantity to Sell:</span>
-            <div className="flex items-center border border-slate-200 rounded-xl bg-white overflow-hidden shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1}
-                className="p-2 hover:bg-slate-50 text-slate-600 disabled:opacity-40 transition cursor-pointer"
-                aria-label="Decrease quantity"
-              >
-                <Minus size={14} />
-              </button>
-              <span className="px-3 py-1 font-bold text-xs text-slate-900 min-w-[28px] text-center">
-                {quantity}
-              </span>
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-                disabled={quantity >= 10}
-                className="p-2 hover:bg-slate-50 text-slate-600 disabled:opacity-40 transition cursor-pointer"
-                aria-label="Increase quantity"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
-          </div>
-
-          <span className="text-[11px] font-medium text-slate-500 hidden sm:inline">
-            Free collection for all quantities
-          </span>
-        </div>
+        <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">
+          Guaranteed 7-Day Offer
+        </span>
       </div>
 
       {/* 5. DUAL ACTION BUTTONS + WHATSAPP */}
