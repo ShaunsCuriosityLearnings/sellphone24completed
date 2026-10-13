@@ -335,10 +335,22 @@ export default function ProductSpecificationTabs({
           <h3 className="text-base sm:text-lg font-black text-slate-900">
             About Selling Your {brand} {modelName} in Dubai &amp; UAE
           </h3>
-          <p>
-            {description ||
-              `SellPhoneCash provides an effortless, transparent way to liquidate or upgrade your pre-owned ${brand} ${modelName}. Forget dealing with unpredictable classified listings, haggling WhatsApp messages, or lowball offline street shops in Deira. Our live automated valuation algorithm tracks current secondary market prices in the UAE to guarantee you the highest legitimate payout.`}
-          </p>
+          <div className="space-y-3 leading-relaxed text-slate-600">
+            {description
+              ? description
+                  .replace(/###\s*/g, "\n\n")
+                  .replace(/\*\*/g, "")
+                  .split("\n\n")
+                  .filter((p) => p.trim().length > 0)
+                  .map((paragraph, idx) => (
+                    <p key={idx}>{paragraph.trim()}</p>
+                  ))
+              : (
+                <p>
+                  SellPhoneCash provides an effortless, transparent way to liquidate or upgrade your pre-owned {brand} {modelName}. Forget dealing with unpredictable classified listings, haggling WhatsApp messages, or lowball offline street shops in Deira. Our live automated valuation algorithm tracks current secondary market prices in the UAE to guarantee you the highest legitimate payout.
+                </p>
+              )}
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5">

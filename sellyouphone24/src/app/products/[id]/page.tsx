@@ -288,7 +288,9 @@ const ProductPage = async ({
               <span className="text-xs text-slate-400">(258+ Verified UAE Reviews)</span>
             </div>
 
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed pt-1">{product.description}</p>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed pt-1">
+              {product.shortDescription || `Upgrade or sell your pre-owned ${product.brand} ${product.name}. Instant guaranteed valuation with free 3-hour doorstep collection across Dubai & UAE.`}
+            </p>
           </div>
 
           <hr className="border-slate-100" />
@@ -296,58 +298,37 @@ const ProductPage = async ({
           {/* Interactive options & calculated price */}
           <ProductInteraction product={product} />
 
-          <hr className="border-slate-100" />
-
-          {/* Value Highlights Grid matching Reference Trust Perks with Lucide Icons */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-600">
-            <div className="flex items-start gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+          {/* Sleek Trust Perks matching Reference Design */}
+          <div className="pt-3 border-t border-slate-100 space-y-2.5">
+            <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                 <Truck size={17} />
               </div>
               <div>
-                <h4 className="font-bold text-slate-900">Free Home Pickup</h4>
-                <p className="text-[10px] text-slate-400 mt-0.5">3-Hour collection across UAE</p>
+                <h4 className="font-bold text-xs text-slate-900">Free 3-Hour Doorstep Pickup</h4>
+                <p className="text-[11px] text-slate-500">Free courier collection provided across Dubai, Abu Dhabi &amp; UAE.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+            <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                 <CreditCard size={17} />
               </div>
               <div>
-                <h4 className="font-bold text-slate-900">Instant Payments</h4>
-                <p className="text-[10px] text-slate-400 mt-0.5">Cash in hand or direct bank wire</p>
+                <h4 className="font-bold text-xs text-slate-900">Instant &amp; Secure Payments</h4>
+                <p className="text-[11px] text-slate-500">Physical cash in hand or immediate direct bank transfer upon handover.</p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+            <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <ShieldCheck size={17} />
+                <Headphones size={17} />
               </div>
               <div>
-                <h4 className="font-bold text-slate-900">Certified Data Wipe</h4>
-                <p className="text-[10px] text-slate-400 mt-0.5">100% Secured DoD Erasure</p>
+                <h4 className="font-bold text-xs text-slate-900">24/7 Dedicated Support</h4>
+                <p className="text-[11px] text-slate-500">Direct WhatsApp support and diagnostic guidance always available.</p>
               </div>
             </div>
-          </div>
-
-          {/* Preparation Checklist */}
-          <div className="space-y-2.5 pt-1">
-            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800">What to do before handover?</h3>
-            <ul className="space-y-1.5 text-xs text-slate-500">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
-                <span>Backup all photos, messages, and files to iCloud or Google Drive.</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
-                <span>Sign out of iCloud / Google accounts and remove device passcodes.</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
-                <span>Charge the device to at least 20% battery for easy courier testing.</span>
-              </li>
-            </ul>
           </div>
         </div>
       </div>
