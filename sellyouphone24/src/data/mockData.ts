@@ -8,10 +8,10 @@ export const categories: CategoryType[] = [
 ];
 
 export const brands: BrandType[] = [
-  { id: "apple", name: "Apple", slug: "apple", logo: "/products/apple logo.jpg" },
-  { id: "samsung", name: "Samsung", slug: "samsung", logo: "/products/samsung logo.jpg" },
-  { id: "google", name: "Google", slug: "google", logo: "/products/logo of google.jpg" },
-  { id: "oneplus", name: "OnePlus", slug: "oneplus", logo: "/products/one plus logo.jpg" },
+  { id: "apple", name: "Apple", slug: "apple", logo: "/products/apple-logo.svg" },
+  { id: "samsung", name: "Samsung", slug: "samsung", logo: "/products/samsung-logo.svg" },
+  { id: "google", name: "Google", slug: "google", logo: "/products/google-logo.svg" },
+  { id: "oneplus", name: "OnePlus", slug: "oneplus", logo: "/products/oneplus-logo.svg" },
 ];
 
 export const products: ProductType[] = [

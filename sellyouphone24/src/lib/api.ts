@@ -1,5 +1,6 @@
-import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType, SeoPageConfigType } from "@/types";
+import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType, SeoPageConfigType, BuyProductType } from "@/types";
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
+import { mockBuyProducts } from "@/data/mockBuyProducts";
 
 let API_BASE = "/api";
 if (typeof window === "undefined") {
@@ -524,4 +525,90 @@ export const api = {
     );
     return res.success;
   },
+
+  // --- BUY PRODUCTS (RESALE MARKETPLACE) ---
+  async getBuyProducts(params?: {
+    brand?: string;
+    condition?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    search?: string;
+    featured?: boolean;
+    sort?: string;
+  }): Promise<BuyProductType[]> {
+    try {
+      const queryParts: string[] = [];
+      if (params?.brand && params.brand !== "all") queryParts.push(`brand=${encodeURIComponent(params.brand)}`);
+      if (params?.condition && params.condition !== "all") queryParts.push(`condition=${encodeURIComponent(params.condition)}`);
+      if (params?.minPrice !== undefined) queryParts.push(`minPrice=${params.minPrice}`);
+      if (params?.maxPrice !== undefined) queryParts.push(`maxPrice=${params.maxPrice}`);
+      if (params?.search) queryParts.push(`search=${encodeURIComponent(params.search)}`);
+      if (params?.featured !== undefined) queryParts.push(`featured=${params.featured}`);
+      if (params?.sort) queryParts.push(`sort=${encodeURIComponent(params.sort)}`);
+
+      const queryString = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
+      const res = await safeFetch<BuyProductType[] | { success: boolean; data: BuyProductType[] }>(
+        `${API_BASE}/buy-products${queryString}`,
+        { method: "GET" },
+        mockBuyProducts
+      );
+
+      let items: BuyProductType[] = [];
+      if (Array.isArray(res)) {
+        items = res;
+      } else if (res && typeof res === "object" && "data" in res && Array.isArray(res.data)) {
+        items = res.data;
+      } else {
+        items = mockBuyProducts;
+      }
+
+      return items.map((p) => ({
+        ...p,
+        id: p._id || p.id,
+      }));
+    } catch {
+      return mockBuyProducts;
+    }
+  },
+
+  async getBuyProductById(id: string): Promise<BuyProductType | null> {
+    const fallback = mockBuyProducts.find((p) => String(p.id) === id || String(p._id) === id) || null;
+    try {
+      const res = await safeFetch<BuyProductType | { success: boolean; data: BuyProductType } | null>(
+        `${API_BASE}/buy-products/${id}`,
+        { method: "GET" },
+        fallback
+      );
+      if (res && "data" in res) return res.data;
+      return res as BuyProductType | null;
+    } catch {
+      return fallback;
+    }
+  },
+
+  async createBuyProduct(product: any, token?: string): Promise<BuyProductType> {
+    const isFormData = product instanceof FormData;
+    return safeFetch<BuyProductType>(`${API_BASE}/buy-products`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: isFormData ? product : JSON.stringify(product),
+    });
+  },
+
+  async updateBuyProduct(id: string, product: any, token?: string): Promise<BuyProductType> {
+    const isFormData = product instanceof FormData;
+    return safeFetch<BuyProductType>(`${API_BASE}/buy-products/${id}`, {
+      method: "PUT",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: isFormData ? product : JSON.stringify(product),
+    });
+  },
+
+  async deleteBuyProduct(id: string, token?: string): Promise<{ success: boolean; message?: string }> {
+    return safeFetch<{ success: boolean; message?: string }>(`${API_BASE}/buy-products/${id}`, {
+      method: "DELETE",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
 };
+

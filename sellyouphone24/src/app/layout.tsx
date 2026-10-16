@@ -107,15 +107,14 @@ export default function RootLayout({
             <Navbar />
 
             {/* Main Content */}
-            <main className="flex-1">
-              <div className="mx-auto w-full max-w-[1440px] px-2 sm:px-6 lg:px-8 xl:px-12 py-2 sm:py-6">
-                <Suspense fallback={null}>
-                  <AnalyticsProvider>
-                    {children}
-                  </AnalyticsProvider>
-                </Suspense>
-              </div>
+            <main className="flex-1 w-full">
+              <Suspense fallback={null}>
+                <AnalyticsProvider>
+                  {children}
+                </AnalyticsProvider>
+              </Suspense>
             </main>
+
 
             {/* Footer */}
             <Footer />

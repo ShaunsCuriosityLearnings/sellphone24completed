@@ -9,7 +9,9 @@ import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import ShowcaseManager from "@/components/ShowcaseManager";
 import SeoPagesManager from "@/components/SeoPagesManager";
+import BuyProductManager from "@/components/BuyProductManager";
 import { 
+  ShoppingBag,
   Globe,
   LayoutGrid,
   ClipboardList,
@@ -158,7 +160,7 @@ export default function AdminPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
   
-  const [activeTab, setActiveTab] = useState<"showcase" | "seo-pages" | "analytics" | "orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("showcase");
+  const [activeTab, setActiveTab] = useState<"showcase" | "buy-phones" | "seo-pages" | "analytics" | "orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("showcase");
   const [orders, setOrders] = useState<OrderType[]>([]);
   const [products, setProducts] = useState<ProductType[]>([]);
   const [categories, setCategories] = useState<CategoryType[]>([]);
@@ -967,6 +969,15 @@ export default function AdminPage() {
             </button>
 
             <button
+              onClick={() => setActiveTab("buy-phones")}
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 text-xs ${
+                activeTab === "buy-phones" ? "bg-slate-900 text-white shadow-md" : "text-emerald-800 bg-emerald-100/80 hover:bg-emerald-200/80 border border-emerald-300"
+              }`}
+            >
+              <ShoppingBag size={14} className="text-emerald-600" /> Buy Phones Catalog
+            </button>
+
+            <button
               onClick={() => setActiveTab("seo-pages")}
               className={`px-3 py-1.5 rounded-lg font-semibold transition flex items-center gap-1.5 text-xs ${
                 activeTab === "seo-pages" ? "bg-slate-900 text-white shadow-sm" : "text-emerald-700 bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200"
@@ -1070,6 +1081,11 @@ export default function AdminPage() {
             {/* HOMEPAGE SHOWCASE MANAGER TAB */}
             {activeTab === "showcase" && (
               <ShowcaseManager products={products} token={user ? undefined : undefined} onRefreshData={() => loadData(false)} />
+            )}
+
+            {/* BUY PHONES RESALE MARKETPLACE TAB */}
+            {activeTab === "buy-phones" && (
+              <BuyProductManager products={products} token={user ? undefined : undefined} />
             )}
 
             {/* SEO ENGINE & RANKINGS TAB */}

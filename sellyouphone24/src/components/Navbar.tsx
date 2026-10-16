@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown, Zap, ShoppingBag, ArrowRight, Grid, Sparkles, Phone, Truck, ShieldCheck } from "lucide-react";
+import { Menu, X, ChevronDown, Zap, ShoppingBag, ArrowRight, Grid, Sparkles, Phone, Truck, ShieldCheck, Smartphone } from "lucide-react";
 import { CategoryType, BrandType } from "@/types";
 import { api } from "@/lib/api";
 import { usePathname } from "next/navigation";
@@ -171,7 +171,7 @@ const Navbar = () => {
           {/* Right Header Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
             
-            <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+            <div className="hidden md:flex items-center gap-5 text-sm font-semibold text-slate-600">
               <Link href="/blogs" className="hover:text-emerald-600 transition">
                 Blogs
               </Link>
@@ -224,15 +224,17 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11 text-xs font-bold tracking-wide">
             
-            <Link
-              href="/services"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
-                pathname === "/services" ? "bg-emerald-500 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"
-              }`}
-            >
-              <Grid size={14} className="text-emerald-400" />
-              <span>All Services</span>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/services"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
+                  pathname === "/services" ? "bg-emerald-500 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"
+                }`}
+              >
+                <Grid size={14} className="text-emerald-400" />
+                <span>All Sell Services</span>
+              </Link>
+            </div>
 
             <div className="flex items-center gap-1 xl:gap-2 h-full">
               {categoriesList.map((category) => {
@@ -314,6 +316,7 @@ const Navbar = () => {
       {/* MOBILE DRAWER NAVIGATION */}
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50 max-h-[85vh] overflow-y-auto">
+          
           <div className="space-y-1">
             <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
               Sell Devices

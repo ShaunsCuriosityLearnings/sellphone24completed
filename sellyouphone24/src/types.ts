@@ -168,3 +168,33 @@ export type SeoPageConfigType = {
   updatedAt?: string;
   createdAt?: string;
 };
+
+export type BuyProductConditionType = "Pristine (Like New)" | "Grade A (Excellent)" | "Grade B (Good Value)";
+
+export type BuyProductType = {
+  id: string | number;
+  _id?: string;
+  title: string;
+  brand: string;
+  model: string;
+  originalProductRef?: string;
+  category?: string;
+  price: number;
+  originalPrice: number;
+  condition: BuyProductConditionType;
+  batteryHealth?: string;
+  warranty?: string;
+  storages: StorageType[];
+  selectedStorage?: string;
+  colors: string[];
+  images: ProductImagesType;
+  description?: string;
+  features: string[];
+  stock: number;
+  isAvailable: boolean;
+  isFeatured?: boolean;
+  rating?: number;
+  reviewCount?: number;
+  createdAt?: string;
+};
+
