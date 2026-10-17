@@ -11,6 +11,8 @@ import Brand from "./models/Brand.js";
 import Product from "./models/Product.js";
 import Blog from "./models/Blog.js";
 import Order from "./models/Order.js";
+import BuyProduct from "./models/BuyProduct.js";
+import BuyOrder from "./models/BuyOrder.js";
 
 // Routes imports
 import categoryRoutes from "./routes/categoryRoutes.js";
@@ -24,6 +26,7 @@ import testimonialRoutes from "./routes/testimonialRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import seoPageRoutes from "./routes/seoPageRoutes.js";
 import buyProductRoutes from "./routes/buyProductRoutes.js";
+import buyOrderRoutes from "./routes/buyOrderRoutes.js";
 
 if (!process.env.CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
   process.env.CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -70,6 +73,7 @@ app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/seo-pages", seoPageRoutes);
 app.use("/api/buy-products", buyProductRoutes);
+app.use("/api/buy-orders", buyOrderRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {
@@ -104,6 +108,9 @@ const checkAndAutoRestoreDB = async () => {
         }
         if (Array.isArray(backupData.blogs)) {
           for (const bl of backupData.blogs) await Blog.findOneAndUpdate({ _id: bl._id }, bl, { upsert: true });
+        }
+        if (Array.isArray(backupData.buyProducts)) {
+          for (const bp of backupData.buyProducts) await BuyProduct.findOneAndUpdate({ _id: bp._id }, bp, { upsert: true });
         }
         console.log("✅ Auto-restore completed successfully!");
       }

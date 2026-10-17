@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import { CategoryType, ProductType, BrandType, BlogType, TestimonialType } from "@/types";
 import { autoFormatPlainTextToMarkdown, parseMarkdownToHtml } from "@/lib/markdown";
@@ -12,6 +13,7 @@ import SeoPagesManager from "@/components/SeoPagesManager";
 import BuyProductManager from "@/components/BuyProductManager";
 import { 
   ShoppingBag,
+  ExternalLink,
   Globe,
   LayoutGrid,
   ClipboardList,
@@ -929,6 +931,14 @@ export default function AdminPage() {
               </button>
             </div>
 
+            <Link
+              href="/admin/buy-phones"
+              className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
+            >
+              <ShoppingBag size={13} className="text-emerald-400" />
+              <span>Go to Buy Phones Admin</span>
+            </Link>
+
             <button
               onClick={() => openAddProductForCategory("smartphones")}
               className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-sm cursor-pointer"
@@ -1085,7 +1095,32 @@ export default function AdminPage() {
 
             {/* BUY PHONES RESALE MARKETPLACE TAB */}
             {activeTab === "buy-phones" && (
-              <BuyProductManager products={products} token={user ? undefined : undefined} />
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md border border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                      <ShoppingBag size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                        Dedicated Buy Phones Admin Portal
+                        <span className="text-[10px] bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded-full uppercase">Full Features</span>
+                      </h3>
+                      <p className="text-xs text-slate-300">
+                        Manage inventory with draft/published status, view & dispatch customer orders, and inspect Google Sheets sync logs.
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/admin/buy-phones"
+                    className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-bold transition shrink-0 cursor-pointer"
+                  >
+                    <span>Launch Dedicated Portal</span>
+                    <ExternalLink size={14} />
+                  </Link>
+                </div>
+                <BuyProductManager products={products} token={user ? undefined : undefined} />
+              </div>
             )}
 
             {/* SEO ENGINE & RANKINGS TAB */}

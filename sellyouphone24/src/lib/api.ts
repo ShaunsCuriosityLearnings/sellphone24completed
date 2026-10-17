@@ -1,4 +1,4 @@
-import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType, SeoPageConfigType, BuyProductType } from "@/types";
+import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType, SeoPageConfigType, BuyProductType, BuyOrderType } from "@/types";
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
 import { mockBuyProducts } from "@/data/mockBuyProducts";
 
@@ -535,6 +535,8 @@ export const api = {
     search?: string;
     featured?: boolean;
     sort?: string;
+    status?: string;
+    includeDrafts?: boolean | string;
   }): Promise<BuyProductType[]> {
     try {
       const queryParts: string[] = [];
@@ -545,6 +547,8 @@ export const api = {
       if (params?.search) queryParts.push(`search=${encodeURIComponent(params.search)}`);
       if (params?.featured !== undefined) queryParts.push(`featured=${params.featured}`);
       if (params?.sort) queryParts.push(`sort=${encodeURIComponent(params.sort)}`);
+      if (params?.status && params.status !== "all") queryParts.push(`status=${encodeURIComponent(params.status)}`);
+      if (params?.includeDrafts === true || params?.includeDrafts === "true") queryParts.push(`includeDrafts=true`);
 
       const queryString = queryParts.length > 0 ? `?${queryParts.join("&")}` : "";
       const res = await safeFetch<BuyProductType[] | { success: boolean; data: BuyProductType[] }>(
@@ -610,5 +614,51 @@ export const api = {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
   },
+
+  // --- BUY PHONE ORDERS (CUSTOMER CHECKOUT & ADMIN) ---
+  async createBuyOrder(orderData: any): Promise<{ success: boolean; message: string; order: BuyOrderType }> {
+    return safeFetch<{ success: boolean; message: string; order: BuyOrderType }>(`${API_BASE}/buy-orders`, {
+      method: "POST",
+      body: JSON.stringify(orderData),
+    });
+  },
+
+  async getBuyOrders(token?: string, query?: { status?: string; search?: string }): Promise<BuyOrderType[]> {
+    const params = new URLSearchParams();
+    if (query?.status) params.append("status", query.status);
+    if (query?.search) params.append("search", query.search);
+    const queryString = params.toString() ? `?${params.toString()}` : "";
+
+    return safeFetch<BuyOrderType[]>(`${API_BASE}/buy-orders${queryString}`, {
+      method: "GET",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }, []);
+  },
+
+  async getBuyOrderById(id: string): Promise<BuyOrderType | null> {
+    return safeFetch<BuyOrderType | null>(`${API_BASE}/buy-orders/${id}`, {
+      method: "GET",
+    }, null);
+  },
+
+  async updateBuyOrderStatus(
+    id: string,
+    updates: { orderStatus?: string; paymentStatus?: string },
+    token?: string
+  ): Promise<{ success: boolean; message: string; order: BuyOrderType }> {
+    return safeFetch<{ success: boolean; message: string; order: BuyOrderType }>(`${API_BASE}/buy-orders/${id}/status`, {
+      method: "PATCH",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: JSON.stringify(updates),
+    });
+  },
+
+  async retryBuyOrderSheetsSync(id: string, token?: string): Promise<{ success: boolean; message: string; googleSheetsSync: any }> {
+    return safeFetch<{ success: boolean; message: string; googleSheetsSync: any }>(`${API_BASE}/buy-orders/${id}/retry-sheets`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
 };
+
 

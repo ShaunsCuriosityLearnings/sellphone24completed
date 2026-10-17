@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import useCartStore from "@/app/stores/cartStore";
+import useBuyCartStore from "@/app/stores/buyCartStore";
 
 const DEFAULT_FALLBACK_BRANDS: BrandType[] = [
   { id: "apple", name: "Apple", slug: "apple", logo: "🍎", categories: ["smartphones", "laptops", "tablets", "smartwatches"] },
@@ -78,6 +79,9 @@ const Navbar = () => {
 
   const cart = useCartStore((state) => state.cart);
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  const buyCart = useBuyCartStore((state) => state.cart);
+  const buyCartCount = buyCart.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   useEffect(() => {
     api.getCategories()
@@ -171,7 +175,18 @@ const Navbar = () => {
           {/* Right Header Actions */}
           <div className="flex items-center gap-2 sm:gap-4">
             
-            <div className="hidden md:flex items-center gap-5 text-sm font-semibold text-slate-600">
+            <div className="hidden md:flex items-center gap-4 text-sm font-semibold text-slate-600">
+              <Link
+                href="/buy-phones"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold text-xs transition ${
+                  pathname.startsWith("/buy-phones")
+                    ? "bg-emerald-500 text-slate-950 shadow-xs"
+                    : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
+                }`}
+              >
+                <Smartphone size={14} />
+                <span>Buy Phones</span>
+              </Link>
               <Link href="/blogs" className="hover:text-emerald-600 transition">
                 Blogs
               </Link>
@@ -182,6 +197,21 @@ const Navbar = () => {
                 Contact
               </Link>
             </div>
+
+            {/* Buy Phones Store Cart Pill */}
+            {buyCartCount > 0 && (
+              <Link
+                href="/buy-phones/cart"
+                className="relative px-2.5 py-1.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-1.5 font-bold text-xs shrink-0 shadow-xs"
+                title="View Buy Phones Store Cart"
+              >
+                <ShoppingBag size={14} className="text-emerald-400" />
+                <span className="hidden sm:inline">Store Cart</span>
+                <span className="bg-emerald-500 text-slate-950 font-black rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-[10px]">
+                  {buyCartCount}
+                </span>
+              </Link>
+            )}
 
             {/* Sell List Cart Pill */}
             {cartCount > 0 && (
@@ -317,6 +347,36 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50 max-h-[85vh] overflow-y-auto">
           
+          {/* BUY PHONES STORE HIGHLIGHT (MOBILE) */}
+          <div className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 p-3.5 rounded-2xl border border-emerald-500/20">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                <Smartphone size={13} className="text-emerald-600" />
+                Buy Phones Store
+              </span>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                12M Warranty
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/buy-phones"
+                className="flex-1 bg-emerald-500 text-slate-950 font-bold text-xs py-2 px-3 rounded-xl text-center shadow-xs hover:bg-emerald-600 transition"
+              >
+                Browse All Phones
+              </Link>
+              {buyCartCount > 0 && (
+                <Link
+                  href="/buy-phones/cart"
+                  className="bg-slate-900 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 shadow-xs"
+                >
+                  <ShoppingBag size={13} className="text-emerald-400" />
+                  <span>Cart ({buyCartCount})</span>
+                </Link>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-1">
             <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
               Sell Devices

@@ -170,14 +170,18 @@ export type SeoPageConfigType = {
 };
 
 export type BuyProductConditionType = "Pristine (Like New)" | "Grade A (Excellent)" | "Grade B (Good Value)";
+export type BuyProductStatusType = "draft" | "published" | "unavailable";
 
 export type BuyProductType = {
   id: string | number;
   _id?: string;
   title: string;
+  slug?: string;
+  status?: BuyProductStatusType;
   brand: string;
+  brandRef?: string | BrandType | any;
   model: string;
-  originalProductRef?: string;
+  originalProductRef?: string | any;
   category?: string;
   price: number;
   originalPrice: number;
@@ -195,6 +199,59 @@ export type BuyProductType = {
   isFeatured?: boolean;
   rating?: number;
   reviewCount?: number;
+  seoMetadata?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    keywords?: string[];
+  };
   createdAt?: string;
+};
+
+export type BuyCartItemType = {
+  id: string | number;
+  _id?: string;
+  title: string;
+  brand: string;
+  model: string;
+  price: number;
+  originalPrice?: number;
+  selectedStorage: string;
+  selectedColor: string;
+  condition: string;
+  quantity: number;
+  image: string;
+  stock?: number;
+  warranty?: string;
+  batteryHealth?: string;
+};
+
+export type BuyOrderType = {
+  _id: string;
+  orderNumber: string;
+  customerDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    building?: string;
+    apartment?: string;
+    city: string;
+    notes?: string;
+  };
+  items: BuyCartItemType[];
+  subtotal: number;
+  deliveryFee: number;
+  totalAmount: number;
+  paymentMethod: "cod" | "card_on_delivery";
+  paymentStatus: "unpaid" | "paid" | "refunded";
+  orderStatus: "pending" | "confirmed" | "dispatched" | "delivered" | "cancelled";
+  googleSheetsSync?: {
+    isSynced: boolean;
+    syncedAt?: string;
+    error?: string;
+    retryCount?: number;
+  };
+  createdAt: string;
+  updatedAt?: string;
 };
 

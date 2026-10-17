@@ -10,6 +10,8 @@ import Blog from "./models/Blog.js";
 import Order from "./models/Order.js";
 import Testimonial from "./models/Testimonial.js";
 import SeoPage from "./models/SeoPage.js";
+import BuyProduct from "./models/BuyProduct.js";
+import BuyOrder from "./models/BuyOrder.js";
 
 async function restoreDatabase() {
   console.log("🔄 Starting Clean Hard MongoDB Database Restore from Backup...");
@@ -42,7 +44,9 @@ async function restoreDatabase() {
       Blog.deleteMany({}),
       Order.deleteMany({}),
       Testimonial.deleteMany({}),
-      SeoPage.deleteMany({})
+      SeoPage.deleteMany({}),
+      BuyProduct.deleteMany({}),
+      BuyOrder.deleteMany({}),
     ]);
 
     // STEP 2: RE-INSERT EXACT BACKUP DATA
@@ -75,15 +79,24 @@ async function restoreDatabase() {
       await SeoPage.insertMany(backupData.seoPages);
     }
 
+    if (Array.isArray(backupData.buyProducts) && backupData.buyProducts.length > 0) {
+      await BuyProduct.insertMany(backupData.buyProducts);
+    }
+
+    if (Array.isArray(backupData.buyOrders) && backupData.buyOrders.length > 0) {
+      await BuyOrder.insertMany(backupData.buyOrders);
+    }
+
     const finalCount = await Product.countDocuments();
+    const finalBuyCount = await BuyProduct.countDocuments();
 
     console.log("==========================================");
     console.log(`🎉 DATABASE RESTORE SUCCESSFUL!`);
-    console.log(`📦 Database now contains EXACTLY ${finalCount} Products from your backup file.`);
+    console.log(`📦 Database now contains: ${finalCount} Sell Products, ${finalBuyCount} Buy Products.`);
     console.log("==========================================\n");
     process.exit(0);
   } catch (error) {
-    console.error(`❌ Restore failed: ${error.message}`);
+    console.error(`❌ Database restore failed: ${error.message}`);
     process.exit(1);
   }
 }

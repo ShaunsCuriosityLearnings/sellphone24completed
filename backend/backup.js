@@ -9,6 +9,8 @@ import Product from "./models/Product.js";
 import Blog from "./models/Blog.js";
 import Order from "./models/Order.js";
 import SeoPage from "./models/SeoPage.js";
+import BuyProduct from "./models/BuyProduct.js";
+import BuyOrder from "./models/BuyOrder.js";
 
 async function backupDatabase() {
   console.log("📦 Starting MongoDB Database Backup...");
@@ -21,6 +23,8 @@ async function backupDatabase() {
     const blogs = await Blog.find({}).lean();
     const orders = await Order.find({}).lean();
     const seoPages = await SeoPage.find({}).lean();
+    const buyProducts = await BuyProduct.find({}).lean();
+    const buyOrders = await BuyOrder.find({}).lean();
 
     const backupData = {
       timestamp: new Date().toISOString(),
@@ -31,6 +35,8 @@ async function backupDatabase() {
         blogs: blogs.length,
         orders: orders.length,
         seoPages: seoPages.length,
+        buyProducts: buyProducts.length,
+        buyOrders: buyOrders.length,
       },
       categories,
       brands,
@@ -38,6 +44,8 @@ async function backupDatabase() {
       blogs,
       orders,
       seoPages,
+      buyProducts,
+      buyOrders,
     };
 
     const backupDir = path.join(process.cwd(), "backups");
@@ -57,7 +65,7 @@ async function backupDatabase() {
     console.log(`📁 History Backup: ${historyPath}`);
     console.log(`📌 Latest Backup: ${latestPath}`);
     console.log(
-      `📊 Summary: ${products.length} Products, ${categories.length} Categories, ${brands.length} Brands, ${blogs.length} Blogs, ${orders.length} Orders, ${seoPages.length} SEO Pages.`
+      `📊 Summary: ${products.length} Products, ${categories.length} Categories, ${brands.length} Brands, ${blogs.length} Blogs, ${orders.length} Sell Orders, ${seoPages.length} SEO Pages, ${buyProducts.length} Buy Products, ${buyOrders.length} Buy Orders.`
     );
 
     process.exit(0);

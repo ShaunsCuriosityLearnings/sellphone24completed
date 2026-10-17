@@ -19,18 +19,21 @@ import {
   Gift, 
   ArrowLeftRight, 
   Mail, 
-  X
+  X,
+  SlidersHorizontal,
+  RotateCcw
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "@/lib/api";
+import useBuyCartStore from "@/app/stores/buyCartStore";
 import { BuyProductType } from "@/types";
 
 // Phone brand logos currently in SellPhoneCash (Clean transparent vectors)
-const BRAND_LOGOS = [
-  { id: "apple", name: "Apple", logo: "/products/apple-logo.svg" },
-  { id: "samsung", name: "Samsung", logo: "/products/samsung-logo.svg" },
-  { id: "google", name: "Google", logo: "/products/google-logo.svg" },
-  { id: "oneplus", name: "OnePlus", logo: "/products/oneplus-logo.svg" },
+const BRAND_LOGOS: Array<{ id: string; name: string; logo: string; slug?: string }> = [
+  { id: "apple", name: "Apple", logo: "/products/apple-logo.svg", slug: "apple" },
+  { id: "samsung", name: "Samsung", logo: "/products/samsung-logo.svg", slug: "samsung" },
+  { id: "google", name: "Google", logo: "/products/google-logo.svg", slug: "google" },
+  { id: "oneplus", name: "OnePlus", logo: "/products/oneplus-logo.svg", slug: "oneplus" },
 ];
 
 // Accessories matching the previous design
@@ -82,16 +85,43 @@ export default function BuyPhonesPage() {
   const [brandLogosList, setBrandLogosList] = useState(BRAND_LOGOS);
   const [loading, setLoading] = useState(true);
 
-  // Search & Filter State from Hero Filter Card
-  const [activeSearchTab, setActiveSearchTab] = useState<"search" | "brand" | "price" | "storage">("search");
+  // Minimalist & Professional Search and Filter State
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("all");
   const [selectedModel, setSelectedModel] = useState("all");
   const [minPrice, setMinPrice] = useState("all");
   const [maxPrice, setMaxPrice] = useState("all");
   const [selectedCondition, setSelectedCondition] = useState("all");
+  const [sortBy, setSortBy] = useState<"featured" | "price-low" | "price-high" | "rating">("featured");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // Category Icon Row Active Tab
   const [activeCategory, setActiveCategory] = useState("all");
+
+  const { addToCart } = useBuyCartStore();
+
+  const handleQuickCart = (phone: BuyProductType, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart({
+      id: String(phone.id || (phone as any)._id),
+      _id: String((phone as any)._id || phone.id),
+      title: phone.title,
+      brand: phone.brand,
+      model: phone.model || phone.title,
+      price: phone.price,
+      originalPrice: phone.originalPrice,
+      selectedStorage: phone.selectedStorage || phone.storages?.[0]?.size || "128GB",
+      selectedColor: phone.colors?.[0] || "Natural Titanium",
+      condition: phone.condition || "Pristine (Like New)",
+      quantity: 1,
+      image: phone.images?.frontView || "/products/iphone-pro-max.jpg",
+      stock: phone.stock,
+      warranty: phone.warranty,
+      batteryHealth: phone.batteryHealth,
+    });
+    toast.success(`Added ${phone.title} to your bag!`);
+  };
 
   // Newsletter
   const [emailInput, setEmailInput] = useState("");
@@ -108,18 +138,23 @@ export default function BuyPhonesPage() {
 
         // Merge dynamic brands with logos from SellPhoneCash if available
         if (brandData && brandData.length > 0) {
-          const map = new Map<string, { id: string; name: string; logo: string }>();
-          BRAND_LOGOS.forEach((b) => map.set(b.name.toLowerCase(), b));
+          const map = new Map<string, { id: string; name: string; logo: string; slug?: string }>();
+          BRAND_LOGOS.forEach((b) => map.set(b.name.toLowerCase(), { ...b, slug: b.id }));
           brandData.forEach((b: any) => {
             const key = b.name.toLowerCase();
+            const brandSlug = b.slug || b.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
             if (!map.has(key)) {
               if (b.logo && (b.logo.startsWith("/") || b.logo.startsWith("http"))) {
                 map.set(key, {
-                  id: b.id || b.slug || key,
+                  id: String(b.id || b._id || brandSlug),
                   name: b.name,
                   logo: b.logo,
+                  slug: brandSlug,
                 });
               }
+            } else {
+              const existing = map.get(key)!;
+              map.set(key, { ...existing, slug: brandSlug });
             }
           });
           setBrandLogosList(Array.from(map.values()));
@@ -168,10 +203,52 @@ export default function BuyPhonesPage() {
     return list.map((p) => p.title);
   }, [products, selectedBrand]);
 
-  // Filtered Products for the Featured Phones Grid
+  // Check if any filter is active
+  const hasActiveFilters = 
+    searchQuery.trim() !== "" || 
+    selectedBrand !== "all" || 
+    selectedModel !== "all" || 
+    minPrice !== "all" || 
+    maxPrice !== "all" || 
+    selectedCondition !== "all" ||
+    activeCategory !== "all";
+
+  const activeFilterCount = [
+    searchQuery.trim() !== "",
+    selectedBrand !== "all",
+    selectedModel !== "all",
+    minPrice !== "all" || maxPrice !== "all",
+    selectedCondition !== "all",
+    activeCategory !== "all",
+  ].filter(Boolean).length;
+
+  const handleResetAllFilters = () => {
+    setSearchQuery("");
+    setSelectedBrand("all");
+    setSelectedModel("all");
+    setMinPrice("all");
+    setMaxPrice("all");
+    setSelectedCondition("all");
+    setSortBy("featured");
+    setActiveCategory("all");
+  };
+
+  // Filtered and Sorted Products
   const filteredProducts = useMemo(() => {
-    return products.filter((phone) => {
-      // Category pill filter
+    let result = products.filter((phone) => {
+      // 1. Live text search
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesTitle = phone.title?.toLowerCase().includes(q);
+        const matchesBrand = phone.brand?.toLowerCase().includes(q);
+        const matchesModel = phone.model?.toLowerCase().includes(q);
+        const matchesCondition = phone.condition?.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesBrand && !matchesModel && !matchesCondition) {
+          return false;
+        }
+      }
+
+      // 2. Category pill filter
       if (activeCategory === "flagship") {
         if (!(phone.price >= 2500 || phone.title.toLowerCase().includes("pro") || phone.title.toLowerCase().includes("ultra"))) return false;
       } else if (activeCategory === "mid-range") {
@@ -184,34 +261,45 @@ export default function BuyPhonesPage() {
         if (!(phone.title.toLowerCase().includes("pro") || phone.title.toLowerCase().includes("ultra") || phone.brand.toLowerCase() === "google")) return false;
       }
 
-      // Hero filter: Brand
+      // 3. Hero filter: Brand
       if (selectedBrand !== "all" && phone.brand.toLowerCase() !== selectedBrand.toLowerCase()) {
         return false;
       }
 
-      // Hero filter: Model
+      // 4. Hero filter: Model
       if (selectedModel !== "all" && phone.title.toLowerCase() !== selectedModel.toLowerCase()) {
         return false;
       }
 
-      // Hero filter: Condition
+      // 5. Hero filter: Condition
       if (selectedCondition !== "all" && !phone.condition.toLowerCase().includes(selectedCondition.toLowerCase())) {
         return false;
       }
 
-      // Hero filter: Min Price
+      // 6. Hero filter: Min Price
       if (minPrice !== "all" && phone.price < Number(minPrice)) {
         return false;
       }
 
-      // Hero filter: Max Price
+      // 7. Hero filter: Max Price
       if (maxPrice !== "all" && phone.price > Number(maxPrice)) {
         return false;
       }
 
       return true;
     });
-  }, [products, activeCategory, selectedBrand, selectedModel, selectedCondition, minPrice, maxPrice]);
+
+    // Sort result
+    if (sortBy === "price-low") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (sortBy === "price-high") {
+      result.sort((a, b) => b.price - a.price);
+    } else if (sortBy === "rating") {
+      result.sort((a, b) => (b.rating || 4.8) - (a.rating || 4.8));
+    }
+
+    return result;
+  }, [products, searchQuery, activeCategory, selectedBrand, selectedModel, selectedCondition, minPrice, maxPrice, sortBy]);
 
   const handleAddToCart = (phone: BuyProductType) => {
     const message = encodeURIComponent(
@@ -323,13 +411,13 @@ export default function BuyPhonesPage() {
 
           </div>
 
-          {/* Right Column: 3 Real Flagship Phones Arranged (Like the Reference Image) */}
-          <div className="lg:col-span-6 relative flex items-center justify-center pt-4 lg:pt-0">
+          {/* Right Column: 3 Real Flagship Phones Arranged (Horizontally Proportioned on Mobile) */}
+          <div className="lg:col-span-6 relative flex items-center justify-center pt-2 lg:pt-0">
             
-            <div className="relative w-full max-w-lg h-72 sm:h-88 flex items-center justify-center">
+            <div className="relative w-full max-w-lg h-52 sm:h-88 flex items-center justify-center">
               
               {/* Left Flanking Phone (Samsung S24 Ultra) */}
-              <div className="absolute left-2 sm:left-6 top-8 w-36 sm:w-48 h-56 sm:h-72 transition-transform duration-500 hover:scale-105 z-10">
+              <div className="absolute left-2 sm:left-6 top-4 sm:top-8 w-28 sm:w-48 h-40 sm:h-72 transition-transform duration-500 hover:scale-105 z-10">
                 <Image
                   src="/products/samsung (1).jpg"
                   alt="Samsung Galaxy S24 Ultra"
@@ -340,7 +428,7 @@ export default function BuyPhonesPage() {
               </div>
 
               {/* Center Prominent Phone (iPhone 16 Pro Max - Front & Center) */}
-              <div className="relative w-44 sm:w-56 h-64 sm:h-84 z-20 transition-transform duration-500 hover:scale-105">
+              <div className="relative w-36 sm:w-56 h-48 sm:h-84 z-20 transition-transform duration-500 hover:scale-105">
                 <Image
                   src="/products/iphone-pro-max.jpg"
                   alt="Apple iPhone 16 Pro Max"
@@ -351,7 +439,7 @@ export default function BuyPhonesPage() {
               </div>
 
               {/* Right Flanking Phone (iPhone 15 Pro) */}
-              <div className="absolute right-2 sm:right-6 top-8 w-36 sm:w-48 h-56 sm:h-72 transition-transform duration-500 hover:scale-105 z-10">
+              <div className="absolute right-2 sm:right-6 top-4 sm:top-8 w-28 sm:w-48 h-40 sm:h-72 transition-transform duration-500 hover:scale-105 z-10">
                 <Image
                   src="/products/iphone (4).jpg"
                   alt="Apple iPhone 15 Pro"
@@ -368,176 +456,243 @@ export default function BuyPhonesPage() {
         </div>
 
         {/* =========================================================================
-            2. DOCKED SEARCH & FILTER CARD (From Reference Image)
+            2. MINIMALIST & PROFESSIONAL SEARCH & FILTER BAR (Desktop & Mobile)
            ========================================================================= */}
-        <div className="relative z-20 mt-8 pt-2">
-          
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-md p-4 sm:p-5 space-y-4">
+        <div className="relative z-20 mt-6 sm:mt-8 pt-1">
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-sm p-3 sm:p-4 space-y-3">
             
-            {/* Top Filter Tabs: Green Active Pill */}
-            <div className="flex items-center gap-2 border-b border-slate-100 pb-3 overflow-x-auto scrollbar-none">
+            {/* Top Row: Live Search Input + Desktop Controls */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
               
-              <button
-                onClick={() => setActiveSearchTab("search")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  activeSearchTab === "search"
-                    ? "bg-emerald-500 text-slate-950 font-black shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
-              >
-                <Search size={14} />
-                <span>Search Phones</span>
-              </button>
+              {/* Search Input Box */}
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by model, brand, or specs (e.g. iPhone 15 Pro, S24 Ultra)..."
+                  className="w-full bg-slate-50 border border-slate-200/80 rounded-xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    title="Clear search"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
 
-              <button
-                onClick={() => setActiveSearchTab("brand")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  activeSearchTab === "brand"
-                    ? "bg-emerald-500 text-slate-950 font-black shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
-              >
-                <Smartphone size={14} />
-                <span>Brand &amp; Series</span>
-              </button>
-
-              <button
-                onClick={() => setActiveSearchTab("price")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  activeSearchTab === "price"
-                    ? "bg-emerald-500 text-slate-950 font-black shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
-              >
-                <DollarSign size={14} />
-                <span>Price Range</span>
-              </button>
-
-              <button
-                onClick={() => setActiveSearchTab("storage")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  activeSearchTab === "storage"
-                    ? "bg-emerald-500 text-slate-950 font-black shadow-xs"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-                }`}
-              >
-                <Layers size={14} />
-                <span>Storage &amp; Specs</span>
-              </button>
-
-            </div>
-
-            {/* Filter Inputs Row (Brand, Model, Min Price, Max Price, Condition + Green Search Button) */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
-              
-              {/* 1. Brand Dropdown */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Brand
-                </label>
+              {/* Desktop Filter Dropdowns (Minimal & Professional) */}
+              <div className="hidden sm:flex items-center gap-2">
+                
+                {/* Brand Dropdown */}
                 <select
                   value={selectedBrand}
                   onChange={(e) => {
                     setSelectedBrand(e.target.value);
                     setSelectedModel("all");
                   }}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                  className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
                 >
                   <option value="all">All Brands</option>
                   {availableBrands.map((b) => (
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
-              </div>
 
-              {/* 2. Model Dropdown */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Model
-                </label>
+                {/* Price Range Dropdown */}
                 <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                  value={minPrice === "all" && maxPrice === "all" ? "all" : `${minPrice}-${maxPrice}`}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "all") { setMinPrice("all"); setMaxPrice("all"); }
+                    else if (val === "under-1500") { setMinPrice("0"); setMaxPrice("1500"); }
+                    else if (val === "1500-3000") { setMinPrice("1500"); setMaxPrice("3000"); }
+                    else if (val === "above-3000") { setMinPrice("3000"); setMaxPrice("8000"); }
+                  }}
+                  className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
                 >
-                  <option value="all">All Models</option>
-                  {availableModels.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
+                  <option value="all">Any Price</option>
+                  <option value="under-1500">Under AED 1,500</option>
+                  <option value="1500-3000">AED 1,500 - 3,000</option>
+                  <option value="above-3000">AED 3,000+</option>
                 </select>
-              </div>
 
-              {/* 3. Min Price */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Min Price
-                </label>
-                <select
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                >
-                  <option value="all">No Min</option>
-                  <option value="1000">AED 1,000</option>
-                  <option value="1500">AED 1,500</option>
-                  <option value="2000">AED 2,000</option>
-                  <option value="3000">AED 3,000</option>
-                </select>
-              </div>
-
-              {/* 4. Max Price */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Max Price
-                </label>
-                <select
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
-                >
-                  <option value="all">No Max</option>
-                  <option value="2000">AED 2,000</option>
-                  <option value="3000">AED 3,000</option>
-                  <option value="4000">AED 4,000</option>
-                  <option value="5000">AED 5,000</option>
-                </select>
-              </div>
-
-              {/* 5. Condition */}
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                  Condition
-                </label>
+                {/* Condition Dropdown */}
                 <select
                   value={selectedCondition}
                   onChange={(e) => setSelectedCondition(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                  className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
                 >
                   <option value="all">All Conditions</option>
                   <option value="Pristine">✨ Pristine (Like-New)</option>
                   <option value="Grade A">💎 Grade A (Excellent)</option>
                   <option value="Grade B">🏷️ Grade B (Good Value)</option>
                 </select>
+
+                {/* Sort Dropdown */}
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Top Rated</option>
+                </select>
+
+                {/* Reset Filter Button */}
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleResetAllFilters}
+                    className="p-2.5 rounded-xl border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-400 transition cursor-pointer"
+                    title="Reset All Filters"
+                  >
+                    <RotateCcw size={14} />
+                  </button>
+                )}
               </div>
 
-              {/* 6. Green Search Action Button */}
-              <div>
+              {/* Mobile Filter Action Controls */}
+              <div className="flex sm:hidden items-center gap-2">
                 <button
-                  onClick={() => {
-                    const el = document.getElementById("featured-phones-section");
-                    el?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="w-full py-2.5 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-xs font-bold transition cursor-pointer ${
+                    hasActiveFilters || mobileFiltersOpen 
+                      ? "bg-slate-900 text-white border-slate-900 shadow-2xs" 
+                      : "bg-slate-50 text-slate-700 border-slate-200"
+                  }`}
                 >
-                  <Search size={14} />
-                  <span>Search Phones</span>
+                  <SlidersHorizontal size={13} />
+                  <span>Filters</span>
+                  {activeFilterCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-black flex items-center justify-center ml-0.5">
+                      {activeFilterCount}
+                    </span>
+                  )}
                 </button>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="flex-1 bg-slate-50 border border-slate-200 rounded-xl py-2 px-2.5 text-xs font-bold text-slate-800 focus:outline-none"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="price-low">Price: Low</option>
+                  <option value="price-high">Price: High</option>
+                </select>
+
+                {hasActiveFilters && (
+                  <button
+                    onClick={handleResetAllFilters}
+                    className="p-2 rounded-xl border border-rose-200 text-rose-600 bg-rose-50 cursor-pointer"
+                    title="Reset Filters"
+                  >
+                    <RotateCcw size={13} />
+                  </button>
+                )}
               </div>
 
             </div>
 
-          </div>
+            {/* Mobile Expandable Filter Panel */}
+            {mobileFiltersOpen && (
+              <div className="sm:hidden pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Condition</label>
+                  <select
+                    value={selectedCondition}
+                    onChange={(e) => setSelectedCondition(e.target.value)}
+                    className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold text-slate-800"
+                  >
+                    <option value="all">All Conditions</option>
+                    <option value="Pristine">✨ Pristine</option>
+                    <option value="Grade A">💎 Grade A</option>
+                    <option value="Grade B">🏷️ Grade B</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Budget</label>
+                  <select
+                    value={minPrice === "all" && maxPrice === "all" ? "all" : `${minPrice}-${maxPrice}`}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "all") { setMinPrice("all"); setMaxPrice("all"); }
+                      else if (val === "under-1500") { setMinPrice("0"); setMaxPrice("1500"); }
+                      else if (val === "1500-3000") { setMinPrice("1500"); setMaxPrice("3000"); }
+                      else if (val === "above-3000") { setMinPrice("3000"); setMaxPrice("8000"); }
+                    }}
+                    className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold text-slate-800"
+                  >
+                    <option value="all">Any Price</option>
+                    <option value="under-1500">&lt; AED 1,500</option>
+                    <option value="1500-3000">AED 1.5k - 3k</option>
+                    <option value="above-3000">AED 3,000+</option>
+                  </select>
+                </div>
+              </div>
+            )}
 
+            {/* Row 2: Minimalist One-Tap Brand Pills & Budget Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1">
+              <button
+                onClick={() => { setSelectedBrand("all"); setSelectedModel("all"); }}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition cursor-pointer ${
+                  selectedBrand === "all" 
+                    ? "bg-slate-900 text-white shadow-2xs" 
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                All Brands
+              </button>
+
+              {availableBrands.map((b) => (
+                <button
+                  key={b}
+                  onClick={() => {
+                    setSelectedBrand(selectedBrand === b ? "all" : b);
+                    setSelectedModel("all");
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition cursor-pointer ${
+                    selectedBrand === b
+                      ? "bg-emerald-500 text-slate-950 font-black shadow-2xs"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {b}
+                </button>
+              ))}
+
+              {[
+                { label: "< AED 1.5k", min: "0", max: "1500" },
+                { label: "AED 1.5k - 3k", min: "1500", max: "3000" },
+                { label: "AED 3k+", min: "3000", max: "8000" },
+              ].map((p, idx) => {
+                const isSel = minPrice === p.min && maxPrice === p.max;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      if (isSel) { setMinPrice("all"); setMaxPrice("all"); }
+                      else { setMinPrice(p.min); setMaxPrice(p.max); }
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition cursor-pointer ${
+                      isSel
+                        ? "bg-slate-900 text-white shadow-2xs"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+
+          </div>
         </div>
 
       </section>
@@ -555,17 +710,13 @@ export default function BuyPhonesPage() {
           {/* Moving brand logos track: left to right - PURE LOGOS ONLY (BIG & PROMINENT) */}
           <div className="flex items-center gap-10 sm:gap-16 md:gap-20 animate-marquee-ltr hover:[animation-play-state:paused] py-3 cursor-pointer">
             {[...brandLogosList, ...brandLogosList, ...brandLogosList, ...brandLogosList].map((brand, idx) => {
-              const isSelected = selectedBrand.toLowerCase() === brand.name.toLowerCase();
+              const brandSlug = (brand.slug || brand.name).toLowerCase().replace(/[^a-z0-9]+/g, "-");
               return (
-                <button
+                <Link
                   key={`${brand.id || brand.name}-${idx}`}
-                  onClick={() => handleBrandClick(brand.name)}
-                  title={`Click to view ${brand.name} models`}
-                  className={`group/brand relative flex flex-col items-center justify-center p-2 transition-all duration-300 cursor-pointer shrink-0 min-w-[150px] sm:min-w-[200px] md:min-w-[240px] h-20 sm:h-24 md:h-28 ${
-                    isSelected
-                      ? "scale-115 opacity-100"
-                      : "opacity-80 hover:opacity-100 hover:scale-115"
-                  }`}
+                  href={`/buy-phones/brand/${encodeURIComponent(brandSlug)}`}
+                  title={`View all ${brand.name} phones & devices`}
+                  className="group/brand relative flex flex-col items-center justify-center p-2 transition-all duration-300 cursor-pointer shrink-0 min-w-[150px] sm:min-w-[200px] md:min-w-[240px] h-20 sm:h-24 md:h-28 opacity-80 hover:opacity-100 hover:scale-115"
                 >
                   <div className="relative w-36 sm:w-48 md:w-56 h-14 sm:h-18 md:h-22 flex items-center justify-center">
                     <Image
@@ -575,10 +726,10 @@ export default function BuyPhonesPage() {
                       className="object-contain transition-transform duration-300"
                     />
                   </div>
-                  {isSelected && (
-                    <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-12 h-1.5 rounded-full bg-emerald-500 shadow-sm" />
-                  )}
-                </button>
+                  <span className="text-[10px] font-bold text-emerald-600 opacity-0 group-hover/brand:opacity-100 transition-opacity mt-1">
+                    Explore {brand.name} &rarr;
+                  </span>
+                </Link>
               );
             })}
           </div>
@@ -587,72 +738,60 @@ export default function BuyPhonesPage() {
       </section>
 
       {/* =========================================================================
-          4. BRAND MODELS & FEATURED PHONES SECTION
+          4. BRAND MODELS & FEATURED PHONES SECTION (Clean 2-Cards/Row Grid)
          ========================================================================= */}
       <section id="featured-phones-section" className="w-full space-y-4">
         
-        {/* Header row */}
+        {/* Header row: Minimalist title + count + reset */}
         <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg sm:text-2xl font-black text-slate-950 tracking-tight">
               {selectedBrand !== "all" ? `${selectedBrand} Models` : "All Phone Models"}
             </h2>
-            {selectedBrand !== "all" && (
-              <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-xs">
-                <span>{selectedBrand} ({filteredProducts.length} {filteredProducts.length === 1 ? "Model" : "Models"})</span>
-                <button 
-                  onClick={() => setSelectedBrand("all")} 
-                  className="hover:text-emerald-950 p-0.5 hover:bg-emerald-200 rounded-full transition cursor-pointer"
-                  title="Clear brand filter to show all models"
-                >
-                  <X size={12} />
-                </button>
-              </span>
-            )}
+            <span className="text-[11px] sm:text-xs bg-slate-100 text-slate-700 font-bold px-2.5 py-0.5 rounded-full border border-slate-200">
+              {filteredProducts.length} {filteredProducts.length === 1 ? "device" : "devices"}
+            </span>
           </div>
-          <button
-            onClick={() => {
-              setActiveCategory("all");
-              setSelectedBrand("all");
-              setSelectedModel("all");
-              setMinPrice("all");
-              setMaxPrice("all");
-              setSelectedCondition("all");
-            }}
-            className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition cursor-pointer"
-          >
-            <span>{selectedBrand !== "all" ? "View All Brands" : "Reset Filters"}</span>
-            <ArrowRight size={14} />
-          </button>
+
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetAllFilters}
+              className="text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1 transition cursor-pointer"
+            >
+              <RotateCcw size={12} />
+              <span>Reset Filters</span>
+            </button>
+          )}
         </div>
 
-        {/* 4-Card Responsive Grid */}
+        {/* Product Catalog Grid */}
         {loading ? (
           <div className="py-20 text-center space-y-3">
             <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs font-bold text-slate-500">Loading featured devices...</p>
+            <p className="text-xs font-bold text-slate-500">Loading certified devices...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-3">
+          <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center space-y-3 shadow-2xs">
             <Smartphone className="w-10 h-10 text-slate-400 mx-auto" />
-            <h3 className="font-bold text-slate-900 text-sm">No phones found for this filter</h3>
+            <h3 className="font-bold text-slate-900 text-sm">No phones found matching your filters</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Try adjusting your search query, price budget, or brand selection.
+            </p>
             <button
-              onClick={() => {
-                setActiveCategory("all");
-                setSelectedBrand("all");
-                setSelectedModel("all");
-                setMinPrice("all");
-                setMaxPrice("all");
-                setSelectedCondition("all");
-              }}
-              className="text-xs font-bold text-emerald-600 hover:underline cursor-pointer"
+              onClick={handleResetAllFilters}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition cursor-pointer"
             >
-              Reset to All Phones
+              <RotateCcw size={12} />
+              <span>Reset All Filters</span>
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-3.5 sm:gap-4">
+          /* ===================================================================
+              PROPER CLEAN CARDS GRID: 2 CARDS IN ONE ROW ON MOBILE, 4 ON DESKTOP
+             =================================================================== */
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
             {filteredProducts.map((phone) => {
+              const pId = phone.id || (phone as any)._id;
               const conditionBadge = phone.condition?.includes("Pristine")
                 ? "✨ Pristine"
                 : phone.condition?.includes("Grade A")
@@ -665,113 +804,95 @@ export default function BuyPhonesPage() {
 
               return (
                 <div
-                  key={phone.id}
-                  className="group bg-white rounded-2xl border border-slate-200/90 hover:border-emerald-400 p-3.5 sm:p-4 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between hover:-translate-y-1 relative"
+                  key={pId}
+                  className="bg-white rounded-2xl border border-slate-200/80 hover:border-emerald-400 p-2.5 sm:p-3.5 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
                 >
-                  
-                  {/* Top: Mobile Showcase Area (Prominent & Clear) */}
-                  <div className="relative w-full h-56 sm:h-60 bg-gradient-to-b from-slate-50/80 via-slate-50/40 to-white rounded-xl p-3 flex items-center justify-center overflow-hidden border border-slate-100 group-hover:border-emerald-100 transition-colors">
-                    
-                    {/* Top Badges: Condition & Discount */}
-                    <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 pointer-events-none">
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-slate-800 border border-slate-200/80 shadow-2xs">
-                        {conditionBadge}
-                      </span>
-                      {savings && (
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 shadow-2xs">
+                  {/* Card Image Area with Subtle Gradient & Floating Badges */}
+                  <Link
+                    href={`/buy-phones/${pId}`}
+                    className="relative w-full aspect-square bg-gradient-to-b from-slate-50 to-slate-100/60 rounded-xl overflow-hidden flex items-center justify-center p-2 mb-2 group-hover:from-emerald-50/30 group-hover:to-slate-50 transition-colors"
+                  >
+                    {/* Top Left: Subtle Condition / Savings Badge */}
+                    <div className="absolute top-2 left-2 z-10 pointer-events-none">
+                      {savings ? (
+                        <span className="text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 shadow-2xs">
                           Save AED {savings.toLocaleString()}
+                        </span>
+                      ) : (
+                        <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-slate-800 border border-slate-200/80 shadow-2xs">
+                          {conditionBadge}
                         </span>
                       )}
                     </div>
 
-                    {/* Mobile Phone Device Image (Front & Center, Large) */}
-                    <div className="relative w-full h-44 sm:h-48 transition-transform duration-500 group-hover:scale-108 flex items-center justify-center">
+                    {/* Top Right: Quick Bag Button */}
+                    <button
+                      onClick={(e) => handleQuickCart(phone, e)}
+                      className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-emerald-500 hover:text-slate-950 text-slate-500 flex items-center justify-center shadow-2xs transition active:scale-90 border border-slate-200/60 cursor-pointer"
+                      title="Add to Shopping Bag"
+                    >
+                      <ShoppingBag size={13} className="sm:w-3.5 sm:h-3.5" />
+                    </button>
+
+                    {/* Product Image */}
+                    <div className="relative w-full h-full flex items-center justify-center p-1">
                       <Image
                         src={phone.images?.frontView || "/products/iphone-pro-max.jpg"}
                         alt={phone.title}
                         fill
-                        className="object-contain drop-shadow-md group-hover:drop-shadow-xl transition-all"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
+                        className="object-contain p-1 group-hover:scale-106 transition-transform duration-300 ease-out"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       />
                     </div>
 
-                    {/* Bottom Pill: Battery & Warranty */}
-                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-center pointer-events-none">
-                      <span className="text-[10px] font-bold text-slate-600 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-slate-200/80 shadow-2xs truncate">
-                        ⚡ {phone.batteryHealth ? phone.batteryHealth.split(" ")[0] : "95%+"} Battery • 🛡️ 12-Mo Warranty
+                    {/* Bottom Pill: Battery / Warranty */}
+                    <div className="absolute bottom-1.5 left-2 right-2 text-center pointer-events-none">
+                      <span className="text-[9px] font-semibold text-slate-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-slate-200/60 shadow-2xs truncate inline-block max-w-[90%]">
+                        🛡️ 12-Mo Warranty
                       </span>
                     </div>
+                  </Link>
 
-                  </div>
-
-                  {/* Middle: Details & Specs */}
-                  <div className="space-y-2 pt-3 flex-1 flex flex-col justify-between">
-                    
+                  {/* Product Details */}
+                  <div className="space-y-1 flex-1 flex flex-col justify-between">
                     <div>
-                      {/* Brand & Star Rating */}
-                      <div className="flex items-center justify-between text-[11px] mb-1">
-                        <span className="font-extrabold uppercase tracking-wider text-emerald-600 text-[10px]">
-                          {phone.brand}
-                        </span>
-                        <div className="flex items-center gap-1 text-slate-500 font-bold">
-                          <div className="flex text-amber-400">
-                            {"★".repeat(5)}
-                          </div>
-                          <span className="text-slate-800 font-extrabold">{phone.rating || 4.8}</span>
-                          <span className="text-slate-400 text-[10px]">({phone.reviewCount || 28})</span>
-                        </div>
-                      </div>
-
-                      {/* Product Title */}
-                      <h3 className="font-black text-sm text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-1 leading-snug" title={phone.title}>
+                      <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 block">
+                        {phone.brand}
+                      </span>
+                      <Link
+                        href={`/buy-phones/${pId}`}
+                        className="font-extrabold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-1 block mt-0.5"
+                        title={phone.title}
+                      >
                         {phone.title}
-                      </h3>
-
-                      {/* Storage Variants Pills */}
-                      <div className="flex items-center gap-1 flex-wrap pt-1.5">
-                        {(phone.storages && phone.storages.length > 0 ? phone.storages : [{ size: "128GB" }, { size: "256GB" }]).slice(0, 3).map((st, i) => (
-                          <span
-                            key={i}
-                            className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/60"
-                          >
-                            {st.size}
-                          </span>
-                        ))}
+                      </Link>
+                      <div className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate mt-0.5">
+                        {phone.selectedStorage || phone.storages?.[0]?.size || "128GB"} • {phone.condition?.includes("Pristine") ? "Like New" : "Certified"}
                       </div>
                     </div>
 
-                    {/* Price & Delivery Notice */}
-                    <div className="pt-2 border-t border-slate-100">
-                      <div className="flex items-baseline gap-1.5 flex-wrap">
-                        <span className="text-xs font-black text-emerald-600">AED</span>
-                        <span className="text-lg font-black text-slate-950 tracking-tight">
-                          {phone.price.toLocaleString()}
+                    {/* Pricing and Action Button */}
+                    <div className="pt-2">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-xs sm:text-sm md:text-base font-black text-slate-950">
+                          AED {phone.price.toLocaleString()}
                         </span>
                         {phone.originalPrice && phone.originalPrice > phone.price && (
-                          <span className="text-xs text-slate-400 line-through font-normal">
+                          <span className="text-[10px] sm:text-xs text-slate-400 line-through">
                             AED {phone.originalPrice.toLocaleString()}
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] font-bold text-emerald-700 flex items-center gap-1 mt-0.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>Ready for Express Dubai Delivery</span>
-                      </div>
+
+                      <Link
+                        href={`/buy-phones/${pId}`}
+                        className="mt-2 w-full py-2 px-2.5 rounded-xl bg-slate-900 group-hover:bg-emerald-500 group-hover:text-slate-950 text-white font-bold text-[11px] sm:text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs text-center cursor-pointer"
+                      >
+                        <span>View Deal</span>
+                        <ArrowRight size={12} />
+                      </Link>
                     </div>
-
                   </div>
-
-                  {/* Bottom: Professional Order Button */}
-                  <div className="pt-3">
-                    <button
-                      onClick={() => handleAddToCart(phone)}
-                      className="w-full py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-sm hover:shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <ShoppingBag size={14} className="fill-slate-950" />
-                      <span>Order Now</span>
-                    </button>
-                  </div>
-
                 </div>
               );
             })}

@@ -11,6 +11,10 @@ const buyProductSchema = new mongoose.Schema({
     required: [true, "Brand is required"],
     trim: true,
   },
+  brandRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Brand",
+  },
   model: {
     type: String,
     required: [true, "Model name is required"],
@@ -73,6 +77,23 @@ const buyProductSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
+  status: {
+    type: String,
+    enum: ["draft", "published", "unavailable"],
+    default: "published",
+    index: true,
+  },
+  slug: {
+    type: String,
+    lowercase: true,
+    trim: true,
+    index: true,
+  },
+  seoMetadata: {
+    metaTitle: { type: String, trim: true },
+    metaDescription: { type: String, trim: true },
+    keywords: [{ type: String, trim: true }],
+  },
   isAvailable: {
     type: Boolean,
     default: true,
@@ -91,4 +112,15 @@ const buyProductSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+buyProductSchema.pre("validate", function(next) {
+  if (!this.slug && this.title) {
+    this.slug = this.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+  next();
+});
+
 export default mongoose.model("BuyProduct", buyProductSchema);
+
