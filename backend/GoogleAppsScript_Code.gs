@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * SellPhoneCash — Unified Google Sheets Sync Webhook
+ * SellPhoneCash — Unified Google Sheets Sync Webhook (V2 - Ultra-Reliable)
  * ==============================================================================
  * Automatically stores both:
  *  1. "Sell Phone Leads" (Trade-In Cash Valuation Leads & Pickup Bookings)
@@ -10,149 +10,61 @@
  * ==============================================================================
  */
 
-// Configuration
-var SPREADSHEET_ID = ""; // Leave blank "" to use the current active spreadsheet attached to this script
+// OPTIONAL: If your script is created at script.google.com (standalone),
+// paste your Google Sheet ID between the quotes below.
+// Example: https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
+// ID is: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
+// If you opened Apps Script from inside the Google Sheet (Extensions > Apps Script), you can leave this blank!
+var SPREADSHEET_ID = "";
 
 /**
- * Handle incoming POST requests from the backend
+ * Main Webhook Receiver (called automatically by Node.js backend)
  */
 function doPost(e) {
-  var lock = LockService.getScriptLock();
-  // Wait up to 30 seconds for concurrent requests
-  try {
-    lock.waitLock(30000);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: "error", message: "Server busy, could not acquire lock" }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
   try {
     if (!e || !e.postData || !e.postData.contents) {
-      throw new Error("No post data received in request.");
+      return ContentService
+        .createTextOutput(JSON.stringify({ 
+          status: "error", 
+          message: "No payload received. Note: To test this in the Apps Script editor, run the testSellLead() or testBuyOrder() function instead of clicking Run on doPost()." 
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
     }
 
     var payload = JSON.parse(e.postData.contents);
-    var action = payload.action;
-    var ss = SPREADSHEET_ID ? SpreadsheetApp.openById(SPREADSHEET_ID) : SpreadsheetApp.getActiveSpreadsheet();
+    var result = processIncomingLeadOrOrder(payload);
 
-    // --------------------------------------------------------------------------
-    // CASE 1: SELL PHONE LEADS (Trade-In / Sell Old Devices for Cash)
-    // --------------------------------------------------------------------------
-    if (action === "appendSellLead" || payload.lead || (payload.order && payload.order.devices)) {
-      var lead = payload.lead || payload.order;
-      var sellSheet = getOrCreateSheet(ss, "Sell Phone Leads", [
-        "Timestamp",
-        "Order ID",
-        "Date / Time",
-        "Customer Name",
-        "Phone Number",
-        "Email Address",
-        "Emirate / City",
-        "Pickup Address",
-        "Pickup Date",
-        "Pickup Time",
-        "Devices & Condition",
-        "Total Payout (AED)",
-        "Payment Method",
-        "Status",
-        "Channel",
-        "Campaign"
-      ], "#0f172a", "#10b981");
-
-      var sellRow = [
-        new Date(),
-        lead.orderId || lead._id || "N/A",
-        lead.date || new Date().toISOString(),
-        lead.customerName || (lead.customerDetails && lead.customerDetails.name) || "N/A",
-        lead.phone || (lead.customerDetails && lead.customerDetails.phone) || "N/A",
-        lead.email || (lead.customerDetails && lead.customerDetails.email) || "N/A",
-        lead.city || (lead.customerDetails && lead.customerDetails.city) || "Dubai",
-        lead.address || (lead.customerDetails && lead.customerDetails.address) || "N/A",
-        lead.pickupDate || (lead.pickupSchedule && lead.pickupSchedule.pickupDate) || "N/A",
-        lead.pickupTime || (lead.pickupSchedule && lead.pickupSchedule.pickupTime) || "N/A",
-        lead.devices || formatDevices(lead.devices),
-        Number(lead.totalPayout || 0),
-        lead.paymentMethod || "Cash on Pickup",
-        lead.status || "pending",
-        lead.channel || (lead.marketingAttribution && lead.marketingAttribution.source) || "Direct",
-        lead.campaign || (lead.marketingAttribution && lead.marketingAttribution.campaign) || "none"
-      ];
-
-      sellSheet.appendRow(sellRow);
-      formatLastRow(sellSheet, sellRow.length);
-
-      return ContentService
-        .createTextOutput(JSON.stringify({ status: "success", type: "sell_lead", orderId: lead.orderId }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // --------------------------------------------------------------------------
-    // CASE 2: BUY PHONE ORDERS (Pre-Owned Marketplace Purchase Orders)
-    // --------------------------------------------------------------------------
-    if (action === "appendBuyOrder" || payload.order) {
-      var order = payload.order;
-      var buySheet = getOrCreateSheet(ss, "Buy Phone Orders", [
-        "Timestamp",
-        "Order Number",
-        "Date / Time",
-        "Customer Name",
-        "Phone Number",
-        "Email Address",
-        "City / Emirate",
-        "Delivery Address",
-        "Purchased Handsets",
-        "Total Amount (AED)",
-        "Payment Method",
-        "Payment Status",
-        "Order Status",
-        "Notes"
-      ], "#0f172a", "#3b82f6");
-
-      var buyRow = [
-        new Date(),
-        order.orderNumber || "BUY-" + Date.now(),
-        order.date || new Date().toISOString(),
-        order.customerName || (order.customerDetails && order.customerDetails.name) || "N/A",
-        order.phone || (order.customerDetails && order.customerDetails.phone) || "N/A",
-        order.email || (order.customerDetails && order.customerDetails.email) || "N/A",
-        order.city || (order.customerDetails && order.customerDetails.city) || "Dubai",
-        order.address || (order.customerDetails && (order.customerDetails.address + " " + (order.customerDetails.building || ""))) || "N/A",
-        order.items || formatItems(order.items),
-        Number(order.totalAmount || 0),
-        order.paymentMethod || "Cash on Delivery",
-        order.paymentStatus || "unpaid",
-        order.orderStatus || "pending",
-        order.notes || (order.customerDetails && order.customerDetails.notes) || ""
-      ];
-
-      buySheet.appendRow(buyRow);
-      formatLastRow(buySheet, buyRow.length);
-
-      return ContentService
-        .createTextOutput(JSON.stringify({ status: "success", type: "buy_order", orderNumber: order.orderNumber }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    throw new Error("Unrecognized payload action or missing order data.");
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
+    Logger.log("doPost Error: " + error.toString());
     return ContentService
       .createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
-  } finally {
-    lock.releaseLock();
   }
 }
 
 /**
- * Health-check GET handler (accessible from browser)
+ * Health-check GET endpoint (testable directly from your browser)
  */
 function doGet(e) {
+  var sheetOk = false;
+  var sheetTitle = "None";
+  try {
+    var ss = getSpreadsheet();
+    sheetOk = true;
+    sheetTitle = ss.getName();
+  } catch (err) {
+    sheetOk = false;
+  }
+
   return ContentService
     .createTextOutput(JSON.stringify({
       status: "active",
-      message: "SellPhoneCash Google Sheets Sync Webhook is active and running!",
+      message: "SellPhoneCash Google Sheets Sync Webhook is running successfully!",
+      connectedSheet: sheetTitle,
       supportedActions: ["appendSellLead", "appendBuyOrder"],
       timestamp: new Date().toISOString()
     }))
@@ -160,14 +72,191 @@ function doGet(e) {
 }
 
 /**
- * Helper: Find or create tab with styled headers and frozen first row
+ * Core processing logic (shared between live webhook and test functions)
  */
-function getOrCreateSheet(ss, sheetName, headers, bgColor, accentColor) {
+function processIncomingLeadOrOrder(payload) {
+  var ss = getSpreadsheet();
+  var action = payload.action;
+
+  // --------------------------------------------------------------------------
+  // 1. SELL PHONE LEADS (Trade-In / Valuation & Doorstep Pickup)
+  // --------------------------------------------------------------------------
+  if (action === "appendSellLead" || payload.lead || (payload.order && payload.order.devices)) {
+    var lead = payload.lead || payload.order;
+    var sellSheet = getOrCreateSheet(ss, "Sell Phone Leads", [
+      "Timestamp",
+      "Order ID",
+      "Date / Time",
+      "Customer Name",
+      "Phone Number",
+      "Email Address",
+      "Emirate / City",
+      "Pickup Address",
+      "Pickup Date",
+      "Pickup Time",
+      "Devices & Condition",
+      "Total Payout (AED)",
+      "Payment Method",
+      "Status",
+      "Channel",
+      "Campaign"
+    ], "#0f172a");
+
+    var sellRow = [
+      new Date(),
+      lead.orderId || lead._id || "N/A",
+      lead.date || new Date().toISOString(),
+      lead.customerName || (lead.customerDetails && lead.customerDetails.name) || "N/A",
+      lead.phone || (lead.customerDetails && lead.customerDetails.phone) || "N/A",
+      lead.email || (lead.customerDetails && lead.customerDetails.email) || "N/A",
+      lead.city || (lead.customerDetails && lead.customerDetails.city) || "Dubai",
+      lead.address || (lead.customerDetails && lead.customerDetails.address) || "N/A",
+      lead.pickupDate || (lead.pickupSchedule && lead.pickupSchedule.pickupDate) || "N/A",
+      lead.pickupTime || (lead.pickupSchedule && lead.pickupSchedule.pickupTime) || "N/A",
+      lead.devices || formatDevices(lead.devices),
+      Number(lead.totalPayout || 0),
+      lead.paymentMethod || "Cash on Pickup",
+      lead.status || "pending",
+      lead.channel || (lead.marketingAttribution && lead.marketingAttribution.source) || "Direct",
+      lead.campaign || (lead.marketingAttribution && lead.marketingAttribution.campaign) || "none"
+    ];
+
+    sellSheet.appendRow(sellRow);
+    formatLastRow(sellSheet, sellRow.length);
+    SpreadsheetApp.flush();
+
+    return { status: "success", type: "sell_lead", orderId: lead.orderId, row: sellSheet.getLastRow() };
+  }
+
+  // --------------------------------------------------------------------------
+  // 2. BUY PHONE ORDERS (Pre-Owned Marketplace Purchase Orders)
+  // --------------------------------------------------------------------------
+  if (action === "appendBuyOrder" || payload.order) {
+    var order = payload.order;
+    var buySheet = getOrCreateSheet(ss, "Buy Phone Orders", [
+      "Timestamp",
+      "Order Number",
+      "Date / Time",
+      "Customer Name",
+      "Phone Number",
+      "Email Address",
+      "City / Emirate",
+      "Delivery Address",
+      "Purchased Handsets",
+      "Total Amount (AED)",
+      "Payment Method",
+      "Payment Status",
+      "Order Status",
+      "Notes"
+    ], "#0f172a");
+
+    var buyRow = [
+      new Date(),
+      order.orderNumber || "BUY-" + Date.now(),
+      order.date || new Date().toISOString(),
+      order.customerName || (order.customerDetails && order.customerDetails.name) || "N/A",
+      order.phone || (order.customerDetails && order.customerDetails.phone) || "N/A",
+      order.email || (order.customerDetails && order.customerDetails.email) || "N/A",
+      order.city || (order.customerDetails && order.customerDetails.city) || "Dubai",
+      order.address || (order.customerDetails && (order.customerDetails.address + " " + (order.customerDetails.building || ""))) || "N/A",
+      order.items || formatItems(order.items),
+      Number(order.totalAmount || 0),
+      order.paymentMethod || "Cash on Delivery",
+      order.paymentStatus || "unpaid",
+      order.orderStatus || "pending",
+      order.notes || (order.customerDetails && order.customerDetails.notes) || ""
+    ];
+
+    buySheet.appendRow(buyRow);
+    formatLastRow(buySheet, buyRow.length);
+    SpreadsheetApp.flush();
+
+    return { status: "success", type: "buy_order", orderNumber: order.orderNumber, row: buySheet.getLastRow() };
+  }
+
+  throw new Error("Unrecognized action. Expected action='appendSellLead' or action='appendBuyOrder'.");
+}
+
+/**
+ * ==============================================================================
+ * TEST FUNCTIONS (Click 'Run' on these inside Apps Script to test without error)
+ * ==============================================================================
+ */
+
+// Select 'testSellLead' in the dropdown and click Run (▶)
+function testSellLead() {
+  var sampleLead = {
+    action: "appendSellLead",
+    lead: {
+      orderId: "SELL-TEST-101",
+      date: new Date().toISOString(),
+      customerName: "Ahmed Al Qasimi",
+      phone: "+971 50 123 4567",
+      email: "ahmed@example.ae",
+      city: "Dubai",
+      address: "Downtown Boulevard, Tower 1",
+      pickupDate: "Tomorrow",
+      pickupTime: "10:00 AM - 01:00 PM",
+      devices: "Apple iPhone 15 Pro Max (256GB, Pristine) x1 @ AED 3,250",
+      totalPayout: 3250,
+      paymentMethod: "Cash on Pickup",
+      status: "pending",
+      channel: "Google Ads",
+      campaign: "dubai_sell_iphone"
+    }
+  };
+
+  var res = processIncomingLeadOrOrder(sampleLead);
+  Logger.log("✅ Sell Lead Test Result: " + JSON.stringify(res));
+}
+
+// Select 'testBuyOrder' in the dropdown and click Run (▶)
+function testBuyOrder() {
+  var sampleOrder = {
+    action: "appendBuyOrder",
+    order: {
+      orderNumber: "BUY-TEST-202",
+      date: new Date().toISOString(),
+      customerName: "Sarah Mansoori",
+      phone: "+971 55 987 6543",
+      email: "sarah@example.ae",
+      city: "Abu Dhabi",
+      address: "Corniche Road, Flat 402",
+      items: "Samsung Galaxy S24 Ultra 5G (512GB, Titanium) x1 @ AED 3,249",
+      totalAmount: 3249,
+      paymentMethod: "Cash on Delivery",
+      paymentStatus: "unpaid",
+      orderStatus: "pending",
+      notes: "Please call before arrival."
+    }
+  };
+
+  var res = processIncomingLeadOrOrder(sampleOrder);
+  Logger.log("✅ Buy Order Test Result: " + JSON.stringify(res));
+}
+
+/**
+ * ==============================================================================
+ * Helper Functions
+ * ==============================================================================
+ */
+
+function getSpreadsheet() {
+  if (SPREADSHEET_ID && SPREADSHEET_ID.trim() !== "") {
+    return SpreadsheetApp.openById(SPREADSHEET_ID.trim());
+  }
+  try {
+    var active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) return active;
+  } catch (e) {}
+
+  throw new Error("Could not find connected spreadsheet. If you are using a standalone Apps Script project, please paste your Google Sheet ID into SPREADSHEET_ID at line 18.");
+}
+
+function getOrCreateSheet(ss, sheetName, headers, bgColor) {
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
-    
-    // Insert header row
     sheet.appendRow(headers);
     sheet.setFrozenRows(1);
 
@@ -181,19 +270,14 @@ function getOrCreateSheet(ss, sheetName, headers, bgColor, accentColor) {
     headerRange.setVerticalAlignment("middle");
     sheet.setRowHeight(1, 38);
 
-    // Auto resize column widths
     for (var i = 1; i <= headers.length; i++) {
       sheet.autoResizeColumn(i);
-      var width = sheet.getColumnWidth(i);
-      if (width < 120) sheet.setColumnWidth(i, 130);
+      if (sheet.getColumnWidth(i) < 130) sheet.setColumnWidth(i, 140);
     }
   }
   return sheet;
 }
 
-/**
- * Helper: Format the newly appended row
- */
 function formatLastRow(sheet, numCols) {
   var lastRow = sheet.getLastRow();
   var range = sheet.getRange(lastRow, 1, 1, numCols);
@@ -201,21 +285,10 @@ function formatLastRow(sheet, numCols) {
   range.setFontSize(10);
   range.setVerticalAlignment("middle");
   sheet.setRowHeight(lastRow, 28);
-
-  // Set date format on col 1 & 3
   sheet.getRange(lastRow, 1).setNumberFormat("yyyy-mm-dd hh:mm:ss");
-  
-  // Set alternating row color for readability
-  if (lastRow % 2 === 0) {
-    range.setBackground("#f8fafc");
-  } else {
-    range.setBackground("#ffffff");
-  }
+  range.setBackground(lastRow % 2 === 0 ? "#f8fafc" : "#ffffff");
 }
 
-/**
- * Helper: Format devices array if passed raw
- */
 function formatDevices(devices) {
   if (!devices) return "N/A";
   if (typeof devices === "string") return devices;
@@ -227,9 +300,6 @@ function formatDevices(devices) {
   return JSON.stringify(devices);
 }
 
-/**
- * Helper: Format items array if passed raw
- */
 function formatItems(items) {
   if (!items) return "N/A";
   if (typeof items === "string") return items;
