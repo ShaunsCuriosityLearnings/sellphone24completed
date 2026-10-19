@@ -36,14 +36,10 @@ import {
   Sparkles,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ serviceSlug: string }>;
-}
-
-export async function generateStaticParams() {
-  return SERVICE_SLUGS.map((slug) => ({
-    serviceSlug: slug,
-  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

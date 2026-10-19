@@ -35,14 +35,10 @@ import {
   Flame,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ locationSlug: string }>;
-}
-
-export async function generateStaticParams() {
-  return LOCATION_SLUGS.map((slug) => ({
-    locationSlug: slug,
-  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

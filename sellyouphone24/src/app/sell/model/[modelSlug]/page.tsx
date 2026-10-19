@@ -39,14 +39,10 @@ import {
   X,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ modelSlug: string }>;
-}
-
-export async function generateStaticParams() {
-  return MODEL_SLUGS.map((slug) => ({
-    modelSlug: slug,
-  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

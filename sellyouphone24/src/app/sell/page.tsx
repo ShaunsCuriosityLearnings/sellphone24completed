@@ -35,6 +35,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Sell Your Phone & Electronics in Dubai | Best Cash Value | SellPhoneCash",
   description:

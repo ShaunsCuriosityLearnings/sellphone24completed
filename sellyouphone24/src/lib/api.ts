@@ -44,6 +44,16 @@ async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): P
 
     return await res.json() as T;
   } catch (error) {
+    // If Next.js signals dynamic server usage bailout during build, handle gracefully
+    if (
+      (error as any)?.digest === "DYNAMIC_SERVER_USAGE" ||
+      (error as any)?.name === "DynamicServerError" ||
+      ((error as Error)?.message && (error as Error).message.includes("Dynamic server usage"))
+    ) {
+      if (fallback !== undefined) return fallback;
+      throw error;
+    }
+
     if (fallback !== undefined) {
       console.warn(`⚠️ API Request failed for ${url}. Error: ${(error as Error).message}. Using fallback data.`);
       return fallback;
