@@ -1,7 +1,7 @@
 import BuyOrder from "../models/BuyOrder.js";
 import BuyProduct from "../models/BuyProduct.js";
 import { syncBuyOrderToGoogleSheets } from "../utils/googleSheetsService.js";
-import { sendBuyOrderConfirmationEmails } from "../utils/buyOrderEmailService.js";
+import { sendBuyOrderConfirmationEmails, sendBuyOrderStatusUpdateEmails } from "../utils/buyOrderEmailService.js";
 
 // Helper to generate unique order number: BUY-YYYYMMDD-XXXX
 const generateOrderNumber = () => {
@@ -208,6 +208,11 @@ export const updateBuyOrderStatus = async (req, res) => {
 
     // Sync updated status to Google Sheets log
     syncBuyOrderToGoogleSheets(order).catch(() => {});
+
+    // Trigger emails asynchronously (Client status update & Admin log)
+    sendBuyOrderStatusUpdateEmails(order).catch((err) => {
+      console.error("Status update email error:", err);
+    });
 
     res.status(200).json({
       success: true,
