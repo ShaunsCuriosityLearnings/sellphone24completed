@@ -125,13 +125,13 @@ const startServer = async () => {
   try {
     await connectToMongoDB();
     await checkAndAutoRestoreDB();
+    app.listen(PORT, () => {
+      console.log(`🚀 SellYourPhone24 backend running on http://localhost:${PORT}`);
+    });
   } catch (error) {
-    console.warn(`⚠️ MongoDB connection unavailable (${error.message}). Starting backend server in offline mode so API endpoints remain responsive.`);
+    console.error(`❌ FAILED to start server: ${error.message}`);
+    process.exit(1);
   }
-
-  app.listen(PORT, () => {
-    console.log(`🚀 SellYourPhone24 backend running on http://localhost:${PORT}`);
-  });
 };
 
 startServer();
