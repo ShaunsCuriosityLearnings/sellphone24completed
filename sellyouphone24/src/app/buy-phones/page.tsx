@@ -126,6 +126,29 @@ export default function BuyPhonesPage() {
   // Newsletter
   const [emailInput, setEmailInput] = useState("");
 
+  // Sync URL search query parameters (from navbar filters or external links)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const cond = sp.get("condition");
+      if (cond) setSelectedCondition(cond);
+
+      const br = sp.get("brand");
+      if (br) setSelectedBrand(br);
+
+      const budget = sp.get("budget");
+      if (budget === "under-1500") {
+        setMaxPrice("1500");
+      }
+
+      const search = sp.get("search");
+      if (search) setSearchQuery(search);
+
+      const cat = sp.get("category");
+      if (cat) setActiveCategory(cat);
+    }
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       setLoading(true);

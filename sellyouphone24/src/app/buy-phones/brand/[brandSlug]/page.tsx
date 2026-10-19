@@ -95,6 +95,21 @@ export default function BrandCatalogPage() {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  // Sync URL search query parameters (from navbar dropdowns or direct links)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const searchParam = sp.get("search");
+      if (searchParam) {
+        setSearchQuery(searchParam);
+      }
+      const cond = sp.get("condition");
+      if (cond) {
+        setSelectedConditions([cond]);
+      }
+    }
+  }, []);
+
   // Load brand details and catalog items
   useEffect(() => {
     async function loadCatalog() {

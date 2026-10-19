@@ -19,6 +19,44 @@ const DEFAULT_FALLBACK_BRANDS: BrandType[] = [
   { id: "sony", name: "Sony", slug: "sony", logo: "🎮", categories: ["games", "tvs"] },
 ];
 
+const BUY_PHONE_NAV_BRANDS = [
+  {
+    name: "Apple",
+    displayName: "Apple iPhone",
+    slug: "apple",
+    icon: "🍎",
+    popularModels: ["iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 15", "iPhone 14 Pro Max", "iPhone 13"],
+  },
+  {
+    name: "Samsung",
+    displayName: "Samsung Galaxy",
+    slug: "samsung",
+    icon: "📱",
+    popularModels: ["Galaxy S24 Ultra", "Galaxy S24+", "Galaxy S23 Ultra", "Galaxy Z Fold 5", "Galaxy Z Flip 5"],
+  },
+  {
+    name: "Google",
+    displayName: "Google Pixel",
+    slug: "google",
+    icon: "🔎",
+    popularModels: ["Pixel 8 Pro", "Pixel 8", "Pixel 7 Pro", "Pixel 7a"],
+  },
+  {
+    name: "OnePlus",
+    displayName: "OnePlus",
+    slug: "oneplus",
+    icon: "➕",
+    popularModels: ["OnePlus 12", "OnePlus 12R", "OnePlus Open", "OnePlus 11"],
+  },
+  {
+    name: "Xiaomi",
+    displayName: "Xiaomi",
+    slug: "xiaomi",
+    icon: "⚡",
+    popularModels: ["Xiaomi 14 Ultra", "Xiaomi 13T Pro", "Redmi Note 13 Pro+"],
+  },
+];
+
 const matchBrandToCategory = (brand: BrandType, category: CategoryType): boolean => {
   const catSlug = category.slug.toLowerCase();
   const bSlug = (brand.slug || "").toLowerCase();
@@ -72,6 +110,7 @@ const matchBrandToCategory = (brand: BrandType, category: CategoryType): boolean
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isBuyPhones = pathname.startsWith("/buy-phones");
 
   const [categoriesList, setCategoriesList] = useState<CategoryType[]>([]);
   const [brandsList, setBrandsList] = useState<BrandType[]>(DEFAULT_FALLBACK_BRANDS);
@@ -254,91 +293,211 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-11 text-xs font-bold tracking-wide">
             
-            <div className="flex items-center gap-2">
-              <Link
-                href="/services"
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
-                  pathname === "/services" ? "bg-emerald-500 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"
-                }`}
-              >
-                <Grid size={14} className="text-emerald-400" />
-                <span>All Sell Services</span>
-              </Link>
-            </div>
-
-            <div className="flex items-center gap-1 xl:gap-2 h-full">
-              {categoriesList.map((category) => {
-                const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
-                const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 6) : brandsList.slice(0, 6);
-                const hasBrands = displayBrands.length > 0;
-
-                return (
-                  <div
-                    key={category.id || category.slug}
-                    className="relative group h-full flex items-center"
-                    onMouseEnter={() => setActiveDropdown(category.slug)}
-                    onMouseLeave={() => setActiveDropdown(null)}
+            {isBuyPhones ? (
+              // =========================================================================
+              // DEDICATED BUY PHONES STORE CATEGORY BAR (When in /buy-phones flow)
+              // =========================================================================
+              <>
+                {/* Left: Store Home Pill */}
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/buy-phones"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
+                      pathname === "/buy-phones"
+                        ? "bg-emerald-500 text-slate-950 font-black shadow-xs"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800"
+                    }`}
                   >
-                    <Link
-                      href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-                      className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 whitespace-nowrap ${
-                        pathname.includes(`/services/${category.slug}`)
-                          ? "text-emerald-400 bg-slate-800"
-                          : "text-slate-300 hover:text-white hover:bg-slate-800"
-                      }`}
-                    >
-                      <span>{category.name}</span>
-                      {hasBrands && (
-                        <ChevronDown size={12} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
-                      )}
-                    </Link>
+                    <Smartphone size={14} className={pathname === "/buy-phones" ? "text-slate-950" : "text-emerald-400"} />
+                    <span>All Certified Phones</span>
+                  </Link>
+                </div>
 
-                    {activeDropdown === category.slug && hasBrands && (
-                      <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-2xl p-3.5 z-50 animate-in fade-in slide-in-from-top-2">
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100 flex justify-between items-center">
-                          <span>Popular {category.name} Brands</span>
-                          <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md font-bold">Instant Cash</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-1.5 pt-2.5">
-                          {displayBrands.map((brand) => (
-                            <Link
-                              key={brand.id || brand._id || brand.name}
-                              href={`/services/${category.slug}?brand=${brand.slug}`}
-                              className="flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50/70 hover:border-emerald-200 transition border border-transparent group/item"
-                            >
-                              <div className="w-6 h-6 flex items-center justify-center text-xs shrink-0 rounded-lg bg-slate-100 group-hover/item:bg-white transition">
-                                {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
-                                  <div className="relative w-4 h-4">
-                                    <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
-                                  </div>
-                                ) : (
-                                  <span>{brand.logo || "📱"}</span>
-                                )}
-                              </div>
-                              <span className="text-xs font-bold text-slate-700 group-hover/item:text-emerald-700 truncate">{brand.name}</span>
-                            </Link>
-                          ))}
-                        </div>
-                        <div className="mt-2.5 pt-2 border-t border-slate-100 text-center">
-                          <Link
-                            href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-                            className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1"
-                          >
-                            <span>View All {category.name} Models</span>
-                            <ArrowRight size={11} />
-                          </Link>
-                        </div>
+                {/* Center: Brands & Handset Categories with Rich Dropdowns */}
+                <div className="flex items-center gap-1 xl:gap-2 h-full">
+                  {BUY_PHONE_NAV_BRANDS.map((b) => {
+                    const isBrandActive = pathname.includes(`/buy-phones/brand/${b.slug}`);
+                    return (
+                      <div
+                        key={b.slug}
+                        className="relative group h-full flex items-center"
+                        onMouseEnter={() => setActiveDropdown(b.slug)}
+                        onMouseLeave={() => setActiveDropdown(null)}
+                      >
+                        <Link
+                          href={`/buy-phones/brand/${b.slug}`}
+                          className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1.5 whitespace-nowrap ${
+                            isBrandActive
+                              ? "text-emerald-400 bg-slate-800 font-extrabold"
+                              : "text-slate-300 hover:text-white hover:bg-slate-800"
+                          }`}
+                        >
+                          <span>{b.icon}</span>
+                          <span>{b.displayName}</span>
+                          <ChevronDown size={11} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
+                        </Link>
+
+                        {/* Dropdown Menu */}
+                        {activeDropdown === b.slug && (
+                          <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-2xl p-3.5 z-50 animate-in fade-in slide-in-from-top-2">
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100 flex justify-between items-center">
+                              <span>{b.name} Handsets</span>
+                              <span className="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md font-bold">12M Warranty</span>
+                            </div>
+                            <div className="grid grid-cols-1 gap-1 pt-2">
+                              {b.popularModels.map((model) => (
+                                <Link
+                                  key={model}
+                                  href={`/buy-phones/brand/${b.slug}?search=${encodeURIComponent(model)}`}
+                                  className="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-emerald-50 text-xs font-semibold text-slate-700 hover:text-emerald-700 transition"
+                                >
+                                  <span>{model}</span>
+                                  <ArrowRight size={11} className="text-slate-400" />
+                                </Link>
+                              ))}
+                            </div>
+                            <div className="mt-2.5 pt-2 border-t border-slate-100 text-center">
+                              <Link
+                                href={`/buy-phones/brand/${b.slug}`}
+                                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1"
+                              >
+                                <span>Browse All {b.name} Models</span>
+                                <ArrowRight size={11} />
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
 
-            <div className="hidden xl:flex items-center gap-1.5 text-emerald-400 text-[11px]">
-              <Sparkles size={13} />
-              <span>Instant UAE Cash Valuation</span>
-            </div>
+                  {/* Curated Filter Shortcuts */}
+                  <Link
+                    href="/buy-phones?condition=Pristine"
+                    className="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition inline-flex items-center gap-1 text-[11px]"
+                  >
+                    <Sparkles size={12} className="text-amber-400" />
+                    <span>Pristine (Like New)</span>
+                  </Link>
+
+                  <Link
+                    href="/buy-phones?budget=under-1500"
+                    className="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition inline-flex items-center gap-1 text-[11px]"
+                  >
+                    <span>Under AED 1,500</span>
+                  </Link>
+                </div>
+
+                {/* Right: Trust Badge & Mode Switch to Sell Phone */}
+                <div className="flex items-center gap-3">
+                  <div className="hidden xl:flex items-center gap-1 text-emerald-400 text-[11px] font-bold">
+                    <ShieldCheck size={13} />
+                    <span>12M Store Warranty</span>
+                  </div>
+
+                  <Link
+                    href="/services"
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 text-[11px] font-bold transition inline-flex items-center gap-1.5"
+                    title="Switch to Sell Phone Trade-In Portal"
+                  >
+                    <span>Sell Phone for Cash</span>
+                    <ArrowRight size={11} className="text-emerald-400" />
+                  </Link>
+                </div>
+              </>
+            ) : (
+              // =========================================================================
+              // STANDARD SELL PHONES CATEGORY BAR (When in trade-in / services flow)
+              // =========================================================================
+              <>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/services"
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition ${
+                      pathname === "/services" ? "bg-emerald-500 text-white" : "text-slate-300 hover:text-white hover:bg-slate-800"
+                    }`}
+                  >
+                    <Grid size={14} className="text-emerald-400" />
+                    <span>All Sell Services</span>
+                  </Link>
+                </div>
+
+                <div className="flex items-center gap-1 xl:gap-2 h-full">
+                  {categoriesList.map((category) => {
+                    const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
+                    const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 6) : brandsList.slice(0, 6);
+                    const hasBrands = displayBrands.length > 0;
+
+                    return (
+                      <div
+                        key={category.id || category.slug}
+                        className="relative group h-full flex items-center"
+                        onMouseEnter={() => setActiveDropdown(category.slug)}
+                        onMouseLeave={() => setActiveDropdown(null)}
+                      >
+                        <Link
+                          href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                          className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 whitespace-nowrap ${
+                            pathname.includes(`/services/${category.slug}`)
+                              ? "text-emerald-400 bg-slate-800"
+                              : "text-slate-300 hover:text-white hover:bg-slate-800"
+                          }`}
+                        >
+                          <span>{category.name}</span>
+                          {hasBrands && (
+                            <ChevronDown size={12} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
+                          )}
+                        </Link>
+
+                        {activeDropdown === category.slug && hasBrands && (
+                          <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-2xl p-3.5 z-50 animate-in fade-in slide-in-from-top-2">
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100 flex justify-between items-center">
+                              <span>Popular {category.name} Brands</span>
+                              <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md font-bold">Instant Cash</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-1.5 pt-2.5">
+                              {displayBrands.map((brand) => (
+                                <Link
+                                  key={brand.id || brand._id || brand.name}
+                                  href={`/services/${category.slug}?brand=${brand.slug}`}
+                                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50/70 hover:border-emerald-200 transition border border-transparent group/item"
+                                >
+                                  <div className="w-6 h-6 flex items-center justify-center text-xs shrink-0 rounded-lg bg-slate-100 group-hover/item:bg-white transition">
+                                    {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
+                                      <div className="relative w-4 h-4">
+                                        <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
+                                      </div>
+                                    ) : (
+                                      <span>{brand.logo || "📱"}</span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs font-bold text-slate-700 group-hover/item:text-emerald-700 truncate">{brand.name}</span>
+                                </Link>
+                              ))}
+                            </div>
+                            <div className="mt-2.5 pt-2 border-t border-slate-100 text-center">
+                              <Link
+                                href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1"
+                              >
+                                <span>View All {category.name} Models</span>
+                                <ArrowRight size={11} />
+                              </Link>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="hidden xl:flex items-center gap-1.5 text-emerald-400 text-[11px]">
+                  <Sparkles size={13} />
+                  <span>Instant UAE Cash Valuation</span>
+                </div>
+              </>
+            )}
+
           </div>
         </div>
       </div>
@@ -347,82 +506,187 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-6 space-y-4 animate-in slide-in-from-top-4 duration-200 shadow-2xl absolute top-full left-0 w-full z-50 max-h-[85vh] overflow-y-auto">
           
-          {/* BUY PHONES STORE HIGHLIGHT (MOBILE) */}
-          <div className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 p-3.5 rounded-2xl border border-emerald-500/20">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-                <Smartphone size={13} className="text-emerald-600" />
-                Buy Phones Store
-              </span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                12M Warranty
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href="/buy-phones"
-                className="flex-1 bg-emerald-500 text-slate-950 font-bold text-xs py-2 px-3 rounded-xl text-center shadow-xs hover:bg-emerald-600 transition"
-              >
-                Browse All Phones
-              </Link>
-              {buyCartCount > 0 && (
+          {isBuyPhones ? (
+            // =========================================================================
+            // DEDICATED BUY PHONES STORE MOBILE DRAWER
+            // =========================================================================
+            <>
+              {/* Store Highlight Card */}
+              <div className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 p-3.5 rounded-2xl border border-emerald-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                    <Smartphone size={13} className="text-emerald-600" />
+                    Buy Phones Certified Store
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    12M Warranty
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/buy-phones"
+                    className="flex-1 bg-emerald-500 text-slate-950 font-bold text-xs py-2 px-3 rounded-xl text-center shadow-xs hover:bg-emerald-600 transition"
+                  >
+                    All Handsets
+                  </Link>
+                  {buyCartCount > 0 && (
+                    <Link
+                      href="/buy-phones/cart"
+                      className="bg-slate-900 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 shadow-xs"
+                    >
+                      <ShoppingBag size={13} className="text-emerald-400" />
+                      <span>Store Cart ({buyCartCount})</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {/* Browse Handsets By Brand */}
+              <div className="space-y-1">
+                <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
+                  Browse Handsets By Brand
+                </div>
+                <div className="grid grid-cols-1 gap-1">
+                  {BUY_PHONE_NAV_BRANDS.map((b) => (
+                    <Link
+                      key={b.slug}
+                      href={`/buy-phones/brand/${b.slug}`}
+                      className="flex items-center justify-between px-3.5 py-2.5 text-sm font-bold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span>{b.icon}</span>
+                        <span>{b.displayName}</span>
+                      </span>
+                      <ArrowRight size={14} className="text-slate-300" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Shop by Condition & Budget */}
+              <div className="space-y-1">
+                <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
+                  Condition & Price Filters
+                </div>
+                <div className="grid grid-cols-1 gap-1">
+                  <Link
+                    href="/buy-phones?condition=Pristine"
+                    className="flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-amber-500" />
+                      <span>Pristine (Like New) Handsets</span>
+                    </span>
+                    <ArrowRight size={13} className="text-slate-300" />
+                  </Link>
+                  <Link
+                    href="/buy-phones?budget=under-1500"
+                    className="flex items-center justify-between px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl"
+                  >
+                    <span>Handsets Under AED 1,500</span>
+                    <ArrowRight size={13} className="text-slate-300" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Switch to Sell Mode */}
+              <div className="pt-2">
                 <Link
-                  href="/buy-phones/cart"
-                  className="bg-slate-900 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 shadow-xs"
+                  href="/services"
+                  className="w-full flex items-center justify-between bg-slate-900 text-white py-3 px-4 rounded-xl text-xs font-bold transition shadow-md hover:bg-slate-800"
                 >
-                  <ShoppingBag size={13} className="text-emerald-400" />
-                  <span>Cart ({buyCartCount})</span>
+                  <span className="flex items-center gap-2">
+                    <Zap size={15} className="text-emerald-400" />
+                    <span>Want to Sell a Phone for Cash?</span>
+                  </span>
+                  <ArrowRight size={14} className="text-emerald-400" />
                 </Link>
-              )}
-            </div>
-          </div>
+              </div>
+            </>
+          ) : (
+            // =========================================================================
+            // STANDARD SELL PHONES MOBILE DRAWER
+            // =========================================================================
+            <>
+              {/* BUY PHONES STORE HIGHLIGHT (MOBILE) */}
+              <div className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 p-3.5 rounded-2xl border border-emerald-500/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
+                    <Smartphone size={13} className="text-emerald-600" />
+                    Buy Phones Store
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    12M Warranty
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/buy-phones"
+                    className="flex-1 bg-emerald-500 text-slate-950 font-bold text-xs py-2 px-3 rounded-xl text-center shadow-xs hover:bg-emerald-600 transition"
+                  >
+                    Browse All Phones
+                  </Link>
+                  {buyCartCount > 0 && (
+                    <Link
+                      href="/buy-phones/cart"
+                      className="bg-slate-900 text-white font-bold text-xs py-2 px-3 rounded-xl flex items-center gap-1.5 shadow-xs"
+                    >
+                      <ShoppingBag size={13} className="text-emerald-400" />
+                      <span>Cart ({buyCartCount})</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
 
-          <div className="space-y-1">
-            <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
-              Sell Devices
-            </div>
-            <div className="grid grid-cols-1 gap-1">
-              <Link
-                href="/services"
-                className="flex items-center justify-between px-3.5 py-2.5 text-sm font-bold text-slate-800 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition"
-              >
-                <span>All Services & Categories</span>
-                <ArrowRight size={14} className="text-slate-400" />
-              </Link>
-              {categoriesList.map((category) => (
+              <div className="space-y-1">
+                <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
+                  Sell Devices
+                </div>
+                <div className="grid grid-cols-1 gap-1">
+                  <Link
+                    href="/services"
+                    className="flex items-center justify-between px-3.5 py-2.5 text-sm font-bold text-slate-800 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition"
+                  >
+                    <span>All Services & Categories</span>
+                    <ArrowRight size={14} className="text-slate-400" />
+                  </Link>
+                  {categoriesList.map((category) => (
+                    <Link
+                      key={category.id || category.slug}
+                      href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
+                      className="flex items-center justify-between px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 rounded-xl transition"
+                    >
+                      <span>Sell {category.name}</span>
+                      <ArrowRight size={14} className="text-slate-300" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-600">
+                <Link href="/blogs" className="py-2.5 bg-slate-50 rounded-xl hover:bg-slate-100">
+                  Blogs
+                </Link>
+                <Link href="/about" className="py-2.5 bg-slate-50 rounded-xl hover:bg-slate-100">
+                  About Us
+                </Link>
+                <Link href="/contact" className="py-2.5 bg-slate-50 rounded-xl hover:bg-slate-100">
+                  Contact
+                </Link>
+              </div>
+
+              <div className="pt-2">
                 <Link
-                  key={category.id || category.slug}
-                  href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
-                  className="flex items-center justify-between px-3.5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-emerald-600 rounded-xl transition"
+                  href="/services"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-3 rounded-xl text-sm font-bold transition shadow-md"
                 >
-                  <span>Sell {category.name}</span>
-                  <ArrowRight size={14} className="text-slate-300" />
+                  <Zap size={18} />
+                  Get Instant Quote Now
                 </Link>
-              ))}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
 
-          <div className="pt-3 border-t border-slate-100 grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-600">
-            <Link href="/blogs" className="py-2.5 bg-slate-50 rounded-xl hover:bg-slate-100">
-              Blogs
-            </Link>
-            <Link href="/about" className="py-2.5 bg-slate-50 rounded-xl hover:bg-slate-100">
-              About Us
-            </Link>
-            <Link href="/contact" className="py-2.5 bg-slate-50 rounded-xl hover:bg-slate-100">
-              Contact
-            </Link>
-          </div>
-
-          <div className="pt-2">
-            <Link
-              href="/services"
-              className="w-full inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-3 rounded-xl text-sm font-bold transition shadow-md"
-            >
-              <Zap size={18} />
-              Get Instant Quote Now
-            </Link>
-          </div>
         </div>
       )}
     </header>
