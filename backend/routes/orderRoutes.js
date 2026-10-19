@@ -4,6 +4,7 @@ import {
   getOrders,
   getOrderById,
   updateOrderStatus,
+  retrySellOrderSheetsSync,
 } from "../controllers/orderController.js";
 import { requireAdmin } from "../middlewares/authMiddleware.js";
 
@@ -18,5 +19,8 @@ router.route("/:id")
 
 router.route("/:id/status")
   .patch(requireAdmin, updateOrderStatus);
+
+router.route("/:id/retry-sheets")
+  .post(requireAdmin, retrySellOrderSheetsSync);
 
 export default router;

@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import { sendOrderConfirmationEmails, sendStatusUpdateEmails } from "../utils/emailService.js";
 import { sendOrderWhatsAppNotification } from "../utils/whatsappService.js";
+import { syncSellLeadToGoogleSheets } from "../utils/googleSheetsService.js";
 
 // @desc    Create/Submit a new valuation order
 // @route   POST /api/orders
@@ -52,6 +53,19 @@ export const createOrder = async (req, res) => {
 
     // Trigger WhatsApp notification for +971555972150
     sendOrderWhatsAppNotification(order);
+
+    // Asynchronously dispatch to Google Sheets
+    syncSellLeadToGoogleSheets(order).then(async (syncResult) => {
+      try {
+        await Order.findByIdAndUpdate(order._id, {
+          "googleSheetsSync.isSynced": syncResult.success,
+          "googleSheetsSync.syncedAt": syncResult.success ? new Date() : null,
+          "googleSheetsSync.error": syncResult.error || null,
+        });
+      } catch (e) {
+        console.warn("Could not update Order googleSheetsSync status:", e.message);
+      }
+    }).catch(() => {});
 
     res.status(201).json({
       success: true,
@@ -124,5 +138,34 @@ export const updateOrderStatus = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+};
+
+// @desc    Retry Google Sheets sync for a Sell Phone order
+// @route   POST /api/orders/:id/retry-sheets
+// @access  Admin
+export const retrySellOrderSheetsSync = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const result = await syncSellLeadToGoogleSheets(order);
+    order.googleSheetsSync = order.googleSheetsSync || {};
+    order.googleSheetsSync.isSynced = result.success;
+    order.googleSheetsSync.syncedAt = result.success ? new Date() : null;
+    order.googleSheetsSync.error = result.error || null;
+    order.googleSheetsSync.retryCount = (order.googleSheetsSync.retryCount || 0) + 1;
+    await order.save();
+
+    res.status(200).json({
+      success: result.success,
+      message: result.success ? "Synced to Google Sheets successfully" : `Sync failed: ${result.error}`,
+      googleSheetsSync: order.googleSheetsSync,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

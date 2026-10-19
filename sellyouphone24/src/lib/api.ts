@@ -659,6 +659,13 @@ export const api = {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
   },
+
+  async retrySellOrderSheetsSync(id: string, token?: string): Promise<{ success: boolean; message: string; googleSheetsSync: any }> {
+    return safeFetch<{ success: boolean; message: string; googleSheetsSync: any }>(`${API_BASE}/orders/${id}/retry-sheets`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+  },
 };
 
 

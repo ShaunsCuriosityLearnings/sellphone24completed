@@ -86,3 +86,84 @@ export const syncBuyOrderToGoogleSheets = async (order) => {
   console.log(`ℹ️ Google Sheet Webhook (GOOGLE_SHEET_BUY_ORDERS_WEBHOOK_URL) not configured. Order #${order.orderNumber} saved to local sync log.`);
   return { success: true, method: "local_log", note: "Logged locally in backups/google_sheets_buy_orders_log.json" };
 };
+
+/**
+ * Append a Sell Phone Trade-In Lead row to the "Sell Phone Leads" Google Sheet
+ */
+export const syncSellLeadToGoogleSheets = async (order) => {
+  const webhookUrl = process.env.GOOGLE_SHEET_SELL_LEADS_WEBHOOK_URL || process.env.GOOGLE_SHEET_WEBHOOK_URL;
+
+  const devicesFormatted = (order.devices || [])
+    .map((d) => `${d.brand || ""} ${d.name || "Device"} (${d.selectedStorage || "Standard"}, ${d.selectedColor || "Standard"}, ${d.selectedCondition || "Good"}) x${d.quantity || 1} @ AED ${d.calculatedPrice || 0}`)
+    .join(" | ");
+
+  const rowData = {
+    orderId: String(order._id || order.id || "N/A"),
+    date: new Date(order.createdAt || Date.now()).toISOString().replace("T", " ").substring(0, 19),
+    customerName: order.customerDetails?.name || "N/A",
+    phone: order.customerDetails?.phone || "N/A",
+    email: order.customerDetails?.email || "N/A",
+    city: order.customerDetails?.city || "Dubai",
+    address: order.customerDetails?.address || "N/A",
+    pickupDate: order.pickupSchedule?.pickupDate || "N/A",
+    pickupTime: order.pickupSchedule?.pickupTime || "N/A",
+    devices: devicesFormatted || "Standard Device",
+    totalPayout: order.totalPayout || 0,
+    paymentMethod: order.paymentMethod === "cash" ? "Cash on Pickup" : order.paymentMethod || "Cash",
+    status: order.status || "pending",
+    channel: order.acquisitionChannel || order.marketingAttribution?.source || "Direct",
+    campaign: order.utmCampaign || order.marketingAttribution?.campaign || "none",
+  };
+
+  // Always log to local operational backup
+  try {
+    const backupDir = path.join(process.cwd(), "backups");
+    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+    const logFile = path.join(backupDir, "google_sheets_sell_leads_log.json");
+    let currentLogs = [];
+    if (fs.existsSync(logFile)) {
+      try {
+        currentLogs = JSON.parse(fs.readFileSync(logFile, "utf-8"));
+      } catch (e) {
+        currentLogs = [];
+      }
+    }
+    const existingIdx = currentLogs.findIndex((log) => log.orderId === rowData.orderId);
+    if (existingIdx >= 0) {
+      currentLogs[existingIdx] = { ...rowData, updatedAt: new Date().toISOString() };
+    } else {
+      currentLogs.push({ ...rowData, loggedAt: new Date().toISOString() });
+    }
+    fs.writeFileSync(logFile, JSON.stringify(currentLogs, null, 2));
+  } catch (err) {
+    console.warn("⚠️ Could not write local Sell Leads sync log:", err.message);
+  }
+
+  // If webhook is provided, dispatch POST request
+  if (webhookUrl) {
+    try {
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "appendSellLead",
+          sheetName: "Sell Phone Leads",
+          lead: rowData,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Sheets Webhook HTTP error ${response.status}`);
+      }
+
+      console.log(`📊 Successfully synced Sell Lead #${rowData.orderId} to Google Sheets via Webhook.`);
+      return { success: true, method: "webhook" };
+    } catch (error) {
+      console.error(`❌ Google Sheets Webhook sync failed for Sell Lead #${rowData.orderId}:`, error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  console.log(`ℹ️ Google Sheet Webhook (GOOGLE_SHEET_WEBHOOK_URL) not configured. Sell Lead #${rowData.orderId} saved to local sync log.`);
+  return { success: true, method: "local_log", note: "Logged locally in backups/google_sheets_sell_leads_log.json" };
+};

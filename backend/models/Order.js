@@ -109,6 +109,12 @@ const orderSchema = new mongoose.Schema({
     ttclid: { type: String, default: "" },
     referrer: { type: String, default: "direct" },
   },
+  googleSheetsSync: {
+    isSynced: { type: Boolean, default: false },
+    syncedAt: { type: Date, default: null },
+    error: { type: String, default: null },
+    retryCount: { type: Number, default: 0 },
+  },
 }, { timestamps: true });
 
 export default mongoose.model("Order", orderSchema);
