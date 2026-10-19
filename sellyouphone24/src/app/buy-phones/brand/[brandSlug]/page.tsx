@@ -73,7 +73,7 @@ export default function BrandCatalogPage() {
   const [sortBy, setSortBy] = useState<"popular" | "price-asc" | "price-desc" | "rating" | "newest">("popular");
 
   // Sidebar Filter States (faithfully matching reference image layout)
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(["smartphones"]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(["all"]);
   const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(8000);
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
@@ -106,6 +106,10 @@ export default function BrandCatalogPage() {
       const cond = sp.get("condition");
       if (cond) {
         setSelectedConditions([cond]);
+      }
+      const cat = sp.get("category");
+      if (cat) {
+        setSelectedCategories([cat]);
       }
     }
   }, []);
@@ -236,10 +240,13 @@ export default function BrandCatalogPage() {
         if (!matchesTitle && !matchesModel && !matchesDesc) return false;
       }
 
-      // 2. Category Filter (smartphones, audio, etc.)
+      // 2. Category Filter (smartphones, laptops, tablets, smartwatches, etc.)
       if (selectedCategories.length > 0 && !selectedCategories.includes("all")) {
         const prodCat = (product.category || "smartphones").toLowerCase();
-        const matchesCategory = selectedCategories.some((c) => prodCat.includes(c.toLowerCase()));
+        const matchesCategory = selectedCategories.some((c) => {
+          const cLow = c.toLowerCase();
+          return prodCat.includes(cLow) || (cLow === "smartphones" && (prodCat.includes("phone") || prodCat.includes("mobile")));
+        });
         if (!matchesCategory) return false;
       }
 

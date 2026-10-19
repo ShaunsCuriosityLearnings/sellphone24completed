@@ -215,7 +215,8 @@ export default function BuyPhonesPage() {
     products.forEach((p) => {
       if (p.brand) set.add(p.brand.trim());
     });
-    return Array.from(set);
+    const list = Array.from(set);
+    return list.length > 0 ? list : ["Apple", "Samsung", "Google", "OnePlus", "Dell", "Sony"];
   }, [products]);
 
   // Compute available models
@@ -271,17 +272,29 @@ export default function BuyPhonesPage() {
         }
       }
 
-      // 2. Category pill filter
-      if (activeCategory === "flagship") {
-        if (!(phone.price >= 2500 || phone.title.toLowerCase().includes("pro") || phone.title.toLowerCase().includes("ultra"))) return false;
-      } else if (activeCategory === "mid-range") {
-        if (!(phone.price >= 1500 && phone.price < 2500)) return false;
-      } else if (activeCategory === "budget") {
-        if (!(phone.price < 1500)) return false;
-      } else if (activeCategory === "gaming") {
-        if (!(phone.brand.toLowerCase() === "oneplus" || phone.title.toLowerCase().includes("ultra") || phone.price >= 2000)) return false;
-      } else if (activeCategory === "camera") {
-        if (!(phone.title.toLowerCase().includes("pro") || phone.title.toLowerCase().includes("ultra") || phone.brand.toLowerCase() === "google")) return false;
+      // 2. Category filter (smartphones, laptops, tablets, smartwatches, games, etc.)
+      if (activeCategory !== "all") {
+        const catLower = activeCategory.toLowerCase();
+        if (catLower === "flagship") {
+          if (!(phone.price >= 2500 || phone.title.toLowerCase().includes("pro") || phone.title.toLowerCase().includes("ultra"))) return false;
+        } else if (catLower === "mid-range") {
+          if (!(phone.price >= 1500 && phone.price < 2500)) return false;
+        } else if (catLower === "budget") {
+          if (!(phone.price < 1500)) return false;
+        } else if (catLower === "gaming") {
+          const pCat = (phone.category || "").toLowerCase();
+          if (!(pCat.includes("game") || phone.brand.toLowerCase() === "oneplus" || phone.title.toLowerCase().includes("ultra") || phone.price >= 2000)) return false;
+        } else if (catLower === "camera") {
+          if (!(phone.title.toLowerCase().includes("pro") || phone.title.toLowerCase().includes("ultra") || phone.brand.toLowerCase() === "google")) return false;
+        } else {
+          const prodCat = (phone.category || "smartphones").toLowerCase();
+          const prodTitle = (phone.title || "").toLowerCase();
+          const isMatch = 
+            prodCat.includes(catLower) || 
+            prodTitle.includes(catLower) || 
+            (catLower === "smartphones" && (prodCat.includes("phone") || prodCat.includes("mobile")));
+          if (!isMatch) return false;
+        }
       }
 
       // 3. Hero filter: Brand
@@ -481,8 +494,8 @@ export default function BuyPhonesPage() {
         {/* =========================================================================
             2. MINIMALIST & PROFESSIONAL SEARCH & FILTER BAR (Desktop & Mobile)
            ========================================================================= */}
-        <div className="relative z-20 mt-6 sm:mt-8 pt-1">
-          <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-sm p-3 sm:p-4 space-y-3">
+        <div className="relative z-20 mt-6 sm:mt-8 pt-1 max-w-5xl mx-auto w-full">
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-sm p-3.5 sm:p-4 space-y-3">
             
             {/* Top Row: Live Search Input + Desktop Controls */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
@@ -509,8 +522,25 @@ export default function BuyPhonesPage() {
               </div>
 
               {/* Desktop Filter Dropdowns (Minimal & Professional) */}
-              <div className="hidden sm:flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2 shrink-0">
                 
+                {/* Category Dropdown */}
+                <select
+                  value={activeCategory}
+                  onChange={(e) => {
+                    setActiveCategory(e.target.value);
+                    setSelectedModel("all");
+                  }}
+                  className="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="smartphones">📱 Smartphones</option>
+                  <option value="laptops">💻 Laptops</option>
+                  <option value="tablets">📱 Tablets</option>
+                  <option value="smartwatches">⌚ Smartwatches</option>
+                  <option value="games">🎮 Gaming & Consoles</option>
+                </select>
+
                 {/* Brand Dropdown */}
                 <select
                   value={selectedBrand}
@@ -626,6 +656,21 @@ export default function BuyPhonesPage() {
             {mobileFiltersOpen && (
               <div className="sm:hidden pt-2 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
                 <div>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
+                  <select
+                    value={activeCategory}
+                    onChange={(e) => setActiveCategory(e.target.value)}
+                    className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs font-bold text-slate-800"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="smartphones">📱 Smartphones</option>
+                    <option value="laptops">💻 Laptops</option>
+                    <option value="tablets">📱 Tablets</option>
+                    <option value="smartwatches">⌚ Smartwatches</option>
+                    <option value="games">🎮 Gaming & Consoles</option>
+                  </select>
+                </div>
+                <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Condition</label>
                   <select
                     value={selectedCondition}
@@ -660,8 +705,8 @@ export default function BuyPhonesPage() {
               </div>
             )}
 
-            {/* Row 2: Minimalist One-Tap Brand Pills & Budget Chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1">
+            {/* Row 2: Minimalist One-Tap Brand Pills & Budget Chips (Centered) */}
+            <div className="flex items-center justify-center flex-wrap gap-1.5 pt-1">
               <button
                 onClick={() => { setSelectedBrand("all"); setSelectedModel("all"); }}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition cursor-pointer ${
@@ -768,8 +813,12 @@ export default function BuyPhonesPage() {
         {/* Header row: Minimalist title + count + reset */}
         <div className="flex items-center justify-between px-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg sm:text-2xl font-black text-slate-950 tracking-tight">
-              {selectedBrand !== "all" ? `${selectedBrand} Models` : "All Phone Models"}
+            <h2 className="text-lg sm:text-2xl font-black text-slate-950 tracking-tight capitalize">
+              {selectedBrand !== "all" 
+                ? `${selectedBrand} Models` 
+                : activeCategory !== "all" 
+                ? `Certified ${activeCategory} Models` 
+                : "All Certified Models"}
             </h2>
             <span className="text-[11px] sm:text-xs bg-slate-100 text-slate-700 font-bold px-2.5 py-0.5 rounded-full border border-slate-200">
               {filteredProducts.length} {filteredProducts.length === 1 ? "device" : "devices"}

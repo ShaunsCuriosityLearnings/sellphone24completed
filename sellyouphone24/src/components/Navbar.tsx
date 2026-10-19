@@ -2,7 +2,24 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown, Zap, ShoppingBag, ArrowRight, Grid, Sparkles, Phone, Truck, ShieldCheck, Smartphone } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  ChevronDown, 
+  Zap, 
+  ShoppingBag, 
+  ArrowRight, 
+  Grid, 
+  Sparkles, 
+  Phone, 
+  Truck, 
+  ShieldCheck, 
+  Smartphone,
+  Laptop,
+  Tablet,
+  Watch,
+  Gamepad2
+} from "lucide-react";
 import { CategoryType, BrandType } from "@/types";
 import { api } from "@/lib/api";
 import { usePathname } from "next/navigation";
@@ -10,52 +27,38 @@ import Image from "next/image";
 import useCartStore from "@/app/stores/cartStore";
 import useBuyCartStore from "@/app/stores/buyCartStore";
 
+const DEFAULT_FALLBACK_CATEGORIES: CategoryType[] = [
+  { id: "smartphones", name: "Smartphones", slug: "smartphones", description: "Smartphones", image: "" },
+  { id: "laptops", name: "Laptops", slug: "laptops", description: "Laptops", image: "" },
+  { id: "tablets", name: "Tablets", slug: "tablets", description: "Tablets", image: "" },
+  { id: "smartwatches", name: "Smartwatches", slug: "smartwatches", description: "Smartwatches", image: "" },
+  { id: "games", name: "Gaming & Consoles", slug: "games", description: "Gaming & Consoles", image: "" },
+];
+
 const DEFAULT_FALLBACK_BRANDS: BrandType[] = [
   { id: "apple", name: "Apple", slug: "apple", logo: "🍎", categories: ["smartphones", "laptops", "tablets", "smartwatches"] },
   { id: "samsung", name: "Samsung", slug: "samsung", logo: "📱", categories: ["smartphones", "tablets", "smartwatches", "tvs"] },
   { id: "google", name: "Google", slug: "google", logo: "🔎", categories: ["smartphones", "smartwatches"] },
   { id: "oneplus", name: "OnePlus", slug: "oneplus", logo: "➕", categories: ["smartphones", "tablets"] },
+  { id: "xiaomi", name: "Xiaomi", slug: "xiaomi", logo: "⚡", categories: ["smartphones", "tablets"] },
   { id: "dell", name: "Dell", slug: "dell", logo: "💻", categories: ["laptops"] },
+  { id: "hp", name: "HP", slug: "hp", logo: "💻", categories: ["laptops"] },
+  { id: "lenovo", name: "Lenovo", slug: "lenovo", logo: "💻", categories: ["laptops", "tablets"] },
+  { id: "asus", name: "ASUS", slug: "asus", logo: "💻", categories: ["laptops", "games"] },
   { id: "sony", name: "Sony", slug: "sony", logo: "🎮", categories: ["games", "tvs"] },
+  { id: "nintendo", name: "Nintendo", slug: "nintendo", logo: "🎮", categories: ["games"] },
+  { id: "microsoft", name: "Microsoft", slug: "microsoft", logo: "💻", categories: ["laptops", "tablets", "games"] },
 ];
 
-const BUY_PHONE_NAV_BRANDS = [
-  {
-    name: "Apple",
-    displayName: "Apple iPhone",
-    slug: "apple",
-    icon: "🍎",
-    popularModels: ["iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 15", "iPhone 14 Pro Max", "iPhone 13"],
-  },
-  {
-    name: "Samsung",
-    displayName: "Samsung Galaxy",
-    slug: "samsung",
-    icon: "📱",
-    popularModels: ["Galaxy S24 Ultra", "Galaxy S24+", "Galaxy S23 Ultra", "Galaxy Z Fold 5", "Galaxy Z Flip 5"],
-  },
-  {
-    name: "Google",
-    displayName: "Google Pixel",
-    slug: "google",
-    icon: "🔎",
-    popularModels: ["Pixel 8 Pro", "Pixel 8", "Pixel 7 Pro", "Pixel 7a"],
-  },
-  {
-    name: "OnePlus",
-    displayName: "OnePlus",
-    slug: "oneplus",
-    icon: "➕",
-    popularModels: ["OnePlus 12", "OnePlus 12R", "OnePlus Open", "OnePlus 11"],
-  },
-  {
-    name: "Xiaomi",
-    displayName: "Xiaomi",
-    slug: "xiaomi",
-    icon: "⚡",
-    popularModels: ["Xiaomi 14 Ultra", "Xiaomi 13T Pro", "Redmi Note 13 Pro+"],
-  },
-];
+const getCategoryIcon = (slugOrName: string) => {
+  const s = (slugOrName || "").toLowerCase();
+  if (s.includes("phone") || s.includes("mobile")) return <Smartphone size={13} className="text-emerald-400" />;
+  if (s.includes("laptop") || s.includes("macbook")) return <Laptop size={13} className="text-emerald-400" />;
+  if (s.includes("tablet") || s.includes("ipad")) return <Tablet size={13} className="text-emerald-400" />;
+  if (s.includes("watch")) return <Watch size={13} className="text-emerald-400" />;
+  if (s.includes("game") || s.includes("console")) return <Gamepad2 size={13} className="text-emerald-400" />;
+  return <Sparkles size={13} className="text-emerald-400" />;
+};
 
 const matchBrandToCategory = (brand: BrandType, category: CategoryType): boolean => {
   const catSlug = category.slug.toLowerCase();
@@ -112,7 +115,7 @@ const Navbar = () => {
   const pathname = usePathname();
   const isBuyPhones = pathname.startsWith("/buy-phones");
 
-  const [categoriesList, setCategoriesList] = useState<CategoryType[]>([]);
+  const [categoriesList, setCategoriesList] = useState<CategoryType[]>(DEFAULT_FALLBACK_CATEGORIES);
   const [brandsList, setBrandsList] = useState<BrandType[]>(DEFAULT_FALLBACK_BRANDS);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
@@ -125,14 +128,18 @@ const Navbar = () => {
   useEffect(() => {
     api.getCategories()
       .then((data) => {
-        const seenNames = new Set<string>();
-        const filtered = data.filter((cat) => {
-          const normName = cat.name.toLowerCase() === "mobile" ? "smartphones" : cat.name.toLowerCase();
-          if (seenNames.has(normName)) return false;
-          seenNames.add(normName);
-          return true;
-        });
-        setCategoriesList(filtered);
+        if (data && data.length > 0) {
+          const seenNames = new Set<string>();
+          const filtered = data.filter((cat) => {
+            const normName = cat.name.toLowerCase() === "mobile" ? "smartphones" : cat.name.toLowerCase();
+            if (seenNames.has(normName)) return false;
+            seenNames.add(normName);
+            return true;
+          });
+          if (filtered.length > 0) {
+            setCategoriesList(filtered);
+          }
+        }
       })
       .catch(() => {});
 
@@ -308,60 +315,76 @@ const Navbar = () => {
                         : "text-slate-300 hover:text-white hover:bg-slate-800"
                     }`}
                   >
-                    <Smartphone size={14} className={pathname === "/buy-phones" ? "text-slate-950" : "text-emerald-400"} />
-                    <span>All Certified Phones</span>
+                    <Grid size={14} className={pathname === "/buy-phones" ? "text-slate-950" : "text-emerald-400"} />
+                    <span>All Certified Tech</span>
                   </Link>
                 </div>
 
-                {/* Center: Brands & Handset Categories with Rich Dropdowns */}
+                {/* Center: Main Categories Sequence (Smartphones, Laptops, Tablets, etc.) with Dynamic Brands Dropdowns */}
                 <div className="flex items-center gap-1 xl:gap-2 h-full">
-                  {BUY_PHONE_NAV_BRANDS.map((b) => {
-                    const isBrandActive = pathname.includes(`/buy-phones/brand/${b.slug}`);
+                  {categoriesList.map((category) => {
+                    const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
+                    const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 8) : brandsList.slice(0, 6);
+                    const hasBrands = displayBrands.length > 0;
+                    const dropdownKey = `buy-${category.slug}`;
+
                     return (
                       <div
-                        key={b.slug}
+                        key={category.id || category.slug}
                         className="relative group h-full flex items-center"
-                        onMouseEnter={() => setActiveDropdown(b.slug)}
+                        onMouseEnter={() => setActiveDropdown(dropdownKey)}
                         onMouseLeave={() => setActiveDropdown(null)}
                       >
                         <Link
-                          href={`/buy-phones/brand/${b.slug}`}
+                          href={`/buy-phones?category=${category.slug}`}
                           className={`px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1.5 whitespace-nowrap ${
-                            isBrandActive
+                            pathname.includes(`/buy-phones`) && pathname.includes(category.slug)
                               ? "text-emerald-400 bg-slate-800 font-extrabold"
                               : "text-slate-300 hover:text-white hover:bg-slate-800"
                           }`}
                         >
-                          <span>{b.icon}</span>
-                          <span>{b.displayName}</span>
-                          <ChevronDown size={11} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
+                          {getCategoryIcon(category.slug || category.name)}
+                          <span>{category.name}</span>
+                          {hasBrands && (
+                            <ChevronDown size={11} className="text-slate-400 group-hover:text-emerald-400 transition-transform group-hover:rotate-180" />
+                          )}
                         </Link>
 
-                        {/* Dropdown Menu */}
-                        {activeDropdown === b.slug && (
-                          <div className="absolute top-full left-0 w-64 bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-2xl p-3.5 z-50 animate-in fade-in slide-in-from-top-2">
+                        {/* Dropdown Menu: Brands Linked to this Category */}
+                        {activeDropdown === dropdownKey && hasBrands && (
+                          <div className="absolute top-full left-0 w-72 bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-2xl p-3.5 z-50 animate-in fade-in slide-in-from-top-2">
                             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 pb-2 border-b border-slate-100 flex justify-between items-center">
-                              <span>{b.name} Handsets</span>
+                              <span>Certified {category.name} Brands</span>
                               <span className="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-md font-bold">12M Warranty</span>
                             </div>
-                            <div className="grid grid-cols-1 gap-1 pt-2">
-                              {b.popularModels.map((model) => (
+
+                            <div className="grid grid-cols-2 gap-1.5 pt-2.5">
+                              {displayBrands.map((brand) => (
                                 <Link
-                                  key={model}
-                                  href={`/buy-phones/brand/${b.slug}?search=${encodeURIComponent(model)}`}
-                                  className="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-emerald-50 text-xs font-semibold text-slate-700 hover:text-emerald-700 transition"
+                                  key={brand.id || brand._id || brand.name}
+                                  href={`/buy-phones/brand/${brand.slug}?category=${category.slug}`}
+                                  className="flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50/70 hover:border-emerald-200 transition border border-transparent group/item"
                                 >
-                                  <span>{model}</span>
-                                  <ArrowRight size={11} className="text-slate-400" />
+                                  <div className="w-6 h-6 flex items-center justify-center text-xs shrink-0 rounded-lg bg-slate-100 group-hover/item:bg-white transition">
+                                    {(brand.logo && (brand.logo.startsWith("/") || brand.logo.startsWith("http"))) ? (
+                                      <div className="relative w-4 h-4">
+                                        <Image src={brand.logo} alt={brand.name} fill className="object-contain" />
+                                      </div>
+                                    ) : (
+                                      <span>{brand.logo || "📱"}</span>
+                                    )}
+                                  </div>
+                                  <span className="text-xs font-bold text-slate-700 group-hover/item:text-emerald-700 truncate">{brand.name}</span>
                                 </Link>
                               ))}
                             </div>
+
                             <div className="mt-2.5 pt-2 border-t border-slate-100 text-center">
                               <Link
-                                href={`/buy-phones/brand/${b.slug}`}
+                                href={`/buy-phones?category=${category.slug}`}
                                 className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center gap-1"
                               >
-                                <span>Browse All {b.name} Models</span>
+                                <span>Browse All Certified {category.name}</span>
                                 <ArrowRight size={11} />
                               </Link>
                             </div>
@@ -370,22 +393,6 @@ const Navbar = () => {
                       </div>
                     );
                   })}
-
-                  {/* Curated Filter Shortcuts */}
-                  <Link
-                    href="/buy-phones?condition=Pristine"
-                    className="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition inline-flex items-center gap-1 text-[11px]"
-                  >
-                    <Sparkles size={12} className="text-amber-400" />
-                    <span>Pristine (Like New)</span>
-                  </Link>
-
-                  <Link
-                    href="/buy-phones?budget=under-1500"
-                    className="px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition inline-flex items-center gap-1 text-[11px]"
-                  >
-                    <span>Under AED 1,500</span>
-                  </Link>
                 </div>
 
                 {/* Right: Trust Badge & Mode Switch to Sell Phone */}
@@ -515,8 +522,8 @@ const Navbar = () => {
               <div className="bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 p-3.5 rounded-2xl border border-emerald-500/20">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center gap-1.5">
-                    <Smartphone size={13} className="text-emerald-600" />
-                    Buy Phones Certified Store
+                    <Grid size={13} className="text-emerald-600" />
+                    Buy Tech Certified Store
                   </span>
                   <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
                     12M Warranty
@@ -527,7 +534,7 @@ const Navbar = () => {
                     href="/buy-phones"
                     className="flex-1 bg-emerald-500 text-slate-950 font-bold text-xs py-2 px-3 rounded-xl text-center shadow-xs hover:bg-emerald-600 transition"
                   >
-                    All Handsets
+                    All Certified Tech
                   </Link>
                   {buyCartCount > 0 && (
                     <Link
@@ -541,25 +548,44 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* Browse Handsets By Brand */}
+              {/* Browse Store Categories & Linked Brands */}
               <div className="space-y-1">
                 <div className="text-slate-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wider">
-                  Browse Handsets By Brand
+                  Store Categories & Brands
                 </div>
-                <div className="grid grid-cols-1 gap-1">
-                  {BUY_PHONE_NAV_BRANDS.map((b) => (
-                    <Link
-                      key={b.slug}
-                      href={`/buy-phones/brand/${b.slug}`}
-                      className="flex items-center justify-between px-3.5 py-2.5 text-sm font-bold text-slate-800 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl transition"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span>{b.icon}</span>
-                        <span>{b.displayName}</span>
-                      </span>
-                      <ArrowRight size={14} className="text-slate-300" />
-                    </Link>
-                  ))}
+                <div className="grid grid-cols-1 gap-1.5">
+                  {categoriesList.map((category) => {
+                    const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
+                    return (
+                      <div key={category.id || category.slug} className="rounded-xl border border-slate-100 overflow-hidden bg-white">
+                        <Link
+                          href={`/buy-phones?category=${category.slug}`}
+                          className="flex items-center justify-between px-3.5 py-2.5 text-sm font-bold text-slate-800 bg-slate-50/70 hover:bg-emerald-50 hover:text-emerald-700 transition"
+                        >
+                          <span className="flex items-center gap-2">
+                            {getCategoryIcon(category.slug || category.name)}
+                            <span>{category.name}</span>
+                          </span>
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                            Browse All
+                          </span>
+                        </Link>
+                        {categoryBrands.length > 0 && (
+                          <div className="px-3 py-2 bg-white flex flex-wrap gap-1.5 border-t border-slate-100">
+                            {categoryBrands.slice(0, 6).map((brand) => (
+                              <Link
+                                key={brand.id || brand._id || brand.name}
+                                href={`/buy-phones/brand/${brand.slug}?category=${category.slug}`}
+                                className="text-xs font-semibold text-slate-600 hover:text-emerald-700 bg-slate-50 hover:bg-emerald-50 px-2.5 py-1 rounded-lg transition border border-slate-100"
+                              >
+                                {brand.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
