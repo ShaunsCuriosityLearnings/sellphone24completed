@@ -5,12 +5,17 @@ dotenv.config();
 
 const connectionString = process.env.MONGODB_CONNECTION || process.env.MONGODB_URI || "";
 
+// Ensure mongoose fails immediately rather than buffering commands indefinitely when disconnected
+mongoose.set("bufferCommands", false);
+
 export async function connectToMongoDB() {
   if (!connectionString) {
     throw new Error("MONGODB_CONNECTION or MONGODB_URI environment variable is missing in backend/.env!");
   }
   try {
-    await mongoose.connect(connectionString);
+    await mongoose.connect(connectionString, {
+      serverSelectionTimeoutMS: 2000,
+    });
     console.log("✅ You successfully connected to MongoDB!");
     return mongoose;
   } catch (err) {
