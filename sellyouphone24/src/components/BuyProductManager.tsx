@@ -44,6 +44,8 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
   const [selectedTradeInProduct, setSelectedTradeInProduct] = useState<string>("");
   const [title, setTitle] = useState("");
   const [brand, setBrand] = useState("Apple");
+  const [category, setCategory] = useState("smartphones");
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
   const [model, setModel] = useState("");
   const [price, setPrice] = useState<number>(2499);
   const [originalPrice, setOriginalPrice] = useState<number>(3499);
@@ -65,8 +67,12 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
   const loadBuyProducts = async () => {
     setLoading(true);
     try {
-      const data = await api.getBuyProducts();
+      const [data, cats] = await Promise.all([
+        api.getBuyProducts(),
+        api.getCategories().catch(() => []),
+      ]);
       setBuyProducts(data);
+      if (cats && cats.length > 0) setCategoriesList(cats);
     } catch (err) {
       console.error("Error loading buy products:", err);
     } finally {
@@ -82,6 +88,7 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
 
     setTitle(found.name);
     setBrand(found.brand || "Apple");
+    setCategory(found.category || "smartphones");
     setModel(found.name);
     setPrice(Math.round((found.basePrice || 2000) * 1.3)); // 30% margin over trade-in
     setOriginalPrice(Math.round((found.basePrice || 2000) * 1.8));
@@ -102,6 +109,7 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
     setSelectedTradeInProduct("");
     setTitle("");
     setBrand("Apple");
+    setCategory("smartphones");
     setModel("");
     setPrice(2499);
     setOriginalPrice(3499);
@@ -123,6 +131,7 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
     setFormSource("custom");
     setTitle(item.title);
     setBrand(item.brand);
+    setCategory(item.category || "smartphones");
     setModel(item.model || item.title);
     setPrice(item.price);
     setOriginalPrice(item.originalPrice || Math.round(item.price * 1.3));
@@ -162,7 +171,7 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
         title: title.trim(),
         brand: brand.trim(),
         model: (model || title).trim(),
-        category: "smartphones",
+        category: (category || "smartphones").trim(),
         price: Number(price),
         originalPrice: Number(originalPrice),
         condition,
@@ -398,6 +407,54 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
+                {/* Department / Category */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Department / Category *
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 font-bold cursor-pointer"
+                  >
+                    <option value="smartphones">Smartphones</option>
+                    <option value="laptops">Laptops</option>
+                    <option value="tablets">Tablets</option>
+                    <option value="smartwatches">Smartwatches</option>
+                    <option value="games">Gaming & Consoles</option>
+                    {categoriesList
+                      .filter((c) => !["smartphones", "laptops", "tablets", "smartwatches", "games"].includes(c.slug))
+                      .map((c) => (
+                        <option key={c.slug} value={c.slug}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Brand */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Brand *
+                  </label>
+                  <select
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 font-bold cursor-pointer"
+                  >
+                    <option value="Apple">Apple</option>
+                    <option value="Samsung">Samsung</option>
+                    <option value="Google">Google</option>
+                    <option value="OnePlus">OnePlus</option>
+                    <option value="Xiaomi">Xiaomi</option>
+                    <option value="Dell">Dell</option>
+                    <option value="Lenovo">Lenovo</option>
+                    <option value="HP">HP</option>
+                    <option value="Sony">Sony</option>
+                    <option value="Nintendo">Nintendo</option>
+                  </select>
+                </div>
+
                 {/* Title */}
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -411,24 +468,6 @@ export default function BuyProductManager({ products = [], token }: BuyProductMa
                     placeholder="e.g. iPhone 15 Pro Max"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500"
                   />
-                </div>
-
-                {/* Brand */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Brand *
-                  </label>
-                  <select
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="Apple">Apple</option>
-                    <option value="Samsung">Samsung</option>
-                    <option value="Google">Google</option>
-                    <option value="OnePlus">OnePlus</option>
-                    <option value="Xiaomi">Xiaomi</option>
-                  </select>
                 </div>
 
                 {/* Selling Price */}

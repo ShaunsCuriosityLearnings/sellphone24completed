@@ -88,6 +88,14 @@ export const api = {
     });
   },
 
+  async updateCategory(id: string | number, category: any, token?: string): Promise<CategoryType> {
+    return safeFetch<CategoryType>(`${API_BASE}/categories/${id}`, {
+      method: "PUT",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      body: category instanceof FormData ? category : JSON.stringify(category),
+    });
+  },
+
   async deleteCategory(id: string | number, token?: string): Promise<{ message: string }> {
     return safeFetch<{ message: string }>(`${API_BASE}/categories/${id}`, {
       method: "DELETE",

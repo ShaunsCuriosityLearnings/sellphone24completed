@@ -7,7 +7,7 @@ import Brand from "../models/Brand.js";
 // @access  Public
 export const getBuyProducts = async (req, res) => {
   try {
-    const { brand, condition, minPrice, maxPrice, search, featured, sort, status, includeDrafts } = req.query;
+    const { category, brand, condition, minPrice, maxPrice, search, featured, sort, status, includeDrafts } = req.query;
 
     const query = {};
 
@@ -16,6 +16,19 @@ export const getBuyProducts = async (req, res) => {
       query.status = status;
     } else if (includeDrafts !== "true") {
       query.status = { $ne: "draft" };
+    }
+
+    // Filter by department / category
+    if (category && category !== "all") {
+      const catLower = category.toLowerCase().trim();
+      if (catLower === "smartphones" || catLower === "mobile") {
+        query.$or = [
+          { category: new RegExp(`^(smartphones|mobile|phones)$`, "i") },
+          { category: { $exists: false } }
+        ];
+      } else {
+        query.category = new RegExp(`^${catLower}$`, "i");
+      }
     }
 
     if (brand && brand !== "all") {

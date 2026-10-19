@@ -28,25 +28,36 @@ import {
   Eye,
   LogOut,
   Sliders,
-  Send
+  Send,
+  Laptop,
+  Tablet,
+  Watch,
+  Gamepad2,
+  FolderPlus,
+  SlidersHorizontal,
+  Pencil,
+  Tag,
+  ChevronRight
 } from "lucide-react";
 import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
 import { toast } from "react-toastify";
 import { api } from "@/lib/api";
-import { BuyProductType, BuyOrderType, ProductType, BuyProductConditionType, BuyProductStatusType, BrandType } from "@/types";
+import { BuyProductType, BuyOrderType, ProductType, BuyProductConditionType, BuyProductStatusType, BrandType, CategoryType } from "@/types";
 
 export default function BuyPhonesAdminPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"products" | "orders" | "sheets">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "categories" | "brands" | "orders" | "sheets">("products");
   const [loading, setLoading] = useState(true);
 
-  // Products state
+  // Products state & filters
   const [buyProducts, setBuyProducts] = useState<BuyProductType[]>([]);
   const [tradeInProducts, setTradeInProducts] = useState<ProductType[]>([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [brandFilter, setBrandFilter] = useState("all");
 
   // Orders state
   const [orders, setOrders] = useState<BuyOrderType[]>([]);
@@ -55,18 +66,54 @@ export default function BuyPhonesAdminPage() {
   const [selectedOrder, setSelectedOrder] = useState<BuyOrderType | null>(null);
   const [syncingOrderId, setSyncingOrderId] = useState<string | null>(null);
 
-  // Modal / Form state
+  // Categories CRUD state
+  const [categoriesList, setCategoriesList] = useState<CategoryType[]>([]);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [newCategory, setNewCategory] = useState<{
+    name: string;
+    slug: string;
+    description: string;
+    image: string | File;
+  }>({
+    name: "",
+    slug: "",
+    description: "",
+    image: "",
+  });
+
+  // Brands CRUD state
+  const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
+  const [newBrand, setNewBrand] = useState<{
+    name: string;
+    slug: string;
+    logo: string | File;
+    categories: string[];
+    isFeaturedOnFrontpage: boolean;
+    frontpageDisplayName: string;
+    displayOrder: number;
+  }>({
+    name: "",
+    slug: "",
+    logo: "",
+    categories: [],
+    isFeaturedOnFrontpage: false,
+    frontpageDisplayName: "",
+    displayOrder: 0,
+  });
+
+  // Modal / Product Form state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formSource, setFormSource] = useState<"custom" | "import">("custom");
   const [selectedTradeInProduct, setSelectedTradeInProduct] = useState("");
 
-  // Product Form Fields
+  // Product Form Fields (Cascading Hierarchy: Category -> Brand -> Specs)
   const [brandsList, setBrandsList] = useState<BrandType[]>([]);
   const [brandId, setBrandId] = useState<string>("");
   const [title, setTitle] = useState("");
   const [brand, setBrand] = useState("Apple");
+  const [category, setCategory] = useState("smartphones");
   const [model, setModel] = useState("");
   const [price, setPrice] = useState<number>(2499);
   const [originalPrice, setOriginalPrice] = useState<number>(3499);
@@ -112,16 +159,28 @@ export default function BuyPhonesAdminPage() {
     if (showSpinner) setLoading(true);
     try {
       const token = await getToken();
-      const [prods, tradeIns, ords, brands] = await Promise.all([
+      const [prods, tradeIns, ords, brands, cats] = await Promise.all([
         api.getBuyProducts({ includeDrafts: true }),
         api.getProducts().catch(() => []),
         api.getBuyOrders(token || undefined).catch(() => []),
         api.getBrands().catch(() => []),
+        api.getCategories().catch(() => []),
       ]);
       setBuyProducts(prods);
       setTradeInProducts(tradeIns);
       setOrders(ords);
       setBrandsList(brands);
+      if (cats && cats.length > 0) {
+        setCategoriesList(cats);
+      } else {
+        setCategoriesList([
+          { id: "smartphones", name: "Smartphones", slug: "smartphones", description: "Certified Flagships & Smartphones", image: "/products/iphone-pro-max.jpg" },
+          { id: "laptops", name: "Laptops", slug: "laptops", description: "MacBooks & Windows Laptops", image: "/products/macbook-pro.webp" },
+          { id: "tablets", name: "Tablets", slug: "tablets", description: "iPads & Galaxy Tabs", image: "/products/ipad-pro-m4.webp" },
+          { id: "smartwatches", name: "Smartwatches", slug: "smartwatches", description: "Apple Watch & Wearables", image: "/products/apple-watch-ultra.webp" },
+          { id: "games", name: "Gaming & Consoles", slug: "games", description: "PlayStation, Xbox & Nintendo Consoles", image: "/products/gaming-console.webp" },
+        ]);
+      }
     } catch (err: any) {
       toast.error("Failed to sync Buy Phones data");
     } finally {
@@ -135,16 +194,102 @@ export default function BuyPhonesAdminPage() {
     }
   }, [isLoaded, isSignedIn, isAdmin]);
 
+  // Hierarchical cascading helper: checks if a brand belongs to a selected category
+  const matchBrandToCategory = (b: BrandType, catSlug: string): boolean => {
+    if (!catSlug || catSlug === "all") return true;
+    const s = catSlug.toLowerCase().trim();
+    
+    // 1. Direct check in brand.categories array
+    if (Array.isArray(b.categories) && b.categories.length > 0) {
+      const matched = b.categories.some((c: any) => {
+        if (!c) return false;
+        if (typeof c === "string") {
+          const cLower = c.toLowerCase().trim();
+          return cLower === s ||
+            (s === "smartphones" && (cLower === "mobile" || cLower === "phones")) ||
+            (s === "laptops" && (cLower === "macbooks" || cLower === "computers")) ||
+            (s === "tablets" && cLower === "ipads") ||
+            (s === "smartwatches" && cLower === "watches") ||
+            (s === "games" && (cLower === "gaming" || cLower === "consoles"));
+        }
+        if (typeof c === "object") {
+          const slug = (c.slug || "").toLowerCase().trim();
+          const name = (c.name || "").toLowerCase().trim();
+          return slug === s || name === s ||
+            (s === "smartphones" && (slug === "mobile" || slug === "phones")) ||
+            (s === "laptops" && (slug === "macbooks" || slug === "computers")) ||
+            (s === "tablets" && slug === "ipads") ||
+            (s === "smartwatches" && slug === "watches") ||
+            (s === "games" && (slug === "gaming" || slug === "consoles"));
+        }
+        return false;
+      });
+      if (matched) return true;
+    }
+
+    // 2. Intelligent domain defaults based on brand name
+    const bName = (b.name || "").toLowerCase().trim();
+    if (bName.includes("apple")) {
+      return ["smartphones", "laptops", "tablets", "smartwatches"].includes(s);
+    }
+    if (bName.includes("samsung")) {
+      return ["smartphones", "tablets", "smartwatches"].includes(s);
+    }
+    if (bName.includes("dell") || bName.includes("hp") || bName.includes("lenovo") || bName.includes("asus") || bName.includes("acer")) {
+      return s === "laptops";
+    }
+    if (bName.includes("sony") || bName.includes("nintendo") || bName.includes("xbox") || bName.includes("playstation")) {
+      return s === "games" || s === "gaming";
+    }
+    if (bName.includes("google") || bName.includes("oneplus") || bName.includes("xiaomi") || bName.includes("huawei") || bName.includes("oppo") || bName.includes("vivo")) {
+      return s === "smartphones" || s === "tablets";
+    }
+    if (bName.includes("garmin")) {
+      return s === "smartwatches";
+    }
+    return true;
+  };
+
+  // Filtered brands for modal based on selected category
+  const filteredBrandsForSelectedCategory = useMemo(() => {
+    const matching = brandsList.filter(b => matchBrandToCategory(b, category));
+    return matching.length > 0 ? matching : brandsList;
+  }, [brandsList, category]);
+
+  // Handle category change in product form modal
+  const handleCategoryChange = (newCat: string) => {
+    setCategory(newCat);
+    const matching = brandsList.filter(b => matchBrandToCategory(b, newCat));
+    if (matching.length > 0 && !matching.some(b => b.name.toLowerCase() === brand.toLowerCase())) {
+      setBrand(matching[0].name);
+      setBrandId(String(matching[0].id || matching[0]._id || ""));
+    }
+  };
+
+  // Helper for category badge visual icon
+  const getCategoryIcon = (slug?: string) => {
+    const s = (slug || "").toLowerCase();
+    if (s.includes("laptop") || s.includes("macbook")) return <Laptop size={13} className="text-blue-500" />;
+    if (s.includes("tablet") || s.includes("ipad")) return <Tablet size={13} className="text-purple-500" />;
+    if (s.includes("watch")) return <Watch size={13} className="text-amber-500" />;
+    if (s.includes("game") || s.includes("playstation") || s.includes("console")) return <Gamepad2 size={13} className="text-rose-500" />;
+    return <Smartphone size={13} className="text-emerald-500" />;
+  };
+
   // Filtered lists (defined at top to satisfy React Rules of Hooks)
   const filteredProducts = useMemo(() => {
     return buyProducts.filter((p) => {
-      const matchesSearch = !searchFilter.trim() || 
-        p.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        p.brand.toLowerCase().includes(searchFilter.toLowerCase());
+      const q = searchFilter.toLowerCase().trim();
+      const matchesSearch = !q || 
+        p.title.toLowerCase().includes(q) ||
+        p.brand.toLowerCase().includes(q) ||
+        (p.category || "").toLowerCase().includes(q);
       const matchesStatus = statusFilter === "all" || p.status === statusFilter;
-      return matchesSearch && matchesStatus;
+      const matchesCategory = categoryFilter === "all" || (p.category || "smartphones").toLowerCase() === categoryFilter.toLowerCase();
+      const matchesBrand = brandFilter === "all" || p.brand.toLowerCase() === brandFilter.toLowerCase();
+      return matchesSearch && matchesStatus && matchesCategory && matchesBrand;
     });
-  }, [buyProducts, searchFilter, statusFilter]);
+  }, [buyProducts, searchFilter, statusFilter, categoryFilter, brandFilter]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
@@ -220,6 +365,7 @@ export default function BuyPhonesAdminPage() {
 
     setTitle(found.name);
     setBrand(found.brand || "Apple");
+    setCategory(found.category || "smartphones");
     const matchedBrand = brandsList.find(
       (b) => b.name.toLowerCase() === (found.brand || "").toLowerCase()
     );
@@ -258,8 +404,13 @@ export default function BuyPhonesAdminPage() {
     setFormSource(source);
     setSelectedTradeInProduct("");
     setTitle("");
-    const defaultBrand = brandsList[0]?.name || "Apple";
-    const defaultBrandId = brandsList[0] ? String(brandsList[0].id || brandsList[0]._id) : "";
+    const initialCategory = "smartphones";
+    setCategory(initialCategory);
+    const matchingBrands = brandsList.filter(b => matchBrandToCategory(b, initialCategory));
+    const defaultBrand = matchingBrands[0]?.name || brandsList[0]?.name || "Apple";
+    const defaultBrandId = matchingBrands[0] 
+      ? String(matchingBrands[0].id || matchingBrands[0]._id) 
+      : (brandsList[0] ? String(brandsList[0].id || brandsList[0]._id) : "");
     setBrand(defaultBrand);
     setBrandId(defaultBrandId);
     setModel("");
@@ -287,6 +438,7 @@ export default function BuyPhonesAdminPage() {
     setFormSource("custom");
     setTitle(item.title);
     setBrand(item.brand);
+    setCategory(item.category || "smartphones");
     const refId = typeof item.brandRef === "object" ? item.brandRef?._id || item.brandRef?.id : item.brandRef;
     if (refId) {
       setBrandId(String(refId));
@@ -339,7 +491,7 @@ export default function BuyPhonesAdminPage() {
         fd.append("brandId", brandId);
       }
       fd.append("model", (model || title).trim());
-      fd.append("category", "smartphones");
+      fd.append("category", (category || "smartphones").trim());
       fd.append("price", String(price));
       fd.append("originalPrice", String(originalPrice));
       fd.append("condition", condition);
@@ -355,7 +507,7 @@ export default function BuyPhonesAdminPage() {
       fd.append("seoMetadata", JSON.stringify({
         metaTitle: seoTitle.trim(),
         metaDescription: seoDescription.trim(),
-        keywords: [brand, model, "buy phone dubai", "certified pre-owned"],
+        keywords: [brand, model, category, "buy phone dubai", "certified pre-owned"],
       }));
 
       // Append 3 image slots (File objects or existing URLs)
@@ -406,6 +558,152 @@ export default function BuyPhonesAdminPage() {
       await loadData(false);
     } catch (err) {
       toast.error("Failed to delete product");
+    }
+  };
+
+  // =========================================================================
+  // CATEGORIES CRUD OPERATIONS
+  // =========================================================================
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategory.name.trim() || !newCategory.slug.trim()) {
+      toast.error("Category name and slug are required");
+      return;
+    }
+    try {
+      const token = await getToken();
+      const fd = new FormData();
+      fd.append("name", newCategory.name.trim());
+      fd.append("slug", newCategory.slug.toLowerCase().trim());
+      fd.append("description", newCategory.description.trim());
+      if (newCategory.image instanceof File) fd.append("image", newCategory.image);
+      else if (newCategory.image) fd.append("image", newCategory.image);
+
+      if (editingCategoryId) {
+        await api.updateCategory(editingCategoryId, fd, token || undefined);
+        toast.success("Main Category updated successfully!");
+      } else {
+        await api.createCategory(fd, token || undefined);
+        toast.success("New Main Category created successfully!");
+      }
+      handleCancelCategoryEdit();
+      await loadData(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save category");
+    }
+  };
+
+  const handleEditCategoryClick = (cat: CategoryType) => {
+    const catId = String(cat.id || cat._id || cat.slug);
+    setEditingCategoryId(catId);
+    setNewCategory({
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description || "",
+      image: cat.image || "",
+    });
+  };
+
+  const handleCancelCategoryEdit = () => {
+    setEditingCategoryId(null);
+    setNewCategory({ name: "", slug: "", description: "", image: "" });
+  };
+
+  const handleDeleteCategory = async (id: string | number) => {
+    if (!confirm("Are you sure you want to delete this category? Devices in this category will remain in the database.")) return;
+    try {
+      const token = await getToken();
+      await api.deleteCategory(id, token || undefined);
+      toast.success("Category deleted");
+      if (editingCategoryId === String(id)) handleCancelCategoryEdit();
+      await loadData(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete category");
+    }
+  };
+
+  // =========================================================================
+  // BRANDS CRUD OPERATIONS & MULTI-CATEGORY MAPPINGS
+  // =========================================================================
+  const handleToggleBrandCategory = (catId: string) => {
+    const updated = newBrand.categories.includes(catId)
+      ? newBrand.categories.filter((id) => id !== catId)
+      : [...newBrand.categories, catId];
+    setNewBrand({ ...newBrand, categories: updated });
+  };
+
+  const handleEditBrandClick = (b: BrandType) => {
+    const bId = String(b.id || b._id || "");
+    setEditingBrandId(bId);
+    const catIds = (b.categories || []).map((c: any) =>
+      typeof c === "object" ? String(c._id || c.id || c.slug) : String(c)
+    );
+    setNewBrand({
+      name: b.name,
+      slug: b.slug,
+      logo: b.logo || "",
+      categories: catIds,
+      isFeaturedOnFrontpage: Boolean(b.isFeaturedOnFrontpage),
+      frontpageDisplayName: b.frontpageDisplayName || "",
+      displayOrder: b.displayOrder || 0,
+    });
+  };
+
+  const handleCancelBrandEdit = () => {
+    setEditingBrandId(null);
+    setNewBrand({
+      name: "",
+      slug: "",
+      logo: "",
+      categories: [],
+      isFeaturedOnFrontpage: false,
+      frontpageDisplayName: "",
+      displayOrder: 0,
+    });
+  };
+
+  const handleCreateBrand = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBrand.name.trim()) {
+      toast.error("Brand name is required");
+      return;
+    }
+    try {
+      const token = await getToken();
+      const fd = new FormData();
+      fd.append("name", newBrand.name.trim());
+      fd.append("slug", newBrand.slug || newBrand.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+      if (newBrand.logo instanceof File) fd.append("logo", newBrand.logo);
+      else if (newBrand.logo) fd.append("logo", newBrand.logo);
+      fd.append("categories", JSON.stringify(newBrand.categories));
+      fd.append("isFeaturedOnFrontpage", String(newBrand.isFeaturedOnFrontpage));
+      fd.append("frontpageDisplayName", newBrand.frontpageDisplayName.trim());
+      fd.append("displayOrder", String(newBrand.displayOrder));
+
+      if (editingBrandId) {
+        await api.updateBrand(editingBrandId, fd, token || undefined);
+        toast.success("Brand updated & category mappings saved!");
+      } else {
+        await api.createBrand(fd, token || undefined);
+        toast.success("Brand created & allocated to categories!");
+      }
+      handleCancelBrandEdit();
+      await loadData(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save brand");
+    }
+  };
+
+  const handleDeleteBrand = async (id: string | number) => {
+    if (!confirm("Are you sure you want to delete this brand?")) return;
+    try {
+      const token = await getToken();
+      await api.deleteBrand(id, token || undefined);
+      toast.success("Brand deleted");
+      if (editingBrandId === String(id)) handleCancelBrandEdit();
+      await loadData(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete brand");
     }
   };
 
@@ -521,6 +819,30 @@ export default function BuyPhonesAdminPage() {
             </button>
 
             <button
+              onClick={() => setActiveTab("categories")}
+              className={`px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 text-xs cursor-pointer ${
+                activeTab === "categories"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <FolderPlus size={14} className="text-blue-500" />
+              <span>Main Categories ({categoriesList.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("brands")}
+              className={`px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 text-xs cursor-pointer ${
+                activeTab === "brands"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Layers size={14} className="text-purple-500" />
+              <span>Brands & Allocations ({brandsList.length})</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab("orders")}
               className={`px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 text-xs cursor-pointer ${
                 activeTab === "orders"
@@ -560,9 +882,35 @@ export default function BuyPhonesAdminPage() {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-xs transition cursor-pointer"
                 >
                   <Plus size={14} />
-                  <span>Add Phone Listing</span>
+                  <span>Add Certified Device</span>
                 </button>
               </>
+            )}
+            {activeTab === "categories" && (
+              <button
+                onClick={() => {
+                  handleCancelCategoryEdit();
+                  const formEl = document.getElementById("category-form-section");
+                  if (formEl) formEl.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+              >
+                <Plus size={14} />
+                <span>Add Main Category</span>
+              </button>
+            )}
+            {activeTab === "brands" && (
+              <button
+                onClick={() => {
+                  handleCancelBrandEdit();
+                  const formEl = document.getElementById("brand-form-section");
+                  if (formEl) formEl.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-xs transition cursor-pointer"
+              >
+                <Plus size={14} />
+                <span>Add Brand</span>
+              </button>
             )}
           </div>
         </div>
@@ -600,7 +948,7 @@ export default function BuyPhonesAdminPage() {
               </div>
             </div>
 
-            {/* Filter Row */}
+            {/* Filter Row: Search + Department + Brand + Status */}
             <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-3 flex-wrap">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -608,11 +956,51 @@ export default function BuyPhonesAdminPage() {
                   type="text"
                   value={searchFilter}
                   onChange={(e) => setSearchFilter(e.target.value)}
-                  placeholder="Search listings by title or brand..."
+                  placeholder="Search listings by title, model, or brand..."
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
+              {/* Department / Category Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-slate-500">Department:</span>
+                <select
+                  value={categoryFilter}
+                  onChange={(e) => {
+                    setCategoryFilter(e.target.value);
+                    setBrandFilter("all");
+                  }}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
+                >
+                  <option value="all">All Departments ({categoriesList.length})</option>
+                  {categoriesList.map((c) => (
+                    <option key={c.slug} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Brand Filter (Dynamically filtered by Category) */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-slate-500">Brand:</span>
+                <select
+                  value={brandFilter}
+                  onChange={(e) => setBrandFilter(e.target.value)}
+                  className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-800"
+                >
+                  <option value="all">All Brands</option>
+                  {brandsList
+                    .filter((b) => categoryFilter === "all" || matchBrandToCategory(b, categoryFilter))
+                    .map((b) => (
+                      <option key={String(b.id || b._id)} value={b.name}>
+                        {b.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              {/* Status Filter */}
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-slate-500">Status:</span>
                 <select
@@ -634,7 +1022,7 @@ export default function BuyPhonesAdminPage() {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider text-[11px]">
-                      <th className="py-3 px-4">Device</th>
+                      <th className="py-3 px-4">Device & Department</th>
                       <th className="py-3 px-4">Condition</th>
                       <th className="py-3 px-4">Selling Price</th>
                       <th className="py-3 px-4">Stock</th>
@@ -656,9 +1044,15 @@ export default function BuyPhonesAdminPage() {
                               />
                             </div>
                             <div>
-                              <div className="font-extrabold text-slate-900 text-sm">{p.title}</div>
-                              <div className="text-[11px] text-slate-400">
-                                {p.brand} • {p.batteryHealth || "95%+ Tested"} • {p.warranty?.split(" ")[0]} {p.warranty?.split(" ")[1]}
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-extrabold text-slate-900 text-sm">{p.title}</span>
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                  {getCategoryIcon(p.category)}
+                                  <span className="capitalize">{p.category || "smartphones"}</span>
+                                </span>
+                              </div>
+                              <div className="text-[11px] text-slate-400 mt-0.5">
+                                <strong className="text-slate-600">{p.brand}</strong> • {p.batteryHealth || "95%+ Tested"} • {p.warranty?.split(" ")[0]} {p.warranty?.split(" ")[1]}
                               </div>
                             </div>
                           </div>
@@ -735,6 +1129,446 @@ export default function BuyPhonesAdminPage() {
               </div>
             </div>
 
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB: MAIN CATEGORIES CRUD MANAGEMENT
+           ========================================================================= */}
+        {activeTab === "categories" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left Column: Categories List & Metrics */}
+            <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                    <FolderPlus size={16} className="text-blue-500" />
+                    <span>Main Categories ({categoriesList.length})</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Hardware departments that organize all certified inventory and brand associations.
+                  </p>
+                </div>
+                <span className="text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                  Top-Level Schema
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {categoriesList.map((cat) => {
+                  const productCount = buyProducts.filter(
+                    (p) => (p.category || "smartphones").toLowerCase() === cat.slug.toLowerCase()
+                  ).length;
+                  const brandCount = brandsList.filter((b) =>
+                    matchBrandToCategory(b, cat.slug)
+                  ).length;
+
+                  return (
+                    <div
+                      key={cat.slug}
+                      className="bg-slate-50 border border-slate-200 hover:border-blue-300 p-3.5 rounded-2xl flex flex-col justify-between gap-3 transition group"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-xs">
+                            {getCategoryIcon(cat.slug)}
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-extrabold text-slate-900 text-xs truncate">{cat.name}</h4>
+                            <span className="text-[10px] text-slate-400 font-mono">/{cat.slug}</span>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+                          <button
+                            onClick={() => handleEditCategoryClick(cat)}
+                            className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-300 transition cursor-pointer"
+                            title="Edit Category"
+                          >
+                            <Pencil size={12} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCategory(cat.id || cat._id || cat.slug)}
+                            className="p-1.5 rounded-lg bg-white border border-slate-200 text-rose-500 hover:text-rose-700 hover:border-rose-300 hover:bg-rose-50 transition cursor-pointer"
+                            title="Delete Category"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {cat.description && (
+                        <p className="text-[10px] text-slate-500 line-clamp-2 leading-relaxed">
+                          {cat.description}
+                        </p>
+                      )}
+
+                      {/* Department Stats */}
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-200/70 text-[10px]">
+                        <span className="font-bold text-slate-700 flex items-center gap-1">
+                          <Package size={11} className="text-emerald-500" />
+                          <span>{productCount} Products</span>
+                        </span>
+                        <span className="text-slate-500 flex items-center gap-1">
+                          <Layers size={11} className="text-purple-500" />
+                          <span>{brandCount} Brands</span>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: Add / Edit Category Form */}
+            <div id="category-form-section" className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="font-extrabold text-slate-900 text-xs flex items-center gap-2">
+                  {editingCategoryId ? <Pencil size={14} className="text-blue-500" /> : <Plus size={14} className="text-blue-500" />}
+                  <span>{editingCategoryId ? "Edit Main Category" : "Add New Main Category"}</span>
+                </h3>
+                {editingCategoryId && (
+                  <button
+                    onClick={handleCancelCategoryEdit}
+                    className="text-[11px] text-slate-500 hover:text-slate-800 font-bold underline cursor-pointer"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+              </div>
+
+              <form onSubmit={handleCreateCategory} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Category Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Laptops, Gaming & Consoles"
+                    value={newCategory.name}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+                      setNewCategory((prev) => ({
+                        ...prev,
+                        name,
+                        slug: prev.slug && editingCategoryId ? prev.slug : slug,
+                      }));
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    URL Slug *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. laptops, games"
+                    value={newCategory.slug}
+                    onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Category Banner / Icon Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) setNewCategory({ ...newCategory, image: e.target.files[0] });
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-[10px] text-slate-600 cursor-pointer"
+                  />
+                  {newCategory.image && typeof newCategory.image === "string" && (
+                    <div className="mt-1 text-[10px] text-slate-400 truncate">
+                      Current: {newCategory.image}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="Brief description for customer browsing and SEO overview..."
+                    value={newCategory.description}
+                    onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="pt-2 flex gap-2">
+                  {editingCategoryId && (
+                    <button
+                      type="button"
+                      onClick={handleCancelCategoryEdit}
+                      className="w-1/3 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className={`${editingCategoryId ? "w-2/3" : "w-full"} bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-2.5 rounded-xl transition shadow-xs cursor-pointer`}
+                  >
+                    {editingCategoryId ? "Save Category Changes" : "Create Main Category"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB: BRANDS & CATEGORY LINKS CRUD MANAGEMENT
+           ========================================================================= */}
+        {activeTab === "brands" && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            {/* Left Column: Brands List & Category Linkages */}
+            <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                    <Layers size={16} className="text-purple-500" />
+                    <span>Brands & Category Allocations ({brandsList.length})</span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Brands can be linked to multiple departments (e.g. Apple $\to$ Smartphones, Laptops, Tablets, Watches).
+                  </p>
+                </div>
+                <span className="text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full">
+                  Multi-Category Matrix
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {brandsList.map((b) => (
+                  <div
+                    key={String(b.id || b._id)}
+                    className="bg-slate-50 border border-slate-200 hover:border-purple-300 p-3.5 rounded-2xl flex flex-col justify-between gap-3 transition group"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 p-1 flex items-center justify-center shrink-0 shadow-xs relative overflow-hidden">
+                          {b.logo ? (
+                            <Image src={b.logo} alt={b.name} fill className="object-contain p-1" />
+                          ) : (
+                            <Tag size={16} className="text-slate-400" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h4 className="font-extrabold text-slate-900 text-xs truncate">{b.name}</h4>
+                            {b.isFeaturedOnFrontpage && (
+                              <span className="bg-amber-100 text-amber-800 text-[8px] font-bold px-1.5 py-0.2 rounded border border-amber-300">
+                                🏠 Frontpage
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-slate-400 font-mono">/{b.slug}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+                        <button
+                          onClick={() => handleEditBrandClick(b)}
+                          className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-purple-600 hover:border-purple-300 transition cursor-pointer"
+                          title="Edit Brand & Category Allocations"
+                        >
+                          <Pencil size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBrand(b.id || b._id || "")}
+                          className="p-1.5 rounded-lg bg-white border border-slate-200 text-rose-500 hover:text-rose-700 hover:border-rose-300 hover:bg-rose-50 transition cursor-pointer"
+                          title="Delete Brand"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Allocated Categories Badges */}
+                    <div className="border-t border-slate-200/70 pt-2">
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        Allocated Categories:
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {Array.isArray(b.categories) && b.categories.length > 0 ? (
+                          b.categories.map((c: any, idx: number) => {
+                            const catName = typeof c === "object" ? c.name : c;
+                            const catSlug = typeof c === "object" ? c.slug : c;
+                            return (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-1 text-[9px] font-bold bg-white text-purple-700 px-2 py-0.5 rounded-md border border-purple-200 shadow-xs"
+                              >
+                                {getCategoryIcon(catSlug)}
+                                <span>{catName}</span>
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className="text-[9px] text-amber-600 font-medium bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                            ⚠️ Auto-inherited (Domain Default)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column: Add / Edit Brand Form */}
+            <div id="brand-form-section" className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="font-extrabold text-slate-900 text-xs flex items-center gap-2">
+                  {editingBrandId ? <Pencil size={14} className="text-purple-500" /> : <Plus size={14} className="text-purple-500" />}
+                  <span>{editingBrandId ? "Edit Brand & Allocations" : "Add New Brand"}</span>
+                </h3>
+                {editingBrandId && (
+                  <button
+                    onClick={handleCancelBrandEdit}
+                    className="text-[11px] text-slate-500 hover:text-slate-800 font-bold underline cursor-pointer"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+              </div>
+
+              <form onSubmit={handleCreateBrand} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Brand Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Apple, Dell, Sony"
+                    value={newBrand.name}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+                      setNewBrand((prev) => ({
+                        ...prev,
+                        name,
+                        slug: prev.slug && editingBrandId ? prev.slug : slug,
+                      }));
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Brand Slug
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Auto-generated if left blank"
+                    value={newBrand.slug}
+                    onChange={(e) => setNewBrand({ ...newBrand, slug: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Brand Logo
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) setNewBrand({ ...newBrand, logo: e.target.files[0] });
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-[10px] text-slate-600 cursor-pointer"
+                  />
+                </div>
+
+                {/* Multi-Category Checkbox Grid */}
+                <div className="bg-purple-50/50 border border-purple-200/80 rounded-2xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-extrabold text-purple-950">
+                      Allocate to Main Categories:
+                    </label>
+                    <span className="text-[10px] text-purple-700 font-bold">
+                      {newBrand.categories.length} selected
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500">
+                    Check which departments this brand manufactures devices for:
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto bg-white border border-purple-100 p-2.5 rounded-xl">
+                    {categoriesList.map((cat) => {
+                      const catId = String(cat._id || cat.id || cat.slug);
+                      const isChecked = newBrand.categories.includes(catId) || newBrand.categories.includes(cat.slug);
+                      return (
+                        <label
+                          key={cat.slug}
+                          className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 cursor-pointer select-none font-semibold text-slate-800"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => handleToggleBrandCategory(catId)}
+                            className="rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer w-3.5 h-3.5"
+                          />
+                          <span className="flex items-center gap-1 text-[11px]">
+                            {getCategoryIcon(cat.slug)}
+                            <span>{cat.name}</span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Frontpage Curation */}
+                <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-3 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newBrand.isFeaturedOnFrontpage}
+                      onChange={(e) => setNewBrand({ ...newBrand, isFeaturedOnFrontpage: e.target.checked })}
+                      className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer w-4 h-4"
+                    />
+                    <span className="font-bold text-slate-900 text-xs">
+                      🏠 Feature on Frontpage Brands Section
+                    </span>
+                  </label>
+                </div>
+
+                <div className="pt-2 flex gap-2">
+                  {editingBrandId && (
+                    <button
+                      type="button"
+                      onClick={handleCancelBrandEdit}
+                      className="w-1/3 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className={`${editingBrandId ? "w-2/3" : "w-full"} bg-purple-600 hover:bg-purple-700 text-white font-extrabold py-2.5 rounded-xl transition shadow-xs cursor-pointer`}
+                  >
+                    {editingBrandId ? "Save Brand & Allocations" : "Add Brand"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
@@ -1077,6 +1911,80 @@ export default function BuyPhonesAdminPage() {
                 </div>
               )}
 
+              {/* Step 1 & 2: Cascading Category -> Brand Hierarchy */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Layers size={13} className="text-emerald-500" />
+                    <span>Hierarchy Sequence: 1. Main Category &rarr; 2. Linked Brand</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded-full">
+                    Cascading Filter Active
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Step 1: Main Category */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      1. Department / Main Category *
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 font-bold cursor-pointer"
+                    >
+                      {categoriesList.map((cat) => (
+                        <option key={cat.slug} value={cat.slug}>
+                          {cat.name} ({cat.slug})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Step 2: Linked Brand (Cascading) */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-bold text-slate-700">
+                        2. Linked Brand ({filteredBrandsForSelectedCategory.length}) *
+                      </label>
+                      <span className="text-[10px] text-slate-400">Filtered by {category}</span>
+                    </div>
+                    <select
+                      value={brandId || brand}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const found = brandsList.find(b => String(b.id || b._id) === val || b.name === val);
+                        if (found) {
+                          setBrandId(String(found.id || found._id));
+                          setBrand(found.name);
+                        } else {
+                          setBrandId("");
+                          setBrand(val);
+                        }
+                      }}
+                      className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 font-bold cursor-pointer"
+                    >
+                      <option value="">-- Select Linked Brand --</option>
+                      {filteredBrandsForSelectedCategory.map((b) => (
+                        <option key={String(b.id || b._id)} value={String(b.id || b._id)}>
+                          {b.name}
+                        </option>
+                      ))}
+                      {!filteredBrandsForSelectedCategory.some(b => b.name === brand) && brand && (
+                        <option value={brand}>{brand}</option>
+                      )}
+                    </select>
+                    {brand && (
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Active: <span className="font-bold text-slate-800">{brand}</span> {brandId && <span className="text-emerald-600 font-mono text-[9px]">(ID: {brandId})</span>}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 3: Product Details */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Listing Title *</label>
@@ -1085,50 +1993,24 @@ export default function BuyPhonesAdminPage() {
                     required
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. iPhone 16 Pro Max"
+                    placeholder="e.g. MacBook Pro 16 M3 Max / iPhone 16 Pro Max"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-bold text-slate-700">Linked Brand *</label>
-                    <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      Brand Model Linked
-                    </span>
-                  </div>
-                  <select
-                    value={brandId || brand}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      const found = brandsList.find(b => String(b.id || b._id) === val || b.name === val);
-                      if (found) {
-                        setBrandId(String(found.id || found._id));
-                        setBrand(found.name);
-                      } else {
-                        setBrandId("");
-                        setBrand(val);
-                      }
-                    }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 font-semibold cursor-pointer"
-                  >
-                    <option value="">-- Select Linked Brand --</option>
-                    {brandsList.map((b) => (
-                      <option key={String(b.id || b._id)} value={String(b.id || b._id)}>
-                        {b.name}
-                      </option>
-                    ))}
-                    {!brandsList.some(b => b.name === brand) && brand && (
-                      <option value={brand}>{brand}</option>
-                    )}
-                  </select>
-                  {brand && (
-                    <p className="text-[10px] text-slate-500 mt-1">
-                      Active: <span className="font-bold text-slate-800">{brand}</span> {brandId && <span className="text-emerald-600 font-mono text-[9px]">(ID: {brandId})</span>}
-                    </p>
-                  )}
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Device Model *</label>
+                  <input
+                    type="text"
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    placeholder="e.g. MacBook Pro 16 / iPhone 16 Pro Max"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500"
+                  />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Selling Resale Price (AED) *</label>
                   <input
