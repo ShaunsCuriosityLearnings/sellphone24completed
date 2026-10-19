@@ -27,6 +27,9 @@ import analyticsRoutes from "./routes/analyticsRoutes.js";
 import seoPageRoutes from "./routes/seoPageRoutes.js";
 import buyProductRoutes from "./routes/buyProductRoutes.js";
 import buyOrderRoutes from "./routes/buyOrderRoutes.js";
+import buyCategoryRoutes from "./routes/buyCategoryRoutes.js";
+import buyBrandRoutes from "./routes/buyBrandRoutes.js";
+import buyDatabaseRoutes from "./routes/buyDatabaseRoutes.js";
 
 if (!process.env.CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
   process.env.CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -74,6 +77,9 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/seo-pages", seoPageRoutes);
 app.use("/api/buy-products", buyProductRoutes);
 app.use("/api/buy-orders", buyOrderRoutes);
+app.use("/api/buy-categories", buyCategoryRoutes);
+app.use("/api/buy-brands", buyBrandRoutes);
+app.use("/api/buy-database", buyDatabaseRoutes);
 
 // Global Error Handling Middleware
 app.use((err, req, res, next) => {
@@ -86,7 +92,7 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Helper to auto-restore from backups/latest.json if MongoDB is empty on start
+// Helper to auto-restore Sell-Phones data from backups/latest.json if MongoDB is empty on start
 const checkAndAutoRestoreDB = async () => {
   try {
     const productCount = await Product.countDocuments();
@@ -109,10 +115,7 @@ const checkAndAutoRestoreDB = async () => {
         if (Array.isArray(backupData.blogs)) {
           for (const bl of backupData.blogs) await Blog.findOneAndUpdate({ _id: bl._id }, bl, { upsert: true });
         }
-        if (Array.isArray(backupData.buyProducts)) {
-          for (const bp of backupData.buyProducts) await BuyProduct.findOneAndUpdate({ _id: bp._id }, bp, { upsert: true });
-        }
-        console.log("✅ Auto-restore completed successfully!");
+        console.log("✅ Sell-Phones auto-restore completed successfully!");
       }
     }
   } catch (err) {

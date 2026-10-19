@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import BuyProduct from "../models/BuyProduct.js";
-import Brand from "../models/Brand.js";
+import BuyBrand from "../models/BuyBrand.js";
 
 // @desc    Get all buy products with filtering
 // @route   GET /api/buy-products
@@ -34,10 +34,10 @@ export const getBuyProducts = async (req, res) => {
     if (brand && brand !== "all") {
       let matchedBrand = null;
       if (mongoose.Types.ObjectId.isValid(brand)) {
-        matchedBrand = await Brand.findById(brand);
+        matchedBrand = await BuyBrand.findById(brand);
       }
       if (!matchedBrand) {
-        matchedBrand = await Brand.findOne({
+        matchedBrand = await BuyBrand.findOne({
           $or: [
             { slug: brand.toLowerCase().trim() },
             { name: new RegExp(`^${brand.trim()}$`, "i") }

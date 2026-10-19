@@ -120,7 +120,7 @@ export default function BrandCatalogPage() {
       setLoading(true);
       try {
         const [brandList, catalog] = await Promise.all([
-          api.getBrands().catch(() => []),
+          api.getBuyBrands().catch(() => []),
           api.getBuyProducts().catch(() => []),
         ]);
 

@@ -155,4 +155,6 @@ const buyOrderSchema = new mongoose.Schema({
 
 buyOrderSchema.index({ createdAt: -1 });
 
-export default mongoose.model("BuyOrder", buyOrderSchema);
+import { buyDb } from "../config/db.js";
+
+export default buyDb.model("BuyOrder", buyOrderSchema, "buyorders");

@@ -674,6 +674,111 @@ export const api = {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
   },
+
+  // --- BUY CATEGORIES (ISOLATED BUY-PHONES DATABASE) ---
+  async getBuyCategories(): Promise<CategoryType[]> {
+    const dbCategories = await safeFetch<any[]>(`${API_BASE}/buy-categories`, { method: "GET" }, mockCategories);
+    return dbCategories.map((c) => ({
+      ...c,
+      id: c._id || c.id,
+    })) as CategoryType[];
+  },
+
+  async createBuyCategory(category: any, token?: string): Promise<CategoryType> {
+    const isFormData = category instanceof FormData;
+    const headers: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+    if (!isFormData) headers["Content-Type"] = "application/json";
+
+    return safeFetch<CategoryType>(`${API_BASE}/buy-categories`, {
+      method: "POST",
+      headers,
+      body: isFormData ? category : JSON.stringify(category),
+    });
+  },
+
+  async updateBuyCategory(id: string, data: any, token?: string): Promise<CategoryType> {
+    const isFormData = data instanceof FormData;
+    const headers: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+    if (!isFormData) headers["Content-Type"] = "application/json";
+
+    return safeFetch<CategoryType>(`${API_BASE}/buy-categories/${id}`, {
+      method: "PUT",
+      headers,
+      body: isFormData ? data : JSON.stringify(data),
+    });
+  },
+
+  async deleteBuyCategory(id: string, token?: string): Promise<{ message: string }> {
+    return safeFetch<{ message: string }>(`${API_BASE}/buy-categories/${id}`, {
+      method: "DELETE",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    });
+  },
+
+  // --- BUY BRANDS (ISOLATED BUY-PHONES DATABASE) ---
+  async getBuyBrands(): Promise<BrandType[]> {
+    const dbBrands = await safeFetch<any[]>(`${API_BASE}/buy-brands`, { method: "GET" }, mockBrands);
+    return dbBrands.map((b) => ({
+      ...b,
+      id: b._id || b.id,
+    })) as BrandType[];
+  },
+
+  async createBuyBrand(brand: any, token?: string): Promise<BrandType> {
+    const isFormData = brand instanceof FormData;
+    const headers: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+    if (!isFormData) headers["Content-Type"] = "application/json";
+
+    return safeFetch<BrandType>(`${API_BASE}/buy-brands`, {
+      method: "POST",
+      headers,
+      body: isFormData ? brand : JSON.stringify(brand),
+    });
+  },
+
+  async updateBuyBrand(id: string, data: any, token?: string): Promise<BrandType> {
+    const isFormData = data instanceof FormData;
+    const headers: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+    if (!isFormData) headers["Content-Type"] = "application/json";
+
+    return safeFetch<BrandType>(`${API_BASE}/buy-brands/${id}`, {
+      method: "PUT",
+      headers,
+      body: isFormData ? data : JSON.stringify(data),
+    });
+  },
+
+  async deleteBuyBrand(id: string, token?: string): Promise<{ message: string }> {
+    return safeFetch<{ message: string }>(`${API_BASE}/buy-brands/${id}`, {
+      method: "DELETE",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    });
+  },
+
+  // --- BUY DATABASE BACKUP & RESTORE (100% ISOLATED) ---
+  async getBuyDatabaseStats(token?: string): Promise<{ databaseName: string; counts: { products: number; categories: number; brands: number; orders: number } }> {
+    return safeFetch<any>(`${API_BASE}/buy-database/stats`, {
+      method: "GET",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    }, { databaseName: "buyphone24", counts: { products: 0, categories: 0, brands: 0, orders: 0 } });
+  },
+
+  async exportBuyDatabase(): Promise<Blob> {
+    const res = await fetch(`${API_BASE}/buy-database/export`);
+    if (!res.ok) throw new Error("Failed to export Buy-Phones database");
+    return await res.blob();
+  },
+
+  async restoreBuyDatabase(backupData: any, token?: string): Promise<{ message: string; counts: any }> {
+    return safeFetch<{ message: string; counts: any }>(`${API_BASE}/buy-database/restore`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(backupData),
+    });
+  },
 };
 
 

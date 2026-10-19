@@ -122,5 +122,7 @@ buyProductSchema.pre("validate", function(next) {
   next();
 });
 
-export default mongoose.model("BuyProduct", buyProductSchema);
+import { buyDb } from "../config/db.js";
+
+export default buyDb.model("BuyProduct", buyProductSchema, "buyproducts");
 

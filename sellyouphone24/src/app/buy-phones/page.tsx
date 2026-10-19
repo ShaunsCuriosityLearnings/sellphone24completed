@@ -155,7 +155,7 @@ export default function BuyPhonesPage() {
       try {
         const [prodData, brandData] = await Promise.all([
           api.getBuyProducts(),
-          api.getBrands().catch(() => []),
+          api.getBuyBrands().catch(() => []),
         ]);
         setProducts(prodData);
 

@@ -37,7 +37,12 @@ import {
   SlidersHorizontal,
   Pencil,
   Tag,
-  ChevronRight
+  ChevronRight,
+  Database,
+  Download,
+  UploadCloud,
+  Server,
+  FileJson
 } from "lucide-react";
 import { useUser, useAuth, SignIn, SignOutButton } from "@clerk/nextjs";
 import { toast } from "react-toastify";
@@ -48,8 +53,18 @@ export default function BuyPhonesAdminPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const { getToken } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<"products" | "categories" | "brands" | "orders" | "sheets">("products");
+  const [activeTab, setActiveTab] = useState<"products" | "categories" | "brands" | "orders" | "sheets" | "database">("products");
   const [loading, setLoading] = useState(true);
+
+  // Database Backup & Restore state (100% Isolated Buy-Phones DB)
+  const [dbStats, setDbStats] = useState<{ databaseName: string; counts: { products: number; categories: number; brands: number; orders: number } }>({
+    databaseName: "buyphone24",
+    counts: { products: 0, categories: 0, brands: 0, orders: 0 },
+  });
+  const [exportingDb, setExportingDb] = useState(false);
+  const [restoringDb, setRestoringDb] = useState(false);
+  const [restorePayload, setRestorePayload] = useState<any | null>(null);
+  const [restoreFileName, setRestoreFileName] = useState<string>("");
 
   // Products state & filters
   const [buyProducts, setBuyProducts] = useState<BuyProductType[]>([]);
@@ -159,17 +174,19 @@ export default function BuyPhonesAdminPage() {
     if (showSpinner) setLoading(true);
     try {
       const token = await getToken();
-      const [prods, tradeIns, ords, brands, cats] = await Promise.all([
+      const [prods, tradeIns, ords, brands, cats, stats] = await Promise.all([
         api.getBuyProducts({ includeDrafts: true }),
         api.getProducts().catch(() => []),
         api.getBuyOrders(token || undefined).catch(() => []),
-        api.getBrands().catch(() => []),
-        api.getCategories().catch(() => []),
+        api.getBuyBrands().catch(() => []),
+        api.getBuyCategories().catch(() => []),
+        api.getBuyDatabaseStats(token || undefined).catch(() => null),
       ]);
       setBuyProducts(prods);
       setTradeInProducts(tradeIns);
       setOrders(ords);
       setBrandsList(brands);
+      if (stats) setDbStats(stats);
       if (cats && cats.length > 0) {
         setCategoriesList(cats);
       } else {
@@ -580,11 +597,11 @@ export default function BuyPhonesAdminPage() {
       else if (newCategory.image) fd.append("image", newCategory.image);
 
       if (editingCategoryId) {
-        await api.updateCategory(editingCategoryId, fd, token || undefined);
-        toast.success("Main Category updated successfully!");
+        await api.updateBuyCategory(editingCategoryId, fd, token || undefined);
+        toast.success("Buy-Phones Category updated successfully!");
       } else {
-        await api.createCategory(fd, token || undefined);
-        toast.success("New Main Category created successfully!");
+        await api.createBuyCategory(fd, token || undefined);
+        toast.success("New Buy-Phones Category created successfully!");
       }
       handleCancelCategoryEdit();
       await loadData(false);
@@ -613,8 +630,8 @@ export default function BuyPhonesAdminPage() {
     if (!confirm("Are you sure you want to delete this category? Devices in this category will remain in the database.")) return;
     try {
       const token = await getToken();
-      await api.deleteCategory(id, token || undefined);
-      toast.success("Category deleted");
+      await api.deleteBuyCategory(String(id), token || undefined);
+      toast.success("Buy-Phones Category deleted");
       if (editingCategoryId === String(id)) handleCancelCategoryEdit();
       await loadData(false);
     } catch (err: any) {
@@ -623,7 +640,7 @@ export default function BuyPhonesAdminPage() {
   };
 
   // =========================================================================
-  // BRANDS CRUD OPERATIONS & MULTI-CATEGORY MAPPINGS
+  // BRANDS CRUD OPERATIONS & MULTI-CATEGORY MAPPINGS (BUY-PHONES DB)
   // =========================================================================
   const handleToggleBrandCategory = (catId: string) => {
     const updated = newBrand.categories.includes(catId)
@@ -681,11 +698,11 @@ export default function BuyPhonesAdminPage() {
       fd.append("displayOrder", String(newBrand.displayOrder));
 
       if (editingBrandId) {
-        await api.updateBrand(editingBrandId, fd, token || undefined);
-        toast.success("Brand updated & category mappings saved!");
+        await api.updateBuyBrand(editingBrandId, fd, token || undefined);
+        toast.success("Buy-Phones Brand updated & category mappings saved!");
       } else {
-        await api.createBrand(fd, token || undefined);
-        toast.success("Brand created & allocated to categories!");
+        await api.createBuyBrand(fd, token || undefined);
+        toast.success("New Buy-Phones Brand created & allocated to categories!");
       }
       handleCancelBrandEdit();
       await loadData(false);
@@ -695,15 +712,87 @@ export default function BuyPhonesAdminPage() {
   };
 
   const handleDeleteBrand = async (id: string | number) => {
-    if (!confirm("Are you sure you want to delete this brand?")) return;
+    if (!confirm("Are you sure you want to delete this brand from Buy-Phones?")) return;
     try {
       const token = await getToken();
-      await api.deleteBrand(id, token || undefined);
-      toast.success("Brand deleted");
+      await api.deleteBuyBrand(String(id), token || undefined);
+      toast.success("Buy-Phones Brand deleted");
       if (editingBrandId === String(id)) handleCancelBrandEdit();
       await loadData(false);
     } catch (err: any) {
       toast.error(err.message || "Failed to delete brand");
+    }
+  };
+
+  // =========================================================================
+  // BUY-PHONES ISOLATED DATABASE BACKUP & RESTORE HANDLERS
+  // =========================================================================
+  const handleExportBuyDb = async () => {
+    setExportingDb(true);
+    try {
+      const blob = await api.exportBuyDatabase();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const dateStr = new Date().toISOString().split("T")[0];
+      a.download = `buyphone24-db-backup-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("Buy-Phones database backup downloaded successfully!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to export Buy-Phones database");
+    } finally {
+      setExportingDb(false);
+    }
+  };
+
+  const handleRestoreFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setRestoreFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (!parsed || (!parsed.products && !parsed.categories && !parsed.brands)) {
+          toast.error("Invalid backup format: Must contain products, categories, or brands");
+          setRestorePayload(null);
+          return;
+        }
+        setRestorePayload(parsed);
+        toast.info(`Backup file loaded: ${parsed.products?.length || 0} products, ${parsed.categories?.length || 0} categories, ${parsed.brands?.length || 0} brands`);
+      } catch (parseErr) {
+        toast.error("Failed to parse JSON backup file");
+        setRestorePayload(null);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleExecuteRestoreBuyDb = async () => {
+    if (!restorePayload) {
+      toast.error("Please upload a valid JSON backup file first");
+      return;
+    }
+    const confirmed = confirm(
+      "CONFIRM RESTORE:\n\nThis will replace the current Buy-Phones catalog with data from the backup file.\n\n⚠️ NOTE: Your Sell-Phones trade-in database is 100% isolated and will NOT be affected.\n\nAre you sure you want to proceed?"
+    );
+    if (!confirmed) return;
+
+    setRestoringDb(true);
+    try {
+      const token = await getToken();
+      const res = await api.restoreBuyDatabase(restorePayload, token || undefined);
+      toast.success(res.message || "Buy-Phones database restored successfully!");
+      setRestorePayload(null);
+      setRestoreFileName("");
+      await loadData(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to restore Buy-Phones database");
+    } finally {
+      setRestoringDb(false);
     }
   };
 
@@ -863,7 +952,19 @@ export default function BuyPhonesAdminPage() {
               }`}
             >
               <FileSpreadsheet size={14} className="text-emerald-500" />
-              <span>Google Sheets Integration</span>
+              <span>Google Sheets</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("database")}
+              className={`px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 text-xs cursor-pointer ${
+                activeTab === "database"
+                  ? "bg-slate-900 text-white shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              <Database size={14} className="text-amber-500" />
+              <span>Database Backup & Restore</span>
             </button>
           </div>
 
@@ -1782,6 +1883,182 @@ export default function BuyPhonesAdminPage() {
                 <div>GOOGLE_SHEET_ID=your_spreadsheet_id</div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* =========================================================================
+            TAB 6: BUY-PHONES ISOLATED DATABASE BACKUP & RESTORE
+           ========================================================================= */}
+        {activeTab === "database" && (
+          <div className="space-y-6">
+            
+            {/* Database Isolation Status Banner */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
+                    <Database size={24} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base font-extrabold text-slate-900">Buy-Phones Isolated Database</h2>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        100% Isolated: {dbStats.databaseName || "buyphone24"}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Independent MongoDB partition. Actions taken here operate exclusively on Buy-Phones and will <strong>never touch or flush the Sell-Phones database</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => loadData(false)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition cursor-pointer"
+                  >
+                    <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+                    <span>Refresh Stats</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Database Counts Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                  <div className="text-[11px] text-slate-500 font-bold uppercase">Products in Catalog</div>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{buyProducts.length}</div>
+                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">buyproducts</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                  <div className="text-[11px] text-slate-500 font-bold uppercase">Main Categories</div>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{categoriesList.length}</div>
+                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">buycategories</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                  <div className="text-[11px] text-slate-500 font-bold uppercase">Allocated Brands</div>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{brandsList.length}</div>
+                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">buybrands</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                  <div className="text-[11px] text-slate-500 font-bold uppercase">Purchase Orders</div>
+                  <div className="text-2xl font-black text-slate-900 mt-1">{orders.length}</div>
+                  <div className="text-[10px] text-slate-400 font-mono mt-0.5">buyorders</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Two Action Panels: Export vs Restore */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Export Panel */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                    <Download size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">Export Buy-Phones Snapshot</h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Download a complete, structured JSON backup of all Buy-Phones catalog items, categories, brands, and customer orders.
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100 text-xs text-blue-900 space-y-1">
+                    <div className="font-bold">What is included in this snapshot:</div>
+                    <ul className="list-disc pl-4 text-[11px] text-blue-800 space-y-0.5">
+                      <li>All {buyProducts.length} certified pre-owned device listings</li>
+                      <li>All {categoriesList.length} departments & category slugs</li>
+                      <li>All {brandsList.length} brands with their category allocations</li>
+                      <li>All {orders.length} customer order history & fulfillment logs</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleExportBuyDb}
+                  disabled={exportingDb}
+                  className="w-full py-3 px-4 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <Download size={15} />
+                  <span>{exportingDb ? "Generating Snapshot..." : "Download Full Buy-Phones Backup (.json)"}</span>
+                </button>
+              </div>
+
+              {/* Restore Panel */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-4">
+                <div className="space-y-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                    <UploadCloud size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">Restore Buy-Phones Snapshot</h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Upload a previously exported JSON file to cleanly restore Buy-Phones inventory and categories.
+                    </p>
+                  </div>
+
+                  {/* Safety Warning */}
+                  <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                      <span>🛡️ Safe Database Isolation Guarantee:</span>
+                    </div>
+                    <p className="text-[11px] text-amber-900 leading-relaxed">
+                      Restoring this file strictly replaces the <strong>Buy-Phones</strong> database. Your <strong>Sell-Phones trade-in valuation catalog will NEVER be wiped or affected</strong>.
+                    </p>
+                  </div>
+
+                  {/* File Upload Dropzone */}
+                  <div className="relative border-2 border-dashed border-slate-200 hover:border-amber-400 rounded-2xl p-4 text-center transition bg-slate-50/50">
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleRestoreFileSelected}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <FileJson size={28} className="mx-auto text-slate-400 mb-1" />
+                    {restoreFileName ? (
+                      <div className="text-xs font-bold text-slate-900 truncate px-2">
+                        Selected: <span className="text-amber-700">{restoreFileName}</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-xs font-bold text-slate-700">Click to select backup .json file</div>
+                        <div className="text-[10px] text-slate-400">or drag and drop your file here</div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Payload Summary preview if loaded */}
+                  {restorePayload && (
+                    <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-[11px] text-emerald-900 space-y-1">
+                      <div className="font-bold">Ready to Restore:</div>
+                      <div className="grid grid-cols-2 gap-1 text-[10px]">
+                        <div>• Products: {restorePayload.products?.length || 0}</div>
+                        <div>• Categories: {restorePayload.categories?.length || 0}</div>
+                        <div>• Brands: {restorePayload.brands?.length || 0}</div>
+                        <div>• Orders: {restorePayload.orders?.length || 0}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={handleExecuteRestoreBuyDb}
+                  disabled={!restorePayload || restoringDb}
+                  className="w-full py-3 px-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <RefreshCw size={15} className={restoringDb ? "animate-spin" : ""} />
+                  <span>{restoringDb ? "Restoring Database..." : "Execute Clean Restore"}</span>
+                </button>
+              </div>
+
+            </div>
+
           </div>
         )}
 
