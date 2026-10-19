@@ -5,17 +5,17 @@ import {
   updateBuyBrand,
   deleteBuyBrand,
 } from "../controllers/buyBrandController.js";
-import { uploadBrand } from "../middlewares/upload.js";
+import upload from "../middlewares/upload.js";
 import { requireAdmin } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 router.route("/")
   .get(getBuyBrands)
-  .post(requireAdmin, uploadBrand.single("logo"), createBuyBrand);
+  .post(requireAdmin, upload.single("logo"), createBuyBrand);
 
 router.route("/:id")
-  .put(requireAdmin, uploadBrand.single("logo"), updateBuyBrand)
+  .put(requireAdmin, upload.single("logo"), updateBuyBrand)
   .delete(requireAdmin, deleteBuyBrand);
 
 export default router;
