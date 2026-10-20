@@ -333,6 +333,13 @@ export const api = {
     });
   },
 
+  async retryOrderSheetsSync(id: string, token?: string): Promise<any> {
+    return safeFetch<any>(`${API_BASE}/orders/${id}/retry-sheets`, {
+      method: "POST",
+      headers: token ? { "Authorization": `Bearer ${token}` } : {},
+    });
+  },
+
   // --- CUSTOM REQUESTS ---
   async submitCustomDeviceRequest(requestData: any): Promise<any> {
     return safeFetch<any>(`${API_BASE}/custom-requests`, {

@@ -46,7 +46,8 @@ import {
   TrendingUp,
   Sparkles,
   MessageSquare,
-  Home
+  Home,
+  CheckCircle2
 } from "lucide-react";
 import Image from "next/image";
 
@@ -78,6 +79,12 @@ type OrderType = {
   paymentMethod: string;
   totalPayout: number;
   status: "pending" | "pickup_assigned" | "inspected" | "completed" | "cancelled";
+  googleSheetsSync?: {
+    isSynced: boolean;
+    syncedAt?: string;
+    error?: string;
+    retryCount?: number;
+  };
   createdAt: string;
 };
 
@@ -164,6 +171,7 @@ export default function AdminPage() {
   
   const [activeTab, setActiveTab] = useState<"showcase" | "buy-phones" | "seo-pages" | "analytics" | "orders" | "products" | "add-product" | "brands" | "categories" | "blogs" | "testimonials" | "database">("showcase");
   const [orders, setOrders] = useState<OrderType[]>([]);
+  const [syncingOrderId, setSyncingOrderId] = useState<string | null>(null);
   const [products, setProducts] = useState<ProductType[]>([]);
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [brands, setBrands] = useState<BrandType[]>([]);
@@ -412,6 +420,24 @@ export default function AdminPage() {
       }
     } catch (error) {
       toast.error("Failed to update status.");
+    }
+  };
+
+  const handleRetryOrderSheetsSync = async (id: string) => {
+    try {
+      setSyncingOrderId(id);
+      const token = await getToken();
+      const res = await api.retryOrderSheetsSync(id, token || undefined);
+      if (res.success) {
+        toast.success("Order synced to Google Sheets successfully!");
+        setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, googleSheetsSync: res.googleSheetsSync || { isSynced: true } } : o)));
+      } else {
+        toast.error(res.message || "Failed to sync order to Google Sheets");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Retry sync failed");
+    } finally {
+      setSyncingOrderId(null);
     }
   };
 
@@ -1994,8 +2020,27 @@ export default function AdminPage() {
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2.5">
                               <span className="font-extrabold text-emerald-600 text-xs">AED {order.totalPayout.toLocaleString()}</span>
+
+                              {order.googleSheetsSync?.isSynced ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                  <CheckCircle2 size={11} /> Sheets Synced
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRetryOrderSheetsSync(order._id);
+                                  }}
+                                  disabled={syncingOrderId === order._id}
+                                  className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 hover:bg-amber-100 transition cursor-pointer"
+                                  title={order.googleSheetsSync?.error || "Click to retry Google Sheets Sync"}
+                                >
+                                  <RefreshCw size={10} className={syncingOrderId === order._id ? "animate-spin" : ""} /> Retry Sheets
+                                </button>
+                              )}
                               
                               <select
                                 value={order.status}

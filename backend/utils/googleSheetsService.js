@@ -3,14 +3,9 @@ import path from "path";
 
 /**
  * Append a Buy Order row to the dedicated "Buy Phones Orders" Google Sheet
- * Supports:
- * 1. Google Apps Script Webhook (Easiest & most reliable: zero complex OAuth token expiration issues)
- * 2. Google Sheets REST API v4 using Service Account / Bearer token
- * 3. Graceful fallback to local persistent sync file if external credentials are not yet set
  */
 export const syncBuyOrderToGoogleSheets = async (order) => {
   const webhookUrl = process.env.GOOGLE_SHEET_BUY_ORDERS_WEBHOOK_URL || process.env.GOOGLE_SHEET_WEBHOOK_URL;
-  const sheetId = process.env.GOOGLE_SHEET_ID;
 
   const itemsFormatted = (order.items || [])
     .map((item) => `${item.title} (${item.selectedStorage || "Standard"}, ${item.selectedColor || "Standard"}, ${item.condition}) x${item.quantity} @ AED ${item.price}`)
@@ -45,7 +40,6 @@ export const syncBuyOrderToGoogleSheets = async (order) => {
         currentLogs = [];
       }
     }
-    // Avoid duplicate entries
     const existingIdx = currentLogs.findIndex((log) => log.orderNumber === order.orderNumber);
     if (existingIdx >= 0) {
       currentLogs[existingIdx] = { ...rowData, updatedAt: new Date().toISOString() };
@@ -57,34 +51,45 @@ export const syncBuyOrderToGoogleSheets = async (order) => {
     console.warn("⚠️ Could not write local Google Sheets sync log:", err.message);
   }
 
-  // If webhook is provided, dispatch POST request
-  if (webhookUrl) {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "appendBuyOrder",
-          sheetName: "Buy Phones Orders",
-          order: rowData,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Google Sheets Webhook HTTP error ${response.status}`);
-      }
-
-      console.log(`📊 Successfully synced Order #${order.orderNumber} to Google Sheets via Webhook.`);
-      return { success: true, method: "webhook" };
-    } catch (error) {
-      console.error(`❌ Google Sheets Webhook sync failed for #${order.orderNumber}:`, error.message);
-      return { success: false, error: error.message };
-    }
+  // If webhook URL is missing, fail explicitly so status isn't masked
+  if (!webhookUrl) {
+    console.warn(`⚠️ Google Sheet Webhook (GOOGLE_SHEET_WEBHOOK_URL) not configured in backend/.env. Order #${order.orderNumber} saved to local sync log only.`);
+    return { success: false, error: "Google Sheet Webhook URL not configured in backend/.env", method: "local_log" };
   }
 
-  // If no webhook or API configured, mark as pending setup but logged locally
-  console.log(`ℹ️ Google Sheet Webhook (GOOGLE_SHEET_BUY_ORDERS_WEBHOOK_URL) not configured. Order #${order.orderNumber} saved to local sync log.`);
-  return { success: true, method: "local_log", note: "Logged locally in backups/google_sheets_buy_orders_log.json" };
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "appendBuyOrder",
+        sheetName: "Buy Phone Orders",
+        order: rowData,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Google Sheets Webhook HTTP error ${response.status}`);
+    }
+
+    const rawText = await response.text();
+    let jsonResult = {};
+    try {
+      jsonResult = JSON.parse(rawText);
+    } catch (parseErr) {
+      throw new Error(`Invalid JSON response from Google Sheets Webhook: ${rawText.slice(0, 100)}`);
+    }
+
+    if (jsonResult.status === "error") {
+      throw new Error(jsonResult.message || "Google Sheets Webhook returned error status");
+    }
+
+    console.log(`📊 Successfully synced Order #${order.orderNumber} to Google Sheets via Webhook.`);
+    return { success: true, method: "webhook", data: jsonResult };
+  } catch (error) {
+    console.error(`❌ Google Sheets Webhook sync failed for #${order.orderNumber}:`, error.message);
+    return { success: false, error: error.message };
+  }
 };
 
 /**
@@ -139,31 +144,90 @@ export const syncSellLeadToGoogleSheets = async (order) => {
     console.warn("⚠️ Could not write local Sell Leads sync log:", err.message);
   }
 
-  // If webhook is provided, dispatch POST request
-  if (webhookUrl) {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "appendSellLead",
-          sheetName: "Sell Phone Leads",
-          lead: rowData,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Google Sheets Webhook HTTP error ${response.status}`);
-      }
-
-      console.log(`📊 Successfully synced Sell Lead #${rowData.orderId} to Google Sheets via Webhook.`);
-      return { success: true, method: "webhook" };
-    } catch (error) {
-      console.error(`❌ Google Sheets Webhook sync failed for Sell Lead #${rowData.orderId}:`, error.message);
-      return { success: false, error: error.message };
-    }
+  // If webhook URL is missing, fail explicitly so status isn't masked
+  if (!webhookUrl) {
+    console.warn(`⚠️ Google Sheet Webhook (GOOGLE_SHEET_WEBHOOK_URL) not configured in backend/.env. Sell Lead #${rowData.orderId} saved to local sync log only.`);
+    return { success: false, error: "Google Sheet Webhook URL not configured in backend/.env", method: "local_log" };
   }
 
-  console.log(`ℹ️ Google Sheet Webhook (GOOGLE_SHEET_WEBHOOK_URL) not configured. Sell Lead #${rowData.orderId} saved to local sync log.`);
-  return { success: true, method: "local_log", note: "Logged locally in backups/google_sheets_sell_leads_log.json" };
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "appendSellLead",
+        sheetName: "Sell Phone Leads",
+        lead: rowData,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Google Sheets Webhook HTTP error ${response.status}`);
+    }
+
+    const rawText = await response.text();
+    let jsonResult = {};
+    try {
+      jsonResult = JSON.parse(rawText);
+    } catch (parseErr) {
+      throw new Error(`Invalid JSON response from Google Sheets Webhook: ${rawText.slice(0, 100)}`);
+    }
+
+    if (jsonResult.status === "error") {
+      throw new Error(jsonResult.message || "Google Sheets Webhook returned error status");
+    }
+
+    console.log(`📊 Successfully synced Sell Lead #${rowData.orderId} to Google Sheets via Webhook.`);
+    return { success: true, method: "webhook", data: jsonResult };
+  } catch (error) {
+    console.error(`❌ Google Sheets Webhook sync failed for Sell Lead #${rowData.orderId}:`, error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Append a Custom Device Request to the Google Sheet
+ */
+export const syncCustomRequestToGoogleSheets = async (customRequest) => {
+  const webhookUrl = process.env.GOOGLE_SHEET_SELL_LEADS_WEBHOOK_URL || process.env.GOOGLE_SHEET_WEBHOOK_URL;
+
+  const rowData = {
+    orderId: "CUSTOM-" + String(customRequest._id || customRequest.id || Date.now()).slice(-6).toUpperCase(),
+    date: new Date(customRequest.createdAt || Date.now()).toISOString().replace("T", " ").substring(0, 19),
+    customerName: customRequest.name || "N/A",
+    phone: customRequest.phone || "N/A",
+    email: customRequest.email || "N/A",
+    city: "Dubai (Custom Quote)",
+    address: customRequest.description ? `Note: ${customRequest.description}` : "Unlisted Device Quote Request",
+    pickupDate: "TBD (Quote Pending)",
+    pickupTime: "Pending Review",
+    devices: `[CUSTOM QUOTE] ${customRequest.deviceBrand} ${customRequest.deviceModel} (${customRequest.condition})`,
+    totalPayout: 0,
+    paymentMethod: "Quote Pending",
+    status: customRequest.status || "pending",
+    channel: "Custom Quote Form",
+    campaign: "sell-any-device",
+  };
+
+  if (!webhookUrl) return { success: false, error: "Webhook not configured" };
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "appendSellLead",
+        sheetName: "Sell Phone Leads",
+        lead: rowData,
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const text = await response.text();
+    const json = JSON.parse(text);
+    return { success: json.status !== "error", data: json };
+  } catch (err) {
+    console.error("Custom request Google Sheet sync failed:", err.message);
+    return { success: false, error: err.message };
+  }
 };

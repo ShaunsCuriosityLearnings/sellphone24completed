@@ -62,10 +62,17 @@ export const createOrder = async (req, res) => {
           "googleSheetsSync.syncedAt": syncResult.success ? new Date() : null,
           "googleSheetsSync.error": syncResult.error || null,
         });
+        if (syncResult.success) {
+          console.log(`📊 Order #${order._id} synced to Google Sheets successfully.`);
+        } else {
+          console.warn(`⚠️ Order #${order._id} Google Sheets sync failed: ${syncResult.error}`);
+        }
       } catch (e) {
         console.warn("Could not update Order googleSheetsSync status:", e.message);
       }
-    }).catch(() => {});
+    }).catch((err) => {
+      console.error("Google Sheets sync trigger error:", err);
+    });
 
     res.status(201).json({
       success: true,

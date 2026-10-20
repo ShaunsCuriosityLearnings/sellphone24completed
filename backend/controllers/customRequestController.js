@@ -1,5 +1,6 @@
 import { CustomRequest } from "../models/CustomRequest.js";
 import { sendCustomRequestEmails } from "../utils/emailService.js";
+import { syncCustomRequestToGoogleSheets } from "../utils/googleSheetsService.js";
 
 // Create a new custom request
 export const createCustomRequest = async (req, res) => {
@@ -24,6 +25,11 @@ export const createCustomRequest = async (req, res) => {
 
     // Trigger email notifications (Client receipt & Admin alert)
     sendCustomRequestEmails(savedRequest);
+
+    // Trigger Google Sheets sync asynchronously
+    syncCustomRequestToGoogleSheets(savedRequest).catch((err) => {
+      console.warn("Custom request Google Sheets sync background error:", err.message);
+    });
 
     res.status(201).json({
       success: true,
