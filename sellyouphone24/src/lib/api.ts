@@ -2,6 +2,14 @@ import { CategoryType, BrandType, ProductType, BlogType, CartItemType, Testimoni
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
 import { mockBuyProducts } from "@/data/mockBuyProducts";
 
+export const mockBuyCategories: CategoryType[] = [
+  { id: "smartphones", name: "Smartphones", slug: "smartphones", description: "Certified Pristine & Pre-Owned Flagships", image: "/products/iphone-pro-max.jpg" },
+  { id: "laptops", name: "Laptops", slug: "laptops", description: "MacBooks & High-Performance Windows Laptops", image: "/products/macbook-pro.webp" },
+  { id: "tablets", name: "Tablets", slug: "tablets", description: "iPads & Galaxy Tabs with Store Warranty", image: "/products/ipad-pro-m4.webp" },
+  { id: "smartwatches", name: "Smartwatches", slug: "smartwatches", description: "Apple Watch & Galaxy Smart Wearables", image: "/products/apple-watch-ultra.webp" },
+  { id: "games", name: "Gaming & Consoles", slug: "games", description: "PlayStation, Xbox & Nintendo Consoles", image: "/products/gaming-console.webp" },
+];
+
 let API_BASE = "/api";
 if (typeof window === "undefined") {
   // Server-side (SSR)
@@ -694,7 +702,7 @@ export const api = {
 
   // --- BUY CATEGORIES (ISOLATED BUY-PHONES DATABASE) ---
   async getBuyCategories(): Promise<CategoryType[]> {
-    const dbCategories = await safeFetch<any[]>(`${API_BASE}/buy-categories`, { method: "GET" }, mockCategories);
+    const dbCategories = await safeFetch<any[]>(`${API_BASE}/buy-categories`, { method: "GET" }, mockBuyCategories);
     return dbCategories.map((c) => ({
       ...c,
       id: c._id || c.id,

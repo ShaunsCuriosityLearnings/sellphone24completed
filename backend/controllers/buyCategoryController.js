@@ -50,7 +50,14 @@ export const getBuyCategories = async (req, res) => {
       }
     }
     
-    res.status(200).json(categories);
+    // Strictly exclude sell / trade-in only categories from buy-phones store
+    const excludedSlugs = new Set(["tvs", "tv", "any-device", "anydevice", "custom-request", "all-services"]);
+    const validCategories = (categories || []).filter((cat) => {
+      const s = (cat.slug || cat.name || "").toLowerCase().trim();
+      return !excludedSlugs.has(s) && !s.includes("any-device");
+    });
+    
+    res.status(200).json(validCategories);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

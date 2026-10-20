@@ -27,12 +27,22 @@ import Image from "next/image";
 import useCartStore from "@/app/stores/cartStore";
 import useBuyCartStore from "@/app/stores/buyCartStore";
 
-const DEFAULT_FALLBACK_CATEGORIES: CategoryType[] = [
+const DEFAULT_BUY_CATEGORIES: CategoryType[] = [
   { id: "smartphones", name: "Smartphones", slug: "smartphones", description: "Smartphones", image: "" },
   { id: "laptops", name: "Laptops", slug: "laptops", description: "Laptops", image: "" },
   { id: "tablets", name: "Tablets", slug: "tablets", description: "Tablets", image: "" },
   { id: "smartwatches", name: "Smartwatches", slug: "smartwatches", description: "Smartwatches", image: "" },
   { id: "games", name: "Gaming & Consoles", slug: "games", description: "Gaming & Consoles", image: "" },
+];
+
+const DEFAULT_SELL_CATEGORIES: CategoryType[] = [
+  { id: "smartphones", name: "Smartphones", slug: "smartphones", description: "Smartphones", image: "" },
+  { id: "laptops", name: "Laptops", slug: "laptops", description: "Laptops", image: "" },
+  { id: "tablets", name: "Tablets", slug: "tablets", description: "Tablets", image: "" },
+  { id: "smartwatches", name: "Smartwatches", slug: "smartwatches", description: "Smartwatches", image: "" },
+  { id: "games", name: "Gaming & Consoles", slug: "games", description: "Gaming & Consoles", image: "" },
+  { id: "tvs", name: "TVs", slug: "tvs", description: "TVs", image: "" },
+  { id: "any-device", name: "Any Device", slug: "any-device", description: "Any Device", image: "" },
 ];
 
 const DEFAULT_FALLBACK_BRANDS: BrandType[] = [
@@ -50,6 +60,39 @@ const DEFAULT_FALLBACK_BRANDS: BrandType[] = [
   { id: "microsoft", name: "Microsoft", slug: "microsoft", logo: "💻", categories: ["laptops", "tablets", "games"] },
 ];
 
+// Logical department sequence for certified retail store
+const BUY_CATEGORY_ORDER: Record<string, number> = {
+  smartphones: 1,
+  mobile: 1,
+  phones: 1,
+  laptops: 2,
+  macbooks: 2,
+  tablets: 3,
+  ipads: 3,
+  smartwatches: 4,
+  watches: 4,
+  games: 5,
+  "gaming-consoles": 5,
+  gaming: 5,
+};
+
+// Trade-in only categories that must NEVER appear under Buy-Phones
+const EXCLUDED_BUY_SLUGS = new Set([
+  "tvs",
+  "tv",
+  "television",
+  "any-device",
+  "anydevice",
+  "any-devices",
+  "custom-request",
+  "all-services",
+]);
+
+const isExcludedFromBuy = (slugOrName: string) => {
+  const s = (slugOrName || "").toLowerCase().trim().replace(/\s+/g, "-");
+  return EXCLUDED_BUY_SLUGS.has(s) || s.includes("any-device") || s === "tv" || s === "tvs";
+};
+
 const getCategoryIcon = (slugOrName: string) => {
   const s = (slugOrName || "").toLowerCase();
   if (s.includes("phone") || s.includes("mobile")) return <Smartphone size={13} className="text-emerald-400" />;
@@ -61,7 +104,7 @@ const getCategoryIcon = (slugOrName: string) => {
 };
 
 const matchBrandToCategory = (brand: BrandType, category: CategoryType): boolean => {
-  const catSlug = category.slug.toLowerCase();
+  const catSlug = (category.slug || "").toLowerCase();
   const bSlug = (brand.slug || "").toLowerCase();
   const bName = (brand.name || "").toLowerCase();
 
@@ -76,6 +119,8 @@ const matchBrandToCategory = (brand: BrandType, category: CategoryType): boolean
         ? ["smartwatches", "watches"]
         : catSlug === "tablets" || catSlug === "ipads"
         ? ["tablets", "ipads"]
+        : catSlug === "games" || catSlug.includes("game") || catSlug.includes("console")
+        ? ["games", "gaming", "consoles", "gaming & consoles"]
         : [catSlug];
 
     const isMatch = brand.categories.some((c) => {
@@ -100,11 +145,11 @@ const matchBrandToCategory = (brand: BrandType, category: CategoryType): boolean
   }
 
   // Known defaults matching by brand name/slug if array matching wasn't matched
-  if (catSlug === "smartphones") return ["apple", "samsung", "google", "oneplus", "xiaomi"].includes(bName) || ["apple", "samsung", "google", "oneplus", "xiaomi"].includes(bSlug);
-  if (catSlug === "laptops") return ["apple", "dell", "hp", "asus", "lenovo", "microsoft", "razer", "acer", "msi"].includes(bName) || ["apple", "dell", "hp", "asus", "lenovo", "microsoft", "razer", "acer", "msi"].includes(bSlug);
-  if (catSlug === "tablets") return ["apple", "samsung", "oneplus", "lenovo", "microsoft", "xiaomi"].includes(bName) || ["apple", "samsung", "oneplus", "lenovo", "microsoft", "xiaomi"].includes(bSlug);
-  if (catSlug === "smartwatches") return ["apple", "samsung", "google"].includes(bName) || ["apple", "samsung", "google"].includes(bSlug);
-  if (catSlug === "games") return ["sony", "microsoft", "nintendo", "valve", "asus", "lenovo", "meta", "msi"].includes(bName) || ["sony", "microsoft", "nintendo", "valve", "asus", "lenovo", "meta", "msi"].includes(bSlug);
+  if (catSlug === "smartphones" || catSlug === "mobile") return ["apple", "samsung", "google", "oneplus", "xiaomi", "huawei", "oppo", "vivo"].includes(bName) || ["apple", "samsung", "google", "oneplus", "xiaomi", "huawei", "oppo", "vivo"].includes(bSlug);
+  if (catSlug === "laptops" || catSlug === "macbooks") return ["apple", "dell", "hp", "asus", "lenovo", "microsoft", "razer", "acer", "msi"].includes(bName) || ["apple", "dell", "hp", "asus", "lenovo", "microsoft", "razer", "acer", "msi"].includes(bSlug);
+  if (catSlug === "tablets" || catSlug === "ipads") return ["apple", "samsung", "oneplus", "lenovo", "microsoft", "xiaomi"].includes(bName) || ["apple", "samsung", "oneplus", "lenovo", "microsoft", "xiaomi"].includes(bSlug);
+  if (catSlug === "smartwatches" || catSlug === "watches") return ["apple", "samsung", "google", "garmin", "huawei"].includes(bName) || ["apple", "samsung", "google", "garmin", "huawei"].includes(bSlug);
+  if (catSlug === "games" || catSlug.includes("game") || catSlug.includes("console")) return ["sony", "microsoft", "nintendo", "valve", "asus", "lenovo", "meta", "msi"].includes(bName) || ["sony", "microsoft", "nintendo", "valve", "asus", "lenovo", "meta", "msi"].includes(bSlug);
   if (catSlug === "tvs") return ["samsung", "lg", "sony", "tcl"].includes(bName) || ["samsung", "lg", "sony", "tcl"].includes(bSlug);
 
   return false;
@@ -115,8 +160,13 @@ const Navbar = () => {
   const pathname = usePathname();
   const isBuyPhones = pathname.startsWith("/buy-phones");
 
-  const [categoriesList, setCategoriesList] = useState<CategoryType[]>(DEFAULT_FALLBACK_CATEGORIES);
-  const [brandsList, setBrandsList] = useState<BrandType[]>(DEFAULT_FALLBACK_BRANDS);
+  // Isolated Category & Brand State for Buy-Phones Store vs Sell Trade-In
+  const [sellCategoriesList, setSellCategoriesList] = useState<CategoryType[]>(DEFAULT_SELL_CATEGORIES);
+  const [sellBrandsList, setSellBrandsList] = useState<BrandType[]>(DEFAULT_FALLBACK_BRANDS);
+
+  const [buyCategoriesList, setBuyCategoriesList] = useState<CategoryType[]>(DEFAULT_BUY_CATEGORIES);
+  const [buyBrandsList, setBuyBrandsList] = useState<BrandType[]>(DEFAULT_FALLBACK_BRANDS);
+
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const cart = useCartStore((state) => state.cart);
@@ -126,6 +176,7 @@ const Navbar = () => {
   const buyCartCount = buyCart.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   useEffect(() => {
+    // 1. Fetch Sell Trade-In Categories & Brands
     api.getCategories()
       .then((data) => {
         if (data && data.length > 0) {
@@ -137,7 +188,7 @@ const Navbar = () => {
             return true;
           });
           if (filtered.length > 0) {
-            setCategoriesList(filtered);
+            setSellCategoriesList(filtered);
           }
         }
       })
@@ -145,38 +196,41 @@ const Navbar = () => {
 
     api.getBrands().then((fetchedBrands) => {
       if (fetchedBrands && fetchedBrands.length > 0) {
-        setBrandsList(fetchedBrands);
+        setSellBrandsList(fetchedBrands);
       }
     }).catch(() => {});
+
+    // 2. Fetch Buy-Phones Certified Tech Categories & Brands (Dedicated Isolated Database)
+    api.getBuyCategories()
+      .then((data) => {
+        if (data && data.length > 0) {
+          // Strictly exclude sell-only categories (e.g. TVs, Any Device)
+          const validBuy = data.filter((cat) => !isExcludedFromBuy(cat.slug || cat.name));
+          if (validBuy.length > 0) {
+            // Sort by certified store hierarchy: Smartphones -> Laptops -> Tablets -> Smartwatches -> Games
+            const sorted = [...validBuy].sort((a, b) => {
+              const orderA = BUY_CATEGORY_ORDER[a.slug?.toLowerCase()] ?? 99;
+              const orderB = BUY_CATEGORY_ORDER[b.slug?.toLowerCase()] ?? 99;
+              return orderA - orderB;
+            });
+            setBuyCategoriesList(sorted);
+          }
+        }
+      })
+      .catch(() => {});
+
+    api.getBuyBrands()
+      .then((fetchedBrands) => {
+        if (fetchedBrands && fetchedBrands.length > 0) {
+          setBuyBrandsList(fetchedBrands);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
-
-  const getMatchingBrandsForCategory = (category: CategoryType) => {
-    const catSlug = (category.slug || "").toLowerCase();
-    const catId = (category.id || category._id || "").toString();
-    const catName = (category.name || "").toLowerCase();
-
-    const matched = brandsList.filter((brand) => {
-      if (!brand.categories || !Array.isArray(brand.categories) || brand.categories.length === 0) return true;
-      return brand.categories.some((c: any) => {
-        if (!c) return false;
-        if (typeof c === "string") {
-          const s = c.toLowerCase();
-          return s === catSlug || s === catName || c === catId;
-        }
-        if (typeof c === "object") {
-          const s = (c.slug || c.name || "").toLowerCase();
-          const id = (c._id || c.id || "").toString();
-          return s === catSlug || s === catName || (id && id === catId);
-        }
-        return false;
-      });
-    });
-    return matched.length > 0 ? matched : brandsList;
-  };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200/80 shadow-xs max-w-full">
@@ -320,11 +374,11 @@ const Navbar = () => {
                   </Link>
                 </div>
 
-                {/* Center: Main Categories Sequence (Smartphones, Laptops, Tablets, etc.) with Dynamic Brands Dropdowns */}
+                {/* Center: Main Categories Sequence (Smartphones, Laptops, Tablets, Smartwatches, Gaming & Consoles) with Dynamic Brands Dropdowns */}
                 <div className="flex items-center gap-1 xl:gap-2 h-full">
-                  {categoriesList.map((category) => {
-                    const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
-                    const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 8) : brandsList.slice(0, 6);
+                  {buyCategoriesList.map((category) => {
+                    const categoryBrands = buyBrandsList.filter((b) => matchBrandToCategory(b, category));
+                    const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 8) : buyBrandsList.slice(0, 6);
                     const hasBrands = displayBrands.length > 0;
                     const dropdownKey = `buy-${category.slug}`;
 
@@ -430,9 +484,9 @@ const Navbar = () => {
                 </div>
 
                 <div className="flex items-center gap-1 xl:gap-2 h-full">
-                  {categoriesList.map((category) => {
-                    const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
-                    const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 6) : brandsList.slice(0, 6);
+                  {sellCategoriesList.map((category) => {
+                    const categoryBrands = sellBrandsList.filter((b) => matchBrandToCategory(b, category));
+                    const displayBrands = categoryBrands.length > 0 ? categoryBrands.slice(0, 6) : sellBrandsList.slice(0, 6);
                     const hasBrands = displayBrands.length > 0;
 
                     return (
@@ -554,8 +608,8 @@ const Navbar = () => {
                   Store Categories & Brands
                 </div>
                 <div className="grid grid-cols-1 gap-1.5">
-                  {categoriesList.map((category) => {
-                    const categoryBrands = brandsList.filter((b) => matchBrandToCategory(b, category));
+                  {buyCategoriesList.map((category) => {
+                    const categoryBrands = buyBrandsList.filter((b) => matchBrandToCategory(b, category));
                     return (
                       <div key={category.id || category.slug} className="rounded-xl border border-slate-100 overflow-hidden bg-white">
                         <Link
@@ -676,7 +730,7 @@ const Navbar = () => {
                     <span>All Services & Categories</span>
                     <ArrowRight size={14} className="text-slate-400" />
                   </Link>
-                  {categoriesList.map((category) => (
+                  {sellCategoriesList.map((category) => (
                     <Link
                       key={category.id || category.slug}
                       href={category.slug === 'any-device' ? '/sell-any-device' : `/services/${category.slug}`}
