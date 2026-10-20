@@ -26,6 +26,7 @@ export type ProductType = {
   isPopular?: boolean;
   isLivePrice?: boolean;
   isHeroProduct?: boolean;
+  slug?: string;
 };
 
 export type ProductsType = ProductType[];
@@ -89,7 +90,7 @@ export type BrandType = {
   _id?: string;
   name: string;
   slug: string;
-  logo: string;
+  logo?: string;
   categories?: any[];
   isFeaturedOnFrontpage?: boolean;
   frontpageDisplayName?: string;
