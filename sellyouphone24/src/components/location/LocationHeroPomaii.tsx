@@ -149,119 +149,135 @@ export default function LocationHeroPomaii({
     <section className="relative w-full pt-1 pb-10 sm:pb-16 lg:pb-20">
       
       {/* ========================================================================= */}
-      {/* 1. HERO VISUAL CONTAINER WITH ORGANIC FLUID WAVE & BACKDROP                */}
+      {/* 1. HERO CONTAINER (WARM SCULPTED FRAME + RIGHT-ALIGNED LOCATION SHOWCASE)  */}
       {/* ========================================================================= */}
-      <div className="relative w-full h-[520px] sm:h-[580px] lg:h-[620px] rounded-3xl sm:rounded-[40px] overflow-hidden shadow-2xl bg-slate-900">
+      <div className="relative w-full min-h-[480px] sm:min-h-[520px] lg:h-[560px] rounded-3xl sm:rounded-[40px] overflow-hidden shadow-xl border border-[#EBE5DA] bg-gradient-to-br from-[#FAF8F5] via-[#F5F2EB] to-[#ECE6DB] flex items-center">
         
-        {/* Background Scenic Cityscape / Landscape Photography */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={imgSrc}
-            alt={`Sell Your Phone in ${page.locationName}`}
-            fill
-            priority
-            onError={() => setImgSrc(defaultHeroFallback)}
-            className="object-cover object-center scale-105 transition-transform duration-1000 ease-out"
-          />
-          {/* Subtle warm sunlight & depth gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-transparent hidden sm:block" />
-        </div>
+        {/* Subtle decorative background watermarks & ambient nature tints */}
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* ======================================================================= */}
-        {/* ORGANIC SCULPTED FLUID WHITE CUTOUT (Exact Match to Pomaii Reference)    */}
-        {/* ======================================================================= */}
-        <div className="absolute inset-y-0 left-0 w-full sm:w-[75%] lg:w-[60%] z-10 pointer-events-none">
-          {/* Desktop/Tablet Organic Flowing Curved Shape */}
-          <svg
-            className="absolute inset-0 w-full h-full hidden sm:block text-white/95 drop-shadow-[0_20px_35px_rgba(0,0,0,0.15)]"
-            viewBox="0 0 600 600"
-            preserveAspectRatio="none"
-            fill="currentColor"
-          >
-            <path d="M0,0 L420,0 C380,80 470,160 410,240 C350,320 460,400 390,480 C340,540 370,580 320,600 L0,600 Z" />
-          </svg>
-
-          {/* Mobile Smooth Gradient Card Cutout */}
-          <div className="absolute inset-0 sm:hidden bg-gradient-to-b from-white/95 via-white/90 to-transparent backdrop-blur-xs" />
-        </div>
-
-        {/* ======================================================================= */}
-        {/* HERO EDITORIAL CONTENT (Left-Aligned inside Organic White Frame)        */}
-        {/* ======================================================================= */}
-        <div className="relative z-20 h-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-14 flex flex-col justify-start sm:justify-center pt-8 sm:pt-0">
-          
-          <div className="max-w-xl space-y-3.5 sm:space-y-5 text-slate-900">
+        {/* Content Container: Two-Column Responsive Grid */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-10 lg:px-14 py-8 sm:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
             
-            {/* Top Eyebrow Pill with Nature/Tech Leaf Accent */}
-            <div className="inline-flex items-center gap-2 bg-emerald-50/90 border border-emerald-200/80 px-3 py-1 rounded-full shadow-xs">
-              <span className="text-emerald-700 text-xs">🌿</span>
-              <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-800">
-                Doorstep Tech Buyback • {page.locationName}
-              </span>
+            {/* LEFT COLUMN: Editorial Text & CTAs (7 cols) */}
+            <div className="lg:col-span-7 space-y-3.5 sm:space-y-5 text-slate-900">
+              
+              {/* Top Eyebrow Pill with Nature/Tech Leaf Accent */}
+              <div className="inline-flex items-center gap-2 bg-white/90 border border-emerald-200/80 px-3.5 py-1.5 rounded-full shadow-xs backdrop-blur-xs">
+                <span className="text-emerald-700 text-xs">🌿</span>
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-emerald-800">
+                  Doorstep Tech Buyback • {page.locationName}
+                </span>
+              </div>
+
+              {/* Main Editorial Headline */}
+              <h1 className="text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-black tracking-tight text-slate-900 leading-[1.08]">
+                {customH1 ? (
+                  customH1
+                ) : (
+                  <>
+                    Sell Your Tech. <br />
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-amber-600">
+                      Get Instant Cash.
+                    </span>
+                  </>
+                )}
+              </h1>
+
+              {/* Clear Subtitle */}
+              <p className="text-xs sm:text-sm lg:text-base text-slate-600 font-medium leading-relaxed max-w-lg">
+                {customSubtitle || (
+                  `Complimentary licensed courier collection across ${page.locationName} in under ${page.pickupSpeed}. On-the-spot device testing with immediate cash or bank transfer.`
+                )}
+              </p>
+
+              {/* Primary Action Button (Warm Amber/Orange Pill Button matching Pomaii) */}
+              <div className="pt-1 sm:pt-2 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/services"
+                  className="inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-full shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all cursor-pointer"
+                >
+                  <span>Instant Valuation</span>
+                  <ArrowRight size={15} />
+                </Link>
+
+                <a
+                  href={`https://wa.me/971555549817?text=${encodeURIComponent(
+                    `Hi SellPhoneCash! I am in ${page.locationName} and want to sell my device for instant cash. Please send courier pickup details.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-full shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
+                >
+                  <span>WhatsApp Dispatch</span>
+                </a>
+              </div>
+
+              {/* Trust Micro-Checkmarks */}
+              <div className="flex flex-wrap items-center gap-4 pt-1 text-[11px] font-bold text-slate-600">
+                <span className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                  <span>Zero Pickup Fee</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                  <span>100% Data Wiped</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 size={14} className="text-emerald-600" />
+                  <span>Cash in Hand</span>
+                </span>
+              </div>
+
             </div>
 
-            {/* Main Editorial Headline */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.08]">
-              {customH1 ? (
-                customH1
-              ) : (
-                <>
-                  Sell Your Tech. <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-amber-600">
-                    Get Instant Cash.
+            {/* RIGHT COLUMN: Location Photo Showcase (Untouched Resolution, Right-Aligned) */}
+            <div className="lg:col-span-5 flex items-center justify-center lg:justify-end">
+              <div className="relative w-full max-w-[460px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-950 group">
+                
+                {/* Ambient Blurred Backdrop behind the image for smooth fill */}
+                <div className="absolute inset-0 scale-125 blur-xl opacity-35">
+                  <Image
+                    src={imgSrc}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    aria-hidden="true"
+                  />
+                </div>
+
+                {/* Natural Aspect Ratio Photo Showcase */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden flex items-center justify-center">
+                  <Image
+                    src={imgSrc}
+                    alt={`Sell Your Phone in ${page.locationName}`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 460px"
+                    priority
+                    onError={() => setImgSrc(defaultHeroFallback)}
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                  {/* Subtle lower gradient vignette for badge readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
+                </div>
+
+                {/* Floating Location & Arrival Speed Badges */}
+                <div className="absolute bottom-3.5 inset-x-3.5 flex items-center justify-between pointer-events-none">
+                  <div className="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-white text-xs font-bold border border-white/20 shadow-md">
+                    <MapPin size={13} className="text-emerald-400" />
+                    <span>{page.locationName}</span>
+                  </div>
+                  <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-500 text-slate-950 shadow-xs">
+                    {page.pickupSpeed}
                   </span>
-                </>
-              )}
-            </h1>
+                </div>
 
-            {/* Clear Subtitle */}
-            <p className="text-xs sm:text-sm lg:text-base text-slate-600 font-medium leading-relaxed max-w-md">
-              {customSubtitle || (
-                `Complimentary licensed courier collection across ${page.locationName} in under ${page.pickupSpeed}. On-the-spot device testing with immediate cash or bank transfer.`
-              )}
-            </p>
-
-            {/* Primary Action Button (Warm Amber/Orange Pill Button matching Pomaii) */}
-            <div className="pt-1 sm:pt-2 flex flex-wrap items-center gap-3">
-              <Link
-                href="/services"
-                className="inline-flex items-center gap-2.5 bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-full shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all pointer-events-auto"
-              >
-                <span>Instant Valuation</span>
-                <ArrowRight size={15} />
-              </Link>
-
-              <a
-                href={`https://wa.me/971555549817?text=${encodeURIComponent(
-                  `Hi SellPhoneCash! I am in ${page.locationName} and want to sell my device for instant cash. Please send courier pickup details.`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-slate-900/90 hover:bg-slate-900 text-white font-bold text-xs sm:text-sm px-5 py-3.5 rounded-full shadow-md hover:-translate-y-0.5 transition-all pointer-events-auto"
-              >
-                <span>WhatsApp Dispatch</span>
-              </a>
-            </div>
-
-            {/* Trust Micro-Checkmarks */}
-            <div className="flex items-center gap-4 pt-1 text-[11px] font-bold text-slate-600">
-              <span className="inline-flex items-center gap-1">
-                <CheckCircle2 size={13} className="text-emerald-500" />
-                <span>Zero Pickup Fee</span>
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <CheckCircle2 size={13} className="text-emerald-500" />
-                <span>100% Data Wiped</span>
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <CheckCircle2 size={13} className="text-emerald-500" />
-                <span>Cash in Hand</span>
-              </span>
+              </div>
             </div>
 
           </div>
-
         </div>
 
       </div>
