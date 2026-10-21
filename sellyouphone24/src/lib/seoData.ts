@@ -71,6 +71,7 @@ export interface LocationPageData {
   faqs: SeoFaq[];
   relatedLocations: string[];
   topModels: string[];
+  heroImage?: string;
 }
 
 // -------------------------------------------------------------
@@ -1089,7 +1090,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "What if my building requires visitor security registration?", answer: "Our staff carry official UAE Emirates IDs and trade company credentials to comply with building concierge regulations seamlessly." }
     ],
     relatedLocations: ["jlt", "downtown-dubai", "al-barsha", "business-bay", "jumeirah"],
-    topModels: ["iphone-pro-max", "iphone-16", "samsung-s25", "macbook-pro", "samsung-fold", "apple-watch-ultra"]
+    topModels: ["iphone-pro-max", "iphone-16", "samsung-s25", "macbook-pro", "samsung-fold", "apple-watch-ultra"],
+    heroImage: "/images/locations/dubai-marina.jpg"
   },
 
   "jlt": {
@@ -1111,7 +1113,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "Do you pay cash or bank transfer?", answer: "We can hand you physical cash immediately or send an instant direct bank transfer to your UAE account." }
     ],
     relatedLocations: ["dubai-marina", "al-barsha", "dubai-silicon-oasis", "downtown-dubai"],
-    topModels: ["iphone-16", "iphone-pro-max", "samsung-s24", "macbook-air", "ipad-pro", "apple-watch"]
+    topModels: ["iphone-16", "iphone-pro-max", "samsung-s24", "macbook-air", "ipad-pro", "apple-watch"],
+    heroImage: "/images/locations/jlt.jpg"
   },
 
   "downtown-dubai": {
@@ -1132,7 +1135,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "Do you buy sealed luxury devices like iPhone Pro Max or Fold in Downtown?", answer: "Yes, we specialize in high-end flagships and offer the highest cash rates in Dubai." }
     ],
     relatedLocations: ["business-bay", "dubai-marina", "jumeirah", "deira"],
-    topModels: ["iphone-pro-max", "iphone-16", "samsung-fold", "macbook-pro", "apple-watch-ultra", "ipad-pro"]
+    topModels: ["iphone-pro-max", "iphone-16", "samsung-fold", "macbook-pro", "apple-watch-ultra", "ipad-pro"],
+    heroImage: "/images/locations/downtown-dubai.jpg"
   },
 
   "business-bay": {
@@ -1153,7 +1157,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "Do you buy laptops and corporate MacBooks in Business Bay?", answer: "Yes, we buy MacBooks, Windows laptops, and phones from individual professionals as well as company fleets." }
     ],
     relatedLocations: ["downtown-dubai", "dubai-marina", "jumeirah", "bur-dubai"],
-    topModels: ["iphone-pro-max", "iphone-16", "macbook-pro", "samsung-s25", "ipad-pro"]
+    topModels: ["iphone-pro-max", "iphone-16", "macbook-pro", "samsung-s25", "ipad-pro"],
+    heroImage: "/images/locations/business-bay.jpg"
   },
 
   "deira": {
@@ -1174,7 +1179,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "Do you buy broken or old phones in Deira?", answer: "Yes, we purchase used, cracked, broken, and older model smartphones throughout Deira." }
     ],
     relatedLocations: ["bur-dubai", "downtown-dubai", "dubai-silicon-oasis", "al-barsha"],
-    topModels: ["iphone-15", "iphone-14", "samsung-s24", "iphone-13", "samsung-flip"]
+    topModels: ["iphone-15", "iphone-14", "samsung-s24", "iphone-13", "samsung-flip"],
+    heroImage: "/images/locations/deira.jpg"
   },
 
   "bur-dubai": {
@@ -1195,7 +1201,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "What brands do you buy in Bur Dubai?", answer: "We buy Apple, Samsung, Google Pixel, Xiaomi, OnePlus, Huawei, as well as laptops and tablets." }
     ],
     relatedLocations: ["deira", "downtown-dubai", "business-bay", "jumeirah"],
-    topModels: ["iphone-15", "iphone-14", "samsung-s24", "iphone-13", "macbook-air"]
+    topModels: ["iphone-15", "iphone-14", "samsung-s24", "iphone-13", "macbook-air"],
+    heroImage: "/images/locations/bur-dubai.jpg"
   },
 
   "jumeirah": {
@@ -1216,7 +1223,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "Can I sell multiple family devices in one go?", answer: "Certainly! We frequently buy families' combined old iPhones, iPads, and MacBooks in a single visit." }
     ],
     relatedLocations: ["downtown-dubai", "dubai-marina", "business-bay", "al-barsha"],
-    topModels: ["iphone-pro-max", "iphone-16", "macbook-pro", "ipad-pro", "apple-watch-ultra"]
+    topModels: ["iphone-pro-max", "iphone-16", "macbook-pro", "ipad-pro", "apple-watch-ultra"],
+    heroImage: "/images/locations/jumeirah.jpg"
   },
 
   "al-barsha": {
@@ -1237,7 +1245,8 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "Do you buy laptops and tablets in Al Barsha as well?", answer: "Yes, we purchase all MacBooks, iPads, and Windows gaming laptops." }
     ],
     relatedLocations: ["dubai-marina", "jlt", "downtown-dubai", "dubai-silicon-oasis"],
-    topModels: ["iphone-16", "iphone-pro-max", "samsung-s24", "macbook-air", "apple-watch"]
+    topModels: ["iphone-16", "iphone-pro-max", "samsung-s24", "macbook-air", "apple-watch"],
+    heroImage: "/images/locations/al-barsha.jpg"
   },
 
   "dubai-silicon-oasis": {
@@ -1258,7 +1267,30 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
       { question: "Can you meet at Silicon Central Mall?", answer: "Yes! We can meet you at Silicon Central, in your residential lobby, or at your villa gate." }
     ],
     relatedLocations: ["al-barsha", "deira", "bur-dubai", "downtown-dubai"],
-    topModels: ["iphone-16", "iphone-15", "samsung-s24", "macbook-air", "google-pixel", "ipad-air"]
+    topModels: ["iphone-16", "iphone-15", "samsung-s24", "macbook-air", "google-pixel", "ipad-air"],
+    heroImage: "/images/locations/dubai-silicon-oasis.jpg"
+  },
+
+  "palm-jumeirah": {
+    slug: "palm-jumeirah",
+    locationName: "Palm Jumeirah",
+    title: "Sell Phone in Palm Jumeirah | Instant Luxury Buyback | SellPhoneCash",
+    metaDescription: "Sell your phone in Palm Jumeirah. White-glove doorstep collection to your villa or apartment on the Crescent & Fronds. Top cash for iPhone, Samsung, MacBooks.",
+    h1: "Sell Your Phone in Palm Jumeirah for Instant Cash",
+    subtitle: "Ultra-luxury device buyback service across Palm Jumeirah Fronds, Crescent, and Nakheel Mall residences. Immediate cash payment on the spot.",
+    targetKeywords: ["sell phone palm jumeirah", "iphone buyback palm jumeirah", "luxury phone buyer dubai", "cash for phone nakheel mall", "mobile buyer the crescent"],
+    pickupSpeed: "45 - 60 Minutes",
+    keyLandmarks: ["Atlantis The Royal", "Nakheel Mall", "The Pointe", "Golden Mile", "Palm Tower", "Crescent Boardwalk"],
+    coverageDescription: "We provide discreet private villa gate and luxury apartment lobby collections across Palm Jumeirah. Our courier specialists carry official credentials and navigate security checkpoints effortlessly.",
+    neighborhoodsServed: ["The Crescent", "The Fronds (A to P)", "Golden Mile", "Shoreline Apartments", "Marina Residences", "Bluewaters Border"],
+    serviceHighlights: ["White-glove private villa collection", "Discreet & high-security service", "Top market payout for luxury devices", "Instant cash or wire transfer"],
+    faqs: [
+      { question: "Can you pick up from private villas on the Fronds in Palm Jumeirah?", answer: "Yes! Our dispatch specialists regularly visit private villas on Fronds A through P and provide discreet service." },
+      { question: "Do you meet at Nakheel Mall or Atlantis?", answer: "Yes, we can meet you at Nakheel Mall, Golden Mile Galleria, or directly in your residence." }
+    ],
+    relatedLocations: ["dubai-marina", "jumeirah", "downtown-dubai", "business-bay"],
+    topModels: ["iphone-pro-max", "iphone-16", "samsung-fold", "macbook-pro", "apple-watch-ultra"],
+    heroImage: "/images/locations/palm-jumeirah.jpg"
   }
 };
 
@@ -1441,7 +1473,8 @@ export function resolveLocationPage(rawSlug: string): LocationPageData {
       { question: `Do I have to pay for courier pickup in ${formatted}?`, answer: `No, doorstep collection anywhere in ${formatted} is 100% free with zero obligation.` }
     ],
     relatedLocations: ["dubai-marina", "downtown-dubai", "business-bay", "jlt"],
-    topModels: ["iphone-16", "iphone-pro-max", "samsung-s24", "macbook-pro"]
+    topModels: ["iphone-16", "iphone-pro-max", "samsung-s24", "macbook-pro"],
+    heroImage: "/images/dubai-hero-phones.jpg"
   };
 }
 

@@ -159,6 +159,7 @@ export type SeoPageConfigType = {
   customH1?: string;
   customSubtitle?: string;
   customHeroImage?: string;
+  heroImage?: string;
   customQuoteBadge?: string;
   customQuotePrice?: number;
   featuredProducts?: ProductType[];

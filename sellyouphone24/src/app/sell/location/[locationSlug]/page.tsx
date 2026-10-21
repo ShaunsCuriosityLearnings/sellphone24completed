@@ -177,6 +177,7 @@ export default async function LocationPage({ params }: Props) {
         page={page}
         customH1={pageOverride?.customH1}
         customSubtitle={pageOverride?.customSubtitle}
+        customHeroImage={pageOverride?.heroImage || page.heroImage}
         categories={allCategories}
         brands={allBrands}
         products={allProducts}

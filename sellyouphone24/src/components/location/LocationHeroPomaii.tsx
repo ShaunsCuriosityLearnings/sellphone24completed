@@ -24,6 +24,7 @@ interface LocationHeroPomaiiProps {
   page: LocationPageData;
   customH1?: string;
   customSubtitle?: string;
+  customHeroImage?: string;
   categories?: CategoryType[];
   brands?: BrandType[];
   products?: ProductType[];
@@ -54,11 +55,19 @@ export default function LocationHeroPomaii({
   page, 
   customH1, 
   customSubtitle,
+  customHeroImage,
   categories = DEFAULT_CATEGORIES,
   brands = [],
   products = []
 }: LocationHeroPomaiiProps) {
   const activeCategories = categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+
+  const defaultHeroFallback = "/images/dubai-hero-phones.jpg";
+  const [imgSrc, setImgSrc] = useState<string>(customHeroImage || page.heroImage || defaultHeroFallback);
+
+  React.useEffect(() => {
+    setImgSrc(customHeroImage || page.heroImage || defaultHeroFallback);
+  }, [customHeroImage, page.heroImage]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(activeCategories[0]?.slug || "smartphones");
   const [selectedBrand, setSelectedBrand] = useState<string>("all");
@@ -147,10 +156,11 @@ export default function LocationHeroPomaii({
         {/* Background Scenic Cityscape / Landscape Photography */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/dubai-hero-phones.jpg"
+            src={imgSrc}
             alt={`Sell Your Phone in ${page.locationName}`}
             fill
             priority
+            onError={() => setImgSrc(defaultHeroFallback)}
             className="object-cover object-center scale-105 transition-transform duration-1000 ease-out"
           />
           {/* Subtle warm sunlight & depth gradients */}
