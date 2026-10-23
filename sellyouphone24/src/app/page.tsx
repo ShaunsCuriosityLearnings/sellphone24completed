@@ -3,6 +3,7 @@ import ServicesGrid from "@/components/ServicesGrid";
 import ProductList from "@/components/ProductList";
 import TrustStatsBar from "@/components/TrustStatsBar";
 import FrontpageSellSection from "@/components/FrontpageSellSection";
+import ProcessVideosSection from "@/components/ProcessVideosSection";
 import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck, Zap } from "lucide-react";
 
@@ -85,7 +86,10 @@ export default function Home() {
       {/* 6. REFERENCE DESIGN HOME PAGE SECTION */}
       <FrontpageSellSection />
 
-      {/* 7. GREEN RECYCLING CORNER & STATISTICS */}
+      {/* 7. REAL DOORSTEP PROCESS VIDEOS SHOWCASE */}
+      <ProcessVideosSection />
+
+      {/* 8. GREEN RECYCLING CORNER & STATISTICS */}
       <section className="bg-slate-900 rounded-2xl md:rounded-3xl text-white p-6 sm:p-8 md:p-10 shadow-xl border border-slate-800 relative overflow-hidden w-full">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-500/10 via-slate-900 to-slate-900" />
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 items-center w-full">

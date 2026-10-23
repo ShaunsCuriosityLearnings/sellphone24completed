@@ -1,4 +1,5 @@
 import { Phone, Mail, MapPin, Clock, Send } from "lucide-react";
+import ProcessVideosSection from "@/components/ProcessVideosSection";
 
 export const metadata = {
   title: "Contact Us | SellPhoneCash",
@@ -143,6 +144,13 @@ const ContactPage = () => {
         </div>
 
       </div>
+
+      {/* Real Doorstep Process Videos */}
+      <ProcessVideosSection
+        title="See Our Doorstep Pickup Process in Action"
+        subtitle="Unsure how doorstep collection works? Watch our couriers and valuation experts deliver cash right to your door across Dubai & the UAE."
+        badge="Video Walkthrough • Doorstep In Real Life"
+      />
 
     </div>
   );

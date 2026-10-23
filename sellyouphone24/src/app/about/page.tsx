@@ -5,6 +5,7 @@ import { Recycle, ShieldCheck, Award, ArrowRight, Star, ChevronLeft, ChevronRigh
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { TestimonialType } from "@/types";
+import ProcessVideosSection from "@/components/ProcessVideosSection";
 
 const fallbackReviews: TestimonialType[] = [
   {
@@ -279,6 +280,13 @@ const AboutPage = () => {
         </div>
 
       </div>
+
+      {/* Real Doorstep Process Videos */}
+      <ProcessVideosSection
+        title="Watch Our Sustainable Trade-In Process in Action"
+        subtitle="See firsthand how our doorstep pickup, transparent instant device diagnostics, and direct cash payouts work in real time across the UAE."
+        badge="Sustainability & Process • Real Video Proof"
+      />
 
       {/* FAQ shortcut CTA */}
       <div className="text-center pt-8 border-t border-slate-100 space-y-4">
