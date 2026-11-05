@@ -161,7 +161,10 @@ export default function ShippingForm({
         quantity: item.quantity || 1,
       }));
 
-      const totalPayout = cart.reduce((acc, item) => acc + item.calculatedPrice * (item.quantity || 1), 0);
+      const totalPayout = cart.reduce(
+        (acc, item) => acc + (Number(item.calculatedPrice) || Number(item.basePrice) || 0) * (Number(item.quantity) || 1),
+        0
+      );
 
       const orderData = {
         customerDetails: {

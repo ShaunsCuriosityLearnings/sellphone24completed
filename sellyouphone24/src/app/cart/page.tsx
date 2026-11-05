@@ -35,19 +35,35 @@ const steps = [
   },
 ];
 
+const getDeviceImage = (img: any) => {
+  if (!img) return "/products/iphone-pro-max.jpg";
+  if (typeof img === "string") return img.trim() || "/products/iphone-pro-max.jpg";
+  if (typeof img === "object") {
+    return img.frontView || img.main || img.url || "/products/iphone-pro-max.jpg";
+  }
+  return "/products/iphone-pro-max.jpg";
+};
+
 const CartCheckoutContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const [mounted, setMounted] = useState(false);
   const [completedOrder, setCompletedOrder] = useState<any>(null);
   const [showWhyPrice, setShowWhyPrice] = useState<boolean>(false);
   
   const activeStep = parseInt(searchParams.get("step") || "1");
-  const { cart, clearCart } = useCartStore();
+  const { cart, clearCart, hasHydrated } = useCartStore();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const activeItem = cart[0] || null;
 
-  const subtotal = activeItem ? activeItem.calculatedPrice * (activeItem.quantity || 1) : 0;
+  const subtotal = activeItem
+    ? (Number(activeItem.calculatedPrice) || Number(activeItem.basePrice) || 0) * (activeItem.quantity || 1)
+    : 0;
 
   const handleStepChange = (step: number) => {
     router.push(`/cart?step=${step}`, {
@@ -67,7 +83,7 @@ const CartCheckoutContent = () => {
         `📅 *Pickup Date:* ${data.shippingForm?.pickupDate || ""}\n` +
         `⏰ *Time Slot:* ${data.shippingForm?.pickupTime || ""}\n\n` +
         `📱 *Device:* ${data.item?.name || "Device"} (${data.item?.selectedStorage || ""}, ${data.item?.selectedColor || ""}, ${data.item?.selectedCondition || ""})\n` +
-        `💰 *Estimated Evaluation:* AED ${data.totalPayout?.toLocaleString() || 0}\n` +
+        `💰 *Estimated Evaluation:* AED ${Number(data.totalPayout || 0).toLocaleString()}\n` +
         `💵 *Payment Method:* Cash on Doorstep Collection`
       );
       window.open(`https://wa.me/971555549817?text=${waMsg}`, "_blank");
@@ -83,6 +99,14 @@ const CartCheckoutContent = () => {
     // Automatically launch WhatsApp with prefilled order alert to 0555549817 (+971555549817)
     triggerAutoWhatsApp(data);
   };
+
+  if (!mounted) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   // SUCCESS STEP 2 RENDER
   if (activeStep === 2) {
@@ -109,8 +133,8 @@ const CartCheckoutContent = () => {
                 <div className="flex gap-4 items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white border border-slate-100 flex-shrink-0 flex items-center justify-center p-2">
                     <Image
-                      src={completedOrder.item.images?.frontView || "/products/iphone-pro-max.jpg"}
-                      alt={completedOrder.item.name}
+                      src={getDeviceImage(completedOrder.item.images)}
+                      alt={completedOrder.item.name || "Device"}
                       fill
                       className="object-contain p-2"
                     />
@@ -142,9 +166,14 @@ const CartCheckoutContent = () => {
                   <Clock size={14} className="text-emerald-500" />
                   <span><strong>Time Slot:</strong> {completedOrder.shippingForm?.pickupTime}</span>
                 </div>
-                <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-100">
-                  <span className="font-bold text-sm text-slate-800">Estimated Evaluation:</span>
-                  <strong className="text-emerald-600 text-xl font-black">AED {completedOrder.totalPayout?.toLocaleString()}</strong>
+                <div className="pt-4 mt-2 border-t border-slate-100 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-slate-800">Estimated Cash Value:</span>
+                    <strong className="text-emerald-700 text-xl font-black">AED {completedOrder.totalPayout?.toLocaleString()}</strong>
+                  </div>
+                  <p className="text-[11px] text-slate-500 text-right">
+                    Final cash offer confirmed after device inspection.
+                  </p>
                 </div>
               </div>
             </>
@@ -239,7 +268,7 @@ const CartCheckoutContent = () => {
               <h2 className="text-base font-extrabold text-slate-900">Your Device</h2>
               {activeItem && (
                 <Link
-                  href={`/products/${activeItem.id}`}
+                  href={`/products/${activeItem.id || (activeItem as any)._id || ""}`}
                   className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
                 >
                   Edit
@@ -254,8 +283,8 @@ const CartCheckoutContent = () => {
                 <div className="flex gap-4 items-center bg-slate-50/70 p-4 rounded-2xl border border-slate-100">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white border border-slate-100 flex-shrink-0 flex items-center justify-center p-2">
                     <Image
-                      src={activeItem.images.frontView}
-                      alt={activeItem.name}
+                      src={getDeviceImage(activeItem.images)}
+                      alt={activeItem.name || "Device"}
                       fill
                       className="object-contain p-1"
                     />
@@ -263,29 +292,36 @@ const CartCheckoutContent = () => {
                   <div className="space-y-1">
                     <h3 className="font-extrabold text-slate-900 text-sm">{activeItem.name}</h3>
                     <p className="text-[11px] font-medium text-slate-500">
-                      {activeItem.selectedStorage} • {activeItem.selectedColor} • {activeItem.selectedCondition}
+                      {activeItem.selectedStorage || "Standard"} • {activeItem.selectedColor || "Standard"} • {activeItem.selectedCondition || "Good"}
                     </p>
                     <span className="inline-block bg-emerald-100 text-emerald-700 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
-                      {activeItem.selectedCondition}
+                      {activeItem.selectedCondition || "Good"}
                     </span>
                   </div>
                 </div>
 
-                {/* You'll Receive Big Valuation Banner */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-2xl p-5 text-center space-y-1">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">You&apos;ll Receive</p>
-                  <h2 className="text-3xl md:text-4xl font-black text-emerald-600">
+                {/* Estimated Cash Value Valuation Banner */}
+                <div className="bg-[#edf8f2] border border-emerald-100 rounded-2xl md:rounded-3xl p-5 sm:p-6 text-center space-y-2.5">
+                  <p className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-800">
+                    ESTIMATED CASH VALUE
+                  </p>
+                  <h2 className="text-3xl sm:text-4xl md:text-[38px] font-black text-emerald-700 tracking-tight">
                     AED {subtotal.toLocaleString()}
                   </h2>
-                  <span className="inline-block bg-emerald-500 text-slate-950 font-extrabold text-[10px] px-3 py-1 rounded-full uppercase shadow-xs">
-                    Paid in Cash Today
-                  </span>
+                  <div>
+                    <span className="inline-block bg-[#d4f4e2] text-emerald-800 border border-emerald-200/60 font-semibold text-xs px-3.5 py-1 rounded-full">
+                      Estimated Payout
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed pt-1 max-w-xs mx-auto">
+                    Final cash offer confirmed after device inspection.
+                  </p>
                 </div>
 
                 {/* Fee Breakdown */}
                 <div className="space-y-3 pt-2 text-xs">
                   <div className="flex justify-between text-slate-600 font-semibold">
-                    <span>Device Payout Value</span>
+                    <span>Estimated Cash Value</span>
                     <span className="font-extrabold text-slate-900">AED {subtotal.toLocaleString()}</span>
                   </div>
 
