@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import BuyProduct from "../models/BuyProduct.js";
 import BuyBrand from "../models/BuyBrand.js";
+import Brand from "../models/Brand.js";
 
 // @desc    Get all buy products with filtering
 // @route   GET /api/buy-products
