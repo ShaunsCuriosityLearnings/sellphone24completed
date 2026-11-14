@@ -5,6 +5,7 @@ import {
   createBuyProduct,
   updateBuyProduct,
   deleteBuyProduct,
+  getBuyProductInventory,
 } from "../controllers/buyProductController.js";
 import { requireAdmin } from "../middlewares/authMiddleware.js";
 import upload from "../middlewares/upload.js";
@@ -28,5 +29,7 @@ router.route("/:id")
   .get(getBuyProductById)
   .put(requireAdmin, uploadFields, updateBuyProduct)
   .delete(requireAdmin, deleteBuyProduct);
+
+router.get("/:id/inventory", requireAdmin, getBuyProductInventory);
 
 export default router;

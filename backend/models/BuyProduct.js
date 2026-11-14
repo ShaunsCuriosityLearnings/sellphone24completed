@@ -77,6 +77,21 @@ const buyProductSchema = new mongoose.Schema({
     type: Number,
     default: 1,
   },
+  inventoryUnits: [
+    {
+      internalId: { type: String, required: true },
+      srNo: { type: String },
+      serialNumber: { type: String, select: false },
+      imei: { type: String, select: false },
+      batteryHealth: { type: String },
+      condition: { type: String },
+      storage: { type: String },
+      color: { type: String },
+      accessories: [{ type: String }],
+      status: { type: String, enum: ["in_stock", "reserved", "sold"], default: "in_stock" },
+      dateAdded: { type: String },
+    }
+  ],
   status: {
     type: String,
     enum: ["draft", "published", "unavailable"],

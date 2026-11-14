@@ -174,6 +174,18 @@ export type SeoPageConfigType = {
 export type BuyProductConditionType = "Pristine (Like New)" | "Grade A (Excellent)" | "Grade B (Good Value)";
 export type BuyProductStatusType = "draft" | "published" | "unavailable";
 
+export type BuyInventoryUnitType = {
+  internalId: string;
+  srNo?: string;
+  batteryHealth?: string;
+  condition?: string;
+  storage?: string;
+  color?: string;
+  accessories?: string[];
+  status?: "in_stock" | "reserved" | "sold";
+  dateAdded?: string;
+};
+
 export type BuyProductType = {
   id: string | number;
   _id?: string;
@@ -197,6 +209,7 @@ export type BuyProductType = {
   description?: string;
   features: string[];
   stock: number;
+  inventoryUnits?: BuyInventoryUnitType[];
   isAvailable: boolean;
   isFeatured?: boolean;
   rating?: number;

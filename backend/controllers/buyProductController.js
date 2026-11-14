@@ -349,3 +349,19 @@ export const deleteBuyProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// @desc    Get physical inventory units for a buy product (including protected IMEIs/serials)
+// @route   GET /api/buy-products/:id/inventory
+// @access  Admin Only
+export const getBuyProductInventory = async (req, res) => {
+  try {
+    const product = await BuyProduct.findById(req.params.id)
+      .select("+inventoryUnits.serialNumber +inventoryUnits.imei");
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    res.status(200).json(product.inventoryUnits || []);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
