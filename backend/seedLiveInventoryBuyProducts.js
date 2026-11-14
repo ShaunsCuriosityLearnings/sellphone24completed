@@ -1,4 +1,25 @@
 import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Intelligently find backend/.env regardless of execution working directory
+const envPaths = [
+  path.resolve(__dirname, ".env"),
+  path.resolve(__dirname, "../backend/.env"),
+  path.resolve(process.cwd(), "backend/.env"),
+  path.resolve(process.cwd(), ".env"),
+];
+
+for (const envPath of envPaths) {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+    break;
+  }
+}
 dotenv.config();
 
 import mongoose from "mongoose";
