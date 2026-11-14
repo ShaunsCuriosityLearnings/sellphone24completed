@@ -1992,6 +1992,4 @@ async function seedLiveInventory() {
   }
 }
 
-if (process.argv[1]?.endsWith("seedLiveInventoryBuyProducts.js")) {
-  seedLiveInventory();
-}
+seedLiveInventory();
