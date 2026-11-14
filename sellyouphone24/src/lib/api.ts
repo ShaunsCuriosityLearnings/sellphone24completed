@@ -1,4 +1,4 @@
-import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType, SeoPageConfigType, BuyProductType, BuyOrderType } from "@/types";
+import { CategoryType, BrandType, ProductType, BlogType, CartItemType, TestimonialType, SeoPageConfigType, BuyProductType, BuyOrderType, BuyInventoryUnitType } from "@/types";
 import { products as mockProducts, categories as mockCategories, brands as mockBrands, blogs as mockBlogs } from "@/data/mockData";
 import { mockBuyProducts } from "@/data/mockBuyProducts";
 
@@ -646,6 +646,18 @@ export const api = {
       method: "DELETE",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
+  },
+
+  async getBuyProductInventory(id: string, token?: string): Promise<BuyInventoryUnitType[]> {
+    try {
+      const res = await safeFetch<BuyInventoryUnitType[]>(`${API_BASE}/buy-products/${id}/inventory`, {
+        method: "GET",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }, []);
+      return Array.isArray(res) ? res : [];
+    } catch {
+      return [];
+    }
   },
 
   // --- BUY PHONE ORDERS (CUSTOMER CHECKOUT & ADMIN) ---

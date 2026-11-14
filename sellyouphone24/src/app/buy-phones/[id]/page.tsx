@@ -180,9 +180,11 @@ export default function BuyProductDetailPage() {
             
             {/* Badges */}
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
-              <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-                {product.condition}
-              </span>
+              {product.isConditionVisible !== false ? (
+                <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                  {product.condition}
+                </span>
+              ) : <div />}
               {savings && savings > 0 && (
                 <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-500 text-slate-950 shadow-2xs">
                   Save AED {savings.toLocaleString()}

@@ -1184,7 +1184,7 @@ export default function BrandCatalogPage() {
                               {product.title}
                             </Link>
                             <div className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
-                              {product.condition} • {product.selectedStorage || product.storages?.[0]?.size || "128GB"}
+                              {product.isConditionVisible !== false ? `${product.condition} • ` : ""}{product.selectedStorage || product.storages?.[0]?.size || "128GB"}
                             </div>
                           </div>
 
@@ -1293,7 +1293,7 @@ export default function BrandCatalogPage() {
                         </Link>
 
                         <div className="text-[11px] text-slate-400 font-medium truncate">
-                          {product.category || "Phones"} • {product.condition || "Like New"}
+                          {product.category || "Phones"}{product.isConditionVisible !== false ? ` • ${product.condition || "Like New"}` : ""}
                         </div>
 
                         {/* Pricing Row */}

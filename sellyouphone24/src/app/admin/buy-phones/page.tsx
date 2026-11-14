@@ -133,6 +133,8 @@ export default function BuyPhonesAdminPage() {
   const [price, setPrice] = useState<number>(2499);
   const [originalPrice, setOriginalPrice] = useState<number>(3499);
   const [condition, setCondition] = useState<BuyProductConditionType>("Pristine (Like New)");
+  const [isConditionVisible, setIsConditionVisible] = useState<boolean>(true);
+  const [serialNumberInput, setSerialNumberInput] = useState<string>("");
   const [status, setStatus] = useState<BuyProductStatusType>("published");
   const [batteryHealth, setBatteryHealth] = useState("98% (Original OEM)");
   const [warranty, setWarranty] = useState("12 Months Comprehensive Store Warranty");
@@ -434,6 +436,8 @@ export default function BuyPhonesAdminPage() {
     setPrice(2499);
     setOriginalPrice(3499);
     setCondition("Pristine (Like New)");
+    setIsConditionVisible(true);
+    setSerialNumberInput("");
     setStatus("published");
     setBatteryHealth("98% (Original OEM)");
     setWarranty("12 Months Comprehensive Store Warranty");
@@ -467,6 +471,28 @@ export default function BuyPhonesAdminPage() {
     setPrice(item.price);
     setOriginalPrice(item.originalPrice || Math.round(item.price * 1.3));
     setCondition(item.condition);
+    setIsConditionVisible(item.isConditionVisible !== false);
+    const existingSn = (item.inventoryUnits || [])
+      .map((u) => u.serialNumber || u.imei)
+      .filter(Boolean);
+    if (existingSn.length > 0) {
+      setSerialNumberInput(existingSn.join(", "));
+    } else {
+      setSerialNumberInput("");
+      const pId = String(item.id || item._id);
+      if (pId) {
+        getToken().then((token) => {
+          api.getBuyProductInventory(pId, token || undefined).then((units) => {
+            if (units && units.length > 0) {
+              const fetchedSerials = units.map((u) => u.serialNumber || u.imei).filter(Boolean);
+              if (fetchedSerials.length > 0) {
+                setSerialNumberInput(fetchedSerials.join(", "));
+              }
+            }
+          }).catch(() => {});
+        }).catch(() => {});
+      }
+    }
     setStatus(item.status || "published");
     setBatteryHealth(item.batteryHealth || "95%+");
     setWarranty(item.warranty || "12 Months Comprehensive Store Warranty");
@@ -512,6 +538,10 @@ export default function BuyPhonesAdminPage() {
       fd.append("price", String(price));
       fd.append("originalPrice", String(originalPrice));
       fd.append("condition", condition);
+      fd.append("isConditionVisible", String(isConditionVisible));
+      if (serialNumberInput.trim()) {
+        fd.append("serialNumbers", serialNumberInput.trim());
+      }
       fd.append("status", status);
       fd.append("batteryHealth", batteryHealth);
       fd.append("warranty", warranty);
@@ -2322,6 +2352,38 @@ export default function BuyPhonesAdminPage() {
                     <option value="Grade A (Excellent)">💎 Grade A (Excellent - Micro Signs)</option>
                     <option value="Grade B (Good Value)">🏷️ Grade B (Good Value - Minor Wear)</option>
                   </select>
+
+                  {/* Condition Visibility Toggle */}
+                  <div className="mt-2 p-2 bg-slate-50 border border-slate-200/90 rounded-xl">
+                    <div className="text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                      <span>Condition Badge Display</span>
+                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${isConditionVisible ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}`}>
+                        {isConditionVisible ? 'Active' : 'Disabled'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-xs">
+                      <label className="flex items-center gap-1.5 text-slate-700 cursor-pointer text-[11px] font-medium hover:text-emerald-700">
+                        <input
+                          type="radio"
+                          name="conditionVisibility"
+                          checked={isConditionVisible}
+                          onChange={() => setIsConditionVisible(true)}
+                          className="text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                        <span>Active — Show Condition Badge</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 text-slate-700 cursor-pointer text-[11px] font-medium hover:text-rose-700">
+                        <input
+                          type="radio"
+                          name="conditionVisibility"
+                          checked={!isConditionVisible}
+                          onChange={() => setIsConditionVisible(false)}
+                          className="text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                        <span>Disabled — Hide Condition Badge</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -2356,6 +2418,28 @@ export default function BuyPhonesAdminPage() {
                     onChange={(e) => setStock(Number(e.target.value))}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500"
                   />
+                </div>
+
+                {/* Device Serial Number / IMEI Field */}
+                <div className="sm:col-span-2 bg-slate-50 border border-slate-200 rounded-xl p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-slate-800">
+                      Device Serial Number / IMEI
+                    </label>
+                    <span className="text-[10px] text-slate-500 font-medium">
+                      🔒 Strictly Private / Internal — never exposed to public storefront
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={serialNumberInput}
+                    onChange={(e) => setSerialNumberInput(e.target.value)}
+                    placeholder="e.g. F2LLN2340P9M (or comma-separated if multiple physical inventory units)"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-900 focus:ring-2 focus:ring-emerald-500 font-mono"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    Enter physical serial numbers or IMEIs for this listing. Uniqueness is automatically verified against all inventory records upon save.
+                  </p>
                 </div>
               </div>
 

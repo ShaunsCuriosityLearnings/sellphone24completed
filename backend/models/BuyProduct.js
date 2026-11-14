@@ -113,6 +113,10 @@ const buyProductSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  isConditionVisible: {
+    type: Boolean,
+    default: true,
+  },
   isFeatured: {
     type: Boolean,
     default: false,

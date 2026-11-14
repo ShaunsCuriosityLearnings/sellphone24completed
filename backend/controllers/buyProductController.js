@@ -91,7 +91,16 @@ export const getBuyProducts = async (req, res) => {
       .populate("originalProductRef")
       .sort(sortOptions);
 
-    res.status(200).json(products);
+    // Strict security sanitization: ensure no serialNumber or imei is ever sent to public callers
+    const sanitized = products.map((p) => {
+      const pObj = p.toObject ? p.toObject() : { ...p };
+      if (Array.isArray(pObj.inventoryUnits)) {
+        pObj.inventoryUnits = pObj.inventoryUnits.map(({ serialNumber, imei, ...safeUnit }) => safeUnit);
+      }
+      return pObj;
+    });
+
+    res.status(200).json(sanitized);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -139,7 +148,14 @@ export const getBuyProductById = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json(product);
+
+    // Strict security sanitization: ensure no serialNumber or imei is ever sent to public callers
+    const pObj = product.toObject ? product.toObject() : { ...product };
+    if (Array.isArray(pObj.inventoryUnits)) {
+      pObj.inventoryUnits = pObj.inventoryUnits.map(({ serialNumber, imei, ...safeUnit }) => safeUnit);
+    }
+
+    res.status(200).json(pObj);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -198,6 +214,49 @@ export const createBuyProduct = async (req, res) => {
     if (productData.price !== undefined) productData.price = Number(productData.price);
     if (productData.originalPrice !== undefined) productData.originalPrice = Number(productData.originalPrice);
     if (productData.stock !== undefined) productData.stock = Number(productData.stock);
+
+    // Condition visibility toggle (defaults to true)
+    if (productData.isConditionVisible !== undefined) {
+      productData.isConditionVisible = productData.isConditionVisible === true || productData.isConditionVisible === "true";
+    }
+
+    // Serial numbers management & uniqueness check
+    let serialList = [];
+    if (productData.serialNumbers) {
+      if (typeof productData.serialNumbers === "string") {
+        serialList = productData.serialNumbers.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean);
+      } else if (Array.isArray(productData.serialNumbers)) {
+        serialList = productData.serialNumbers.map((s) => String(s).trim()).filter(Boolean);
+      }
+    } else if (productData.serialNumber) {
+      serialList = [String(productData.serialNumber).trim()].filter(Boolean);
+    }
+
+    if (serialList.length > 0) {
+      for (const sn of serialList) {
+        const duplicate = await BuyProduct.findOne({
+          "inventoryUnits.serialNumber": sn,
+        }).select("_id title");
+        if (duplicate) {
+          return res.status(400).json({
+            message: `Serial Number / IMEI "${sn}" is already assigned to listing "${duplicate.title}"! Duplicate serial numbers are not allowed.`
+          });
+        }
+      }
+
+      productData.inventoryUnits = serialList.map((sn, idx) => ({
+        internalId: `INV-${Date.now().toString().slice(-4)}-${idx + 1}`,
+        srNo: String(idx + 1),
+        serialNumber: sn,
+        imei: sn,
+        batteryHealth: productData.batteryHealth || "100%",
+        condition: productData.condition || "Pristine (Like New)",
+        storage: productData.selectedStorage || productData.storages?.[0]?.size || "Standard",
+        color: productData.colors?.[0] || "Standard",
+        status: "in_stock",
+        dateAdded: new Date().toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: '2-digit' }),
+      }));
+    }
 
     if (productData.title && !productData.slug) {
       productData.slug = productData.title
@@ -295,6 +354,61 @@ export const updateBuyProduct = async (req, res) => {
     if (updateData.price !== undefined) updateData.price = Number(updateData.price);
     if (updateData.originalPrice !== undefined) updateData.originalPrice = Number(updateData.originalPrice);
     if (updateData.stock !== undefined) updateData.stock = Number(updateData.stock);
+
+    // Condition visibility toggle
+    if (updateData.isConditionVisible !== undefined) {
+      updateData.isConditionVisible = updateData.isConditionVisible === true || updateData.isConditionVisible === "true";
+    }
+
+    // Serial numbers management & uniqueness check
+    let serialList = null;
+    if (updateData.serialNumbers !== undefined) {
+      if (typeof updateData.serialNumbers === "string") {
+        serialList = updateData.serialNumbers.split(/[,;\n]+/).map((s) => s.trim()).filter(Boolean);
+      } else if (Array.isArray(updateData.serialNumbers)) {
+        serialList = updateData.serialNumbers.map((s) => String(s).trim()).filter(Boolean);
+      }
+    } else if (updateData.serialNumber !== undefined) {
+      serialList = [String(updateData.serialNumber).trim()].filter(Boolean);
+    }
+
+    if (serialList !== null && serialList.length > 0) {
+      for (const sn of serialList) {
+        const duplicate = await BuyProduct.findOne({
+          _id: { $ne: id },
+          "inventoryUnits.serialNumber": sn,
+        }).select("_id title");
+        if (duplicate) {
+          return res.status(400).json({
+            message: `Serial Number / IMEI "${sn}" is already assigned to listing "${duplicate.title}"! Duplicate serial numbers are not allowed.`
+          });
+        }
+      }
+
+      const existingUnits = existingProduct.inventoryUnits || [];
+      const updatedUnits = serialList.map((sn, idx) => {
+        const existing = existingUnits[idx] || {};
+        return {
+          internalId: existing.internalId || `INV-${Date.now().toString().slice(-4)}-${idx + 1}`,
+          srNo: existing.srNo || String(idx + 1),
+          serialNumber: sn,
+          imei: sn,
+          batteryHealth: existing.batteryHealth || updateData.batteryHealth || existingProduct.batteryHealth || "100%",
+          condition: existing.condition || updateData.condition || existingProduct.condition || "Pristine (Like New)",
+          storage: existing.storage || updateData.selectedStorage || existingProduct.selectedStorage || "Standard",
+          color: existing.color || (updateData.colors && updateData.colors[0]) || (existingProduct.colors && existingProduct.colors[0]) || "Standard",
+          accessories: existing.accessories || [],
+          status: existing.status || "in_stock",
+          dateAdded: existing.dateAdded || new Date().toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: '2-digit' }),
+        };
+      });
+      if (existingUnits.length > serialList.length) {
+        for (let i = serialList.length; i < existingUnits.length; i++) {
+          updatedUnits.push(existingUnits[i]);
+        }
+      }
+      updateData.inventoryUnits = updatedUnits;
+    }
 
     if (updateData.title && !updateData.slug) {
       updateData.slug = updateData.title

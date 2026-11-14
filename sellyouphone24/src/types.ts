@@ -177,6 +177,8 @@ export type BuyProductStatusType = "draft" | "published" | "unavailable";
 export type BuyInventoryUnitType = {
   internalId: string;
   srNo?: string;
+  serialNumber?: string;
+  imei?: string;
   batteryHealth?: string;
   condition?: string;
   storage?: string;
@@ -200,6 +202,9 @@ export type BuyProductType = {
   price: number;
   originalPrice: number;
   condition: BuyProductConditionType;
+  isConditionVisible?: boolean;
+  serialNumber?: string;
+  serialNumbers?: string | string[];
   batteryHealth?: string;
   warranty?: string;
   storages: StorageType[];

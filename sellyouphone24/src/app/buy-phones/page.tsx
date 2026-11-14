@@ -80,6 +80,41 @@ const ACCESSORIES = [
   },
 ];
 
+function MarqueeBrandItem({
+  brand,
+  onSelectBrand,
+}: {
+  brand: { id: string; name: string; logo?: string; slug?: string };
+  onSelectBrand: (brandName: string) => void;
+}) {
+  const [imgError, setImgError] = useState(false);
+  const hasValidLogo = !!brand.logo && !imgError;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelectBrand(brand.name)}
+      title={`Browse all certified ${brand.name} devices`}
+      className="group/brand relative flex items-center justify-center px-4 sm:px-6 py-1 transition-all duration-300 cursor-pointer shrink-0 focus:outline-hidden"
+    >
+      {hasValidLogo ? (
+        <div className="h-7 sm:h-8 max-w-[110px] flex items-center justify-center">
+          <img
+            src={brand.logo}
+            alt={brand.name}
+            onError={() => setImgError(true)}
+            className="h-full w-auto max-w-[110px] object-contain filter grayscale opacity-60 group-hover/brand:grayscale-0 group-hover/brand:opacity-100 group-hover/brand:scale-105 transition-all duration-300"
+          />
+        </div>
+      ) : (
+        <span className="text-xs sm:text-sm font-extrabold tracking-wider text-slate-400 group-hover/brand:text-slate-900 group-hover/brand:scale-105 transition-all duration-300 uppercase px-2 py-1">
+          {brand.name}
+        </span>
+      )}
+    </button>
+  );
+}
+
 export default function BuyPhonesPage() {
   const [products, setProducts] = useState<BuyProductType[]>([]);
   const [brandLogosList, setBrandLogosList] = useState(BRAND_LOGOS);
@@ -766,43 +801,28 @@ export default function BuyPhonesPage() {
       </section>
 
       {/* =========================================================================
-          3. MOVING BRAND LOGOS ROW (LOGOS ONLY - NO BACKGROUND CONTAINERS)
+          3. SLEEK HORIZONTAL BRANDS MARQUEE (MINIMAL, ELEGANT, NO BACKGROUND CARDS)
          ========================================================================= */}
-      <section id="brand-marquee-section" className="w-full py-5 sm:py-7 px-2 overflow-hidden relative group">
-        
+      <section id="brand-marquee-section" className="w-full py-2.5 sm:py-3 px-2 overflow-hidden relative group border-y border-slate-100/80 my-2">
         {/* Soft edge gradient fades for seamless infinite scroll */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-r from-[#f8fafc] via-[#f8fafc]/90 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-28 bg-gradient-to-l from-[#f8fafc] via-[#f8fafc]/90 to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-r from-[#f8fafc] to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-20 bg-gradient-to-l from-[#f8fafc] to-transparent z-10 pointer-events-none" />
 
-        <div className="flex items-center overflow-hidden">
-          {/* Moving brand logos track: left to right - PURE LOGOS ONLY (BIG & PROMINENT) */}
-          <div className="flex items-center gap-10 sm:gap-16 md:gap-20 animate-marquee-ltr hover:[animation-play-state:paused] py-3 cursor-pointer">
-            {[...brandLogosList, ...brandLogosList, ...brandLogosList, ...brandLogosList].map((brand, idx) => {
-              const brandSlug = (brand.slug || brand.name).toLowerCase().replace(/[^a-z0-9]+/g, "-");
-              return (
-                <Link
-                  key={`${brand.id || brand.name}-${idx}`}
-                  href={`/buy-phones/brand/${encodeURIComponent(brandSlug)}`}
-                  title={`View all ${brand.name} phones & devices`}
-                  className="group/brand relative flex flex-col items-center justify-center p-2 transition-all duration-300 cursor-pointer shrink-0 min-w-[150px] sm:min-w-[200px] md:min-w-[240px] h-20 sm:h-24 md:h-28 opacity-80 hover:opacity-100 hover:scale-115"
-                >
-                  <div className="relative w-36 sm:w-48 md:w-56 h-14 sm:h-18 md:h-22 flex items-center justify-center">
-                    <Image
-                      src={brand.logo}
-                      alt={brand.name}
-                      fill
-                      className="object-contain transition-transform duration-300"
-                    />
-                  </div>
-                  <span className="text-[10px] font-bold text-emerald-600 opacity-0 group-hover/brand:opacity-100 transition-opacity mt-1">
-                    Explore {brand.name} &rarr;
-                  </span>
-                </Link>
-              );
-            })}
+        <div className="flex items-center overflow-hidden h-10 sm:h-12">
+          {/* Moving brand logos track: sleek ~44-48px height, grayscale with hover color */}
+          <div className="flex items-center gap-6 sm:gap-10 md:gap-12 animate-marquee-ltr hover:[animation-play-state:paused] cursor-pointer">
+            {[...brandLogosList, ...brandLogosList, ...brandLogosList, ...brandLogosList].map((brand, idx) => (
+              <MarqueeBrandItem
+                key={`${brand.id || brand.name}-${idx}`}
+                brand={brand}
+                onSelectBrand={(brandName) => {
+                  setSelectedBrand(brandName);
+                  document.getElementById("featured-phones-section")?.scrollIntoView({ behavior: "smooth" });
+                }}
+              />
+            ))}
           </div>
         </div>
-
       </section>
 
       {/* =========================================================================
@@ -859,9 +879,9 @@ export default function BuyPhonesPage() {
           </div>
         ) : (
           /* ===================================================================
-              PROPER CLEAN CARDS GRID: 2 CARDS IN ONE ROW ON MOBILE, 4 ON DESKTOP
+              RESPONSIVE PRODUCT CARDS GRID: 6 CARDS PER ROW ON DESKTOP
              =================================================================== */
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 sm:gap-2.5 md:gap-3">
             {filteredProducts.map((phone) => {
               const pId = phone.id || (phone as any)._id;
               const conditionBadge = phone.condition?.includes("Pristine")
@@ -877,34 +897,26 @@ export default function BuyPhonesPage() {
               return (
                 <div
                   key={pId}
-                  className="bg-white rounded-2xl border border-slate-200/80 hover:border-emerald-400 p-2.5 sm:p-3.5 shadow-2xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+                  className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 hover:border-emerald-400 p-2 sm:p-2.5 shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
                 >
                   {/* Card Image Area with Subtle Gradient & Floating Badges */}
                   <Link
                     href={`/buy-phones/${pId}`}
-                    className="relative w-full aspect-square bg-gradient-to-b from-slate-50 to-slate-100/60 rounded-xl overflow-hidden flex items-center justify-center p-2 mb-2 group-hover:from-emerald-50/30 group-hover:to-slate-50 transition-colors"
+                    className="relative w-full aspect-square bg-gradient-to-b from-slate-50 to-slate-100/60 rounded-lg sm:rounded-xl overflow-hidden flex items-center justify-center p-1.5 mb-1.5 group-hover:from-emerald-50/30 group-hover:to-slate-50 transition-colors"
                   >
-                    {/* Top Left: Subtle Condition / Savings Badge */}
-                    <div className="absolute top-2 left-2 z-10 pointer-events-none">
+                    {/* Top Left: Badges (Discount & Condition) */}
+                    <div className="absolute top-1.5 left-1.5 z-10 flex flex-col gap-1 pointer-events-none items-start">
                       {savings ? (
-                        <span className="text-[9px] sm:text-[10px] font-black px-1.5 sm:px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 shadow-2xs">
+                        <span className="text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded-full bg-emerald-500 text-slate-950 shadow-2xs">
                           Save AED {savings.toLocaleString()}
                         </span>
-                      ) : (
-                        <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-slate-800 border border-slate-200/80 shadow-2xs">
+                      ) : null}
+                      {phone.isConditionVisible !== false && (
+                        <span className="text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-slate-800 border border-slate-200/80 shadow-2xs">
                           {conditionBadge}
                         </span>
                       )}
                     </div>
-
-                    {/* Top Right: Quick Bag Button */}
-                    <button
-                      onClick={(e) => handleQuickCart(phone, e)}
-                      className="absolute top-2 right-2 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 hover:bg-emerald-500 hover:text-slate-950 text-slate-500 flex items-center justify-center shadow-2xs transition active:scale-90 border border-slate-200/60 cursor-pointer"
-                      title="Add to Shopping Bag"
-                    >
-                      <ShoppingBag size={13} className="sm:w-3.5 sm:h-3.5" />
-                    </button>
 
                     {/* Product Image */}
                     <div className="relative w-full h-full flex items-center justify-center p-1">
@@ -913,44 +925,37 @@ export default function BuyPhonesPage() {
                         alt={phone.title}
                         fill
                         className="object-contain p-1 group-hover:scale-106 transition-transform duration-300 ease-out"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, (max-width: 1280px) 20vw, 16vw"
                       />
-                    </div>
-
-                    {/* Bottom Pill: Battery / Warranty */}
-                    <div className="absolute bottom-1.5 left-2 right-2 text-center pointer-events-none">
-                      <span className="text-[9px] font-semibold text-slate-500 bg-white/90 backdrop-blur-xs px-2 py-0.5 rounded-full border border-slate-200/60 shadow-2xs truncate inline-block max-w-[90%]">
-                        🛡️ 12-Mo Warranty
-                      </span>
                     </div>
                   </Link>
 
                   {/* Product Details */}
                   <div className="space-y-1 flex-1 flex flex-col justify-between">
                     <div>
-                      <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 block">
+                      <span className="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider text-emerald-600 block">
                         {phone.brand}
                       </span>
                       <Link
                         href={`/buy-phones/${pId}`}
-                        className="font-extrabold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-1 block mt-0.5"
+                        className="font-bold text-[11px] sm:text-xs text-slate-900 group-hover:text-emerald-600 transition-colors line-clamp-1 block mt-0.5"
                         title={phone.title}
                       >
                         {phone.title}
                       </Link>
-                      <div className="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate mt-0.5">
-                        {phone.selectedStorage || phone.storages?.[0]?.size || "128GB"} • {phone.condition?.includes("Pristine") ? "Like New" : "Certified"}
+                      <div className="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate mt-0.5">
+                        {phone.selectedStorage || phone.storages?.[0]?.size || "Standard"}
                       </div>
                     </div>
 
                     {/* Pricing and Action Button */}
-                    <div className="pt-2">
-                      <div className="flex items-baseline gap-1.5">
-                        <span className="text-xs sm:text-sm md:text-base font-black text-slate-950">
+                    <div className="pt-1.5">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-xs sm:text-[13px] md:text-sm font-black text-slate-950">
                           AED {phone.price.toLocaleString()}
                         </span>
                         {phone.originalPrice && phone.originalPrice > phone.price && (
-                          <span className="text-[10px] sm:text-xs text-slate-400 line-through">
+                          <span className="text-[9px] sm:text-[10px] text-slate-400 line-through">
                             AED {phone.originalPrice.toLocaleString()}
                           </span>
                         )}
@@ -958,10 +963,10 @@ export default function BuyPhonesPage() {
 
                       <Link
                         href={`/buy-phones/${pId}`}
-                        className="mt-2 w-full py-2 px-2.5 rounded-xl bg-slate-900 group-hover:bg-emerald-500 group-hover:text-slate-950 text-white font-bold text-[11px] sm:text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs text-center cursor-pointer"
+                        className="mt-1.5 w-full py-1.5 px-2 rounded-lg bg-slate-900 group-hover:bg-emerald-500 group-hover:text-slate-950 text-white font-bold text-[10px] sm:text-[11px] transition-colors flex items-center justify-center gap-1 shadow-2xs text-center cursor-pointer"
                       >
                         <span>View Deal</span>
-                        <ArrowRight size={12} />
+                        <ArrowRight size={11} />
                       </Link>
                     </div>
                   </div>
