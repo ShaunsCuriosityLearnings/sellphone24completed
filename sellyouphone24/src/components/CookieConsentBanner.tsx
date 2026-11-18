@@ -13,9 +13,32 @@ export default function CookieConsentBanner() {
   useEffect(() => {
     const prefs = cookieConsent.getPreferences();
     if (!prefs.hasAnswered) {
-      // Delay presentation slightly for smooth UX
-      const timer = setTimeout(() => setIsVisible(true), 800);
-      return () => clearTimeout(timer);
+      const showBanner = () => {
+        setIsVisible(true);
+        cleanup();
+      };
+      const cleanup = () => {
+        window.removeEventListener("scroll", showBanner);
+        window.removeEventListener("click", showBanner);
+        window.removeEventListener("touchstart", showBanner);
+      };
+
+      window.addEventListener("scroll", showBanner, { passive: true, once: true });
+      window.addEventListener("click", showBanner, { passive: true, once: true });
+      window.addEventListener("touchstart", showBanner, { passive: true, once: true });
+
+      const idleTimer = setTimeout(() => {
+        if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+          (window as any).requestIdleCallback(showBanner);
+        } else {
+          showBanner();
+        }
+      }, 4000);
+
+      return () => {
+        cleanup();
+        clearTimeout(idleTimer);
+      };
     }
   }, []);
 

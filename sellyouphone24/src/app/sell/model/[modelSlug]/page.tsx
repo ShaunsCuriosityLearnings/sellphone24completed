@@ -49,8 +49,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { modelSlug } = await params;
   const page = resolveModelPage(modelSlug);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
-  const canonicalUrl = `${baseUrl}/sell/model/${page.slug}`;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
+  const canonicalUrl = `${baseUrl}/sell/model/${modelSlug}`;
 
   return {
     title: page.title,
@@ -126,7 +126,7 @@ export default async function ModelPage({ params }: Props) {
     console.warn("Could not load products for model page:", err);
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
 
   // Schema.org Product / Buyback Offer JSON-LD
   const productJsonLd = {

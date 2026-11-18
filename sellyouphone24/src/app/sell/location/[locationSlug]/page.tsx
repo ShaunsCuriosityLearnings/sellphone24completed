@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locationSlug } = await params;
   const page = resolveLocationPage(locationSlug);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
   const canonicalUrl = `${baseUrl}/sell/location/${page.slug}`;
 
   return {
@@ -98,35 +98,62 @@ export default async function LocationPage({ params }: Props) {
     ? pageOverride.featuredProducts
     : allProducts;
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
 
-  // Schema.org LocalBusiness with areaServed
-  const localBusinessJsonLd = {
+  // Schema.org LocalBusiness with areaServed and BreadcrumbList
+  const locationSchemaGraph = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": `SellPhoneCash - ${page.locationName}`,
-    "image": `${baseUrl}/logo.png`,
-    "telephone": "+971555549817",
-    "priceRange": "AED 100 - AED 8,000",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": page.locationName,
-      "addressRegion": "Dubai",
-      "addressCountry": "AE",
-    },
-    "areaServed": {
-      "@type": "AdministrativeArea",
-      "name": `${page.locationName}, Dubai, UAE`,
-    },
-    "openingHoursSpecification": [
+    "@graph": [
       {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-        "opens": "09:00",
-        "closes": "22:00",
+        "@type": "LocalBusiness",
+        "name": `SellPhoneCash - ${page.locationName}`,
+        "image": `${baseUrl}/logo.png`,
+        "telephone": "+971555549817",
+        "priceRange": "AED 100 - AED 8,000",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": page.locationName,
+          "addressRegion": "Dubai",
+          "addressCountry": "AE",
+        },
+        "areaServed": {
+          "@type": "AdministrativeArea",
+          "name": `${page.locationName}, Dubai, UAE`,
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "09:00",
+            "closes": "22:00",
+          },
+        ],
+        "description": page.coverageDescription,
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": `${baseUrl}`,
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Sell Hub",
+            "item": `${baseUrl}/sell`,
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": page.locationName,
+            "item": `${baseUrl}/sell/location/${page.slug}`,
+          },
+        ],
       },
     ],
-    "description": page.coverageDescription,
   };
 
   const localReviews = [
@@ -153,10 +180,10 @@ export default async function LocationPage({ params }: Props) {
   return (
     <div className="w-full bg-[#FAF9F6] text-slate-900 min-h-screen">
       
-      {/* LocalBusiness Schema */}
+      {/* LocalBusiness & Breadcrumb Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(locationSchemaGraph) }}
       />
 
       {/* Top Breadcrumb Navigation */}

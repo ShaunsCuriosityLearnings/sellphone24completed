@@ -13,7 +13,6 @@ import {
   ChevronUp, 
   ChevronRight, 
   Heart, 
-  ShoppingBag, 
   ArrowLeft, 
   Check, 
   Grid3X3, 
@@ -28,8 +27,8 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import { api } from "@/lib/api";
-import useBuyCartStore from "@/app/stores/buyCartStore";
 import { BuyProductType, BrandType } from "@/types";
+import { mockBuyProducts } from "@/data/mockBuyProducts";
 
 // Standard brand logos fallback
 const BRAND_FALLBACKS: Record<string, string> = {
@@ -46,13 +45,10 @@ export default function BrandCatalogPage() {
   const rawBrandSlug = Array.isArray(params.brandSlug) ? params.brandSlug[0] : (params.brandSlug as string);
   const currentSlug = decodeURIComponent(rawBrandSlug || "").toLowerCase();
 
-  const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState<BuyProductType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState<BuyProductType[]>(mockBuyProducts);
   const [allBrands, setAllBrands] = useState<BrandType[]>([]);
   const [currentBrandInfo, setCurrentBrandInfo] = useState<BrandType | null>(null);
-
-  // Cart store
-  const { addToCart } = useBuyCartStore();
 
   // Wishlist state (stored in local state with instant heart animation)
   const [wishlist, setWishlist] = useState<Record<string, boolean>>({});
@@ -117,15 +113,14 @@ export default function BrandCatalogPage() {
   // Load brand details and catalog items
   useEffect(() => {
     async function loadCatalog() {
-      setLoading(true);
       try {
         const [brandList, catalog] = await Promise.all([
           api.getBuyBrands().catch(() => []),
           api.getBuyProducts().catch(() => []),
         ]);
 
-        setAllBrands(brandList);
-        setProducts(catalog);
+        if (brandList && brandList.length > 0) setAllBrands(brandList);
+        if (catalog && catalog.length > 0) setProducts(catalog);
 
         // Find current brand entity
         const matched = brandList.find(
@@ -319,32 +314,6 @@ export default function BrandCatalogPage() {
       }
       return { ...prev, [productId]: next };
     });
-  };
-
-  // Quick Cart Action (Shopping Bag Button from Image 1)
-  const handleQuickAdd = (product: BuyProductType, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    addToCart({
-      id: String(product.id || product._id),
-      _id: String(product._id || product.id),
-      title: product.title,
-      brand: product.brand,
-      model: product.model || product.title,
-      price: product.price,
-      originalPrice: product.originalPrice,
-      selectedStorage: product.selectedStorage || product.storages?.[0]?.size || "128GB",
-      selectedColor: product.colors?.[0] || "Natural Titanium",
-      condition: product.condition || "Pristine (Like New)",
-      quantity: 1,
-      image: product.images?.frontView || "/products/iphone-pro-max.jpg",
-      stock: product.stock,
-      warranty: product.warranty,
-      batteryHealth: product.batteryHealth,
-    });
-
-    toast.success(`Added ${product.title} to your bag!`);
   };
 
   // Reset all filters
@@ -1184,7 +1153,7 @@ export default function BrandCatalogPage() {
                               {product.title}
                             </Link>
                             <div className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
-                              {product.isConditionVisible !== false ? `${product.condition} • ` : ""}{product.selectedStorage || product.storages?.[0]?.size || "128GB"}
+                              {product.selectedStorage || product.storages?.[0]?.size || "Standard"}
                             </div>
                           </div>
 
@@ -1201,20 +1170,13 @@ export default function BrandCatalogPage() {
                               )}
                             </div>
 
-                            <div className="flex items-center gap-1.5 mt-2">
+                            <div className="mt-2">
                               <Link
                                 href={`/buy-phones/${prodId}`}
-                                className="flex-1 py-1.5 px-2 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-[11px] transition text-center shadow-2xs"
+                                className="block w-full py-1.5 px-2 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-[11px] transition text-center shadow-2xs"
                               >
                                 Buy
                               </Link>
-                              <button
-                                onClick={(e) => handleQuickAdd(product, e)}
-                                className="p-1.5 rounded-xl border border-slate-200 text-slate-700 hover:text-blue-600 hover:bg-blue-50 transition active:scale-95"
-                                title="Add to Shopping Bag"
-                              >
-                                <ShoppingBag size={13} />
-                              </button>
                             </div>
                           </div>
                         </div>
@@ -1293,7 +1255,7 @@ export default function BrandCatalogPage() {
                         </Link>
 
                         <div className="text-[11px] text-slate-400 font-medium truncate">
-                          {product.category || "Phones"}{product.isConditionVisible !== false ? ` • ${product.condition || "Like New"}` : ""}
+                          {product.category || "Phones"} • {product.selectedStorage || product.storages?.[0]?.size || "Standard"}
                         </div>
 
                         {/* Pricing Row */}
@@ -1309,26 +1271,14 @@ export default function BrandCatalogPage() {
                         </div>
                       </div>
 
-                      {/* Bottom Action Buttons: Prominent Blue CTA + Quick Cart Icon (Exact replica of Image 1!) */}
-                      <div className="flex items-center gap-2 pt-4 mt-auto">
-                        
-                        {/* Blue Button: "Buy AED {price}" */}
+                      {/* Bottom Action Button: Prominent Full-Width Blue CTA */}
+                      <div className="pt-4 mt-auto">
                         <Link
                           href={`/buy-phones/${prodId}`}
-                          className="flex-1 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-sm shadow-blue-600/20 transition-all hover:scale-102 active:scale-98 text-center flex items-center justify-center"
+                          className="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-sm shadow-blue-600/20 transition-all hover:scale-102 active:scale-98 text-center flex items-center justify-center"
                         >
                           Buy AED {product.price.toLocaleString()}
                         </Link>
-
-                        {/* Quick Add to Cart Basket Button [ 🛍️ ] */}
-                        <button
-                          onClick={(e) => handleQuickAdd(product, e)}
-                          title="Add to Shopping Bag"
-                          className="p-2.5 rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 transition-all cursor-pointer flex items-center justify-center shrink-0 active:scale-95"
-                        >
-                          <ShoppingBag size={16} />
-                        </button>
-
                       </div>
 
                     </div>
@@ -1408,13 +1358,6 @@ export default function BrandCatalogPage() {
                           >
                             Buy AED {product.price.toLocaleString()}
                           </Link>
-
-                          <button
-                            onClick={(e) => handleQuickAdd(product, e)}
-                            className="p-2.5 rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
-                          >
-                            <ShoppingBag size={16} />
-                          </button>
                         </div>
                       </div>
 

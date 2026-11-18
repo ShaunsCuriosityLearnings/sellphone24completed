@@ -11,7 +11,7 @@ interface SeoBreadcrumbProps {
 }
 
 export default function SeoBreadcrumb({ items }: SeoBreadcrumbProps) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
 
   // Build JSON-LD BreadcrumbList
   const breadcrumbListJsonLd = {

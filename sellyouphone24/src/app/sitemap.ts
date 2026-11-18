@@ -2,31 +2,27 @@ import { MetadataRoute } from "next";
 import { api } from "@/lib/api";
 import { SERVICE_SLUGS, MODEL_SLUGS, LOCATION_SLUGS } from "@/lib/seoData";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Incremental Static Regeneration: revalidate sitemap once every 24 hours to prevent live database locks
+export const revalidate = 86400;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
 
-  // 1. Static base pages
-  const staticRoutes = [
-    { route: "", priority: 1.0, changeFrequency: "daily" as const },
-    { route: "/sell", priority: 0.95, changeFrequency: "daily" as const },
-    { route: "/sell-any-device", priority: 0.9, changeFrequency: "daily" as const },
-    { route: "/services", priority: 0.85, changeFrequency: "daily" as const },
-    { route: "/products", priority: 0.85, changeFrequency: "daily" as const },
-    { route: "/blogs", priority: 0.8, changeFrequency: "daily" as const },
-    { route: "/about", priority: 0.7, changeFrequency: "monthly" as const },
-    { route: "/contact", priority: 0.7, changeFrequency: "monthly" as const },
-    { route: "/privacy-policy", priority: 0.5, changeFrequency: "yearly" as const },
-  ].map((item) => ({
-    url: `${baseUrl}${item.route}`,
-    lastModified: new Date(),
-    changeFrequency: item.changeFrequency,
-    priority: item.priority,
-  }));
+  // 1. Core Static Base Routes
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}`, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
+    { url: `${baseUrl}/sell`, lastModified: new Date(), changeFrequency: "daily", priority: 0.95 },
+    { url: `${baseUrl}/buy-phones`, lastModified: new Date(), changeFrequency: "daily", priority: 0.95 },
+    { url: `${baseUrl}/sell-any-device`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: "daily", priority: 0.85 },
+    { url: `${baseUrl}/products`, lastModified: new Date(), changeFrequency: "daily", priority: 0.85 },
+    { url: `${baseUrl}/blogs`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
+    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: `${baseUrl}/privacy-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.5 },
+  ];
 
-  // Programmatic SEO landing pages (Services, Models, Locations) - deduplicated with Set
+  // 2. Programmatic SEO Trade-In Pages (Deduplicated)
   const uniqueServiceSlugs = Array.from(new Set(SERVICE_SLUGS));
   const uniqueModelSlugs = Array.from(new Set(MODEL_SLUGS));
   const uniqueLocationSlugs = Array.from(new Set(LOCATION_SLUGS));
@@ -54,36 +50,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let dynamicRoutes: MetadataRoute.Sitemap = [];
 
+  // 3. Trade-In Categories (Clean Category Hubs Only — Zero Cartesian Product Ghost URLs)
   try {
-    // 2. Fetch categories & brands for service pages
     const categories = await api.getCategories();
-    const brands = await api.getBrands();
-
     categories.forEach((cat) => {
-      const catSlug = cat.slug.toLowerCase();
-      dynamicRoutes.push({
-        url: `${baseUrl}/services/${catSlug}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      });
-
-      brands.forEach((brand) => {
-        const brandSlug = brand.slug.toLowerCase();
+      if (cat.slug) {
         dynamicRoutes.push({
-          url: `${baseUrl}/services/${catSlug}/${brandSlug}`,
+          url: `${baseUrl}/services/${cat.slug.toLowerCase()}`,
           lastModified: new Date(),
           changeFrequency: "weekly" as const,
-          priority: 0.7,
+          priority: 0.8,
         });
-      });
+      }
     });
   } catch (error) {
-    console.error("⚠️ Dynamic sitemap categories/brands query failed:", error);
+    console.error("⚠️ Dynamic sitemap categories query failed:", error);
   }
 
+  // 4. Trade-In Products Valuation Routes
   try {
-    // 3. Fetch products for product evaluation pages
     const products = await api.getProducts();
     const productRoutes = products.map((p) => ({
       url: `${baseUrl}/products/${p.id || p._id}`,
@@ -96,18 +81,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("⚠️ Dynamic sitemap products query failed:", error);
   }
 
+  // 5. Blog Articles Routes
   try {
-    // 4. Fetch blogs for blog article pages
     const blogs = await api.getBlogs();
     const blogRoutes = blogs.map((b) => ({
       url: `${baseUrl}/blogs/${b.slug}`,
       lastModified: new Date(b.createdAt || new Date()),
       changeFrequency: "monthly" as const,
-      priority: 0.6,
+      priority: 0.7,
     }));
     dynamicRoutes = [...dynamicRoutes, ...blogRoutes];
   } catch (error) {
     console.error("⚠️ Dynamic sitemap blogs query failed:", error);
+  }
+
+  // 6. Certified Buy-Phones Resale Inventory Routes (Active Listings + Brand Archives)
+  try {
+    const buyProducts = await api.getBuyProducts({ status: "active" });
+    const buyBrandsSeen = new Set<string>();
+
+    buyProducts.forEach((bp) => {
+      // Individual certified product detail page
+      const id = bp.id || bp._id;
+      if (id) {
+        const lastMod = (bp as any).updatedAt || (bp as any).createdAt 
+          ? new Date((bp as any).updatedAt || (bp as any).createdAt) 
+          : new Date();
+
+        dynamicRoutes.push({
+          url: `${baseUrl}/buy-phones/${id}`,
+          lastModified: lastMod,
+          changeFrequency: "daily" as const,
+          priority: 0.85,
+        });
+      }
+
+      // Brand archive page
+      const brandStr = typeof bp.brand === "string" ? bp.brand : (bp as any).brand?.name || "";
+      const brandSlug = brandStr.toLowerCase().trim();
+      if (brandSlug && !buyBrandsSeen.has(brandSlug)) {
+        buyBrandsSeen.add(brandSlug);
+        dynamicRoutes.push({
+          url: `${baseUrl}/buy-phones/brand/${encodeURIComponent(brandSlug)}`,
+          lastModified: new Date(),
+          changeFrequency: "weekly" as const,
+          priority: 0.75,
+        });
+      }
+    });
+  } catch (error) {
+    console.error("⚠️ Dynamic sitemap buy-phones query failed:", error);
   }
 
   return [...staticRoutes, ...seoRoutes, ...dynamicRoutes];

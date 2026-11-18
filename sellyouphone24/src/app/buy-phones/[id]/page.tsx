@@ -29,21 +29,29 @@ import { toast } from "react-toastify";
 import { api } from "@/lib/api";
 import useBuyCartStore from "@/app/stores/buyCartStore";
 import { BuyProductType } from "@/types";
+import { mockBuyProducts } from "@/data/mockBuyProducts";
 
 export default function BuyProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : (params.id as string);
 
-  const [product, setProduct] = useState<BuyProductType | null>(null);
-  const [allProducts, setAllProducts] = useState<BuyProductType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialMock = useMemo(() => {
+    if (!id) return null;
+    return mockBuyProducts.find(
+      (p) => String(p.id) === id || String(p.slug) === id || String((p as any)._id) === id
+    ) || mockBuyProducts[0];
+  }, [id]);
+
+  const [product, setProduct] = useState<BuyProductType | null>(initialMock);
+  const [allProducts, setAllProducts] = useState<BuyProductType[]>(mockBuyProducts);
+  const [loading, setLoading] = useState(false);
 
   // User selections
   const [activeImageKey, setActiveImageKey] = useState<"frontView" | "sideView" | "backView">("frontView");
-  const [selectedStorage, setSelectedStorage] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
-  const [selectedCondition, setSelectedCondition] = useState("");
+  const [selectedStorage, setSelectedStorage] = useState<string>(initialMock?.selectedStorage || initialMock?.storages?.[0]?.size || "128GB");
+  const [selectedColor, setSelectedColor] = useState<string>(initialMock?.colors?.[0] || "Natural Titanium");
+  const [selectedCondition, setSelectedCondition] = useState<string>(initialMock?.condition || "Pristine (Like New)");
   const [quantity, setQuantity] = useState(1);
 
   const { addToCart } = useBuyCartStore();
@@ -51,7 +59,6 @@ export default function BuyProductDetailPage() {
   useEffect(() => {
     async function fetchPhoneData() {
       if (!id) return;
-      setLoading(true);
       try {
         const [foundProduct, catalog] = await Promise.all([
           api.getBuyProductById(id),
@@ -64,7 +71,9 @@ export default function BuyProductDetailPage() {
           setSelectedColor(foundProduct.colors?.[0] || "Natural Titanium");
           setSelectedCondition(foundProduct.condition || "Pristine (Like New)");
         }
-        setAllProducts(catalog);
+        if (catalog && catalog.length > 0) {
+          setAllProducts(catalog);
+        }
       } catch (err) {
         console.error("Failed to load product details:", err);
       } finally {
@@ -199,6 +208,8 @@ export default function BuyProductDetailPage() {
                 alt={product.title}
                 fill
                 priority
+                fetchPriority="high"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                 className="object-contain drop-shadow-xl"
               />
             </div>

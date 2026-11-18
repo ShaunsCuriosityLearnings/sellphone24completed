@@ -15,6 +15,36 @@ const INTENT_KEY = "spc_analytics_intent_score";
 const MARKETING_ATTRIBUTION_KEY = "spc_marketing_attribution";
 const BATCH_INTERVAL_MS = 3000;
 
+// Recursive deep PII sanitizer to strictly prevent customer PII from leaking to GTM, GA4, or analytics payloads
+function sanitizeDeep<T>(val: T): T {
+  if (val === null || val === undefined) return val;
+  if (typeof val === "string") {
+    // Scrub raw email addresses in strings
+    if (/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/.test(val)) {
+      return "[REDACTED_EMAIL]" as unknown as T;
+    }
+    // Scrub raw phone numbers (UAE 05x or +971)
+    const stripped = val.replace(/[\s-]/g, "");
+    if (/(?:\+971|00971|0)?(?:50|51|52|54|55|56|58)\d{7}/.test(stripped) && stripped.length >= 9) {
+      return "[REDACTED_PHONE]" as unknown as T;
+    }
+    return val;
+  }
+  if (typeof val !== "object") return val;
+  if (Array.isArray(val)) {
+    return val.map((item) => sanitizeDeep(item)) as unknown as T;
+  }
+  const piiRegex = /^(phone|email|mobile|telephone|customername|name|password|address|street|building|apartment|flat|cardnumber|cvv|emiratesid|nationalid)$/i;
+  const cleaned: Record<string, any> = {};
+  for (const [k, v] of Object.entries(val)) {
+    if (piiRegex.test(k)) {
+      continue; // Strip key entirely
+    }
+    cleaned[k] = sanitizeDeep(v);
+  }
+  return cleaned as T;
+}
+
 export interface MarketingAttribution {
   source: string;
   medium: string;
@@ -131,6 +161,9 @@ class AnalyticsSDK {
     const urlParams = new URLSearchParams(window.location.search);
     const attribution = this.getMarketingAttribution();
 
+    // PII Sanitization: Strictly never transmit sensitive customer PII to analytics or dataLayer (deep recursive scrub)
+    const sanitizedProps: Record<string, any> = sanitizeDeep(properties || {});
+
     const contextProps = {
       sessionId: this.getSessionId(),
       pageUrl: window.location.pathname + window.location.search,
@@ -146,7 +179,7 @@ class AnalyticsSDK {
       ttclid: attribution.ttclid || urlParams.get("ttclid") || "",
       marketingConsent: cookieConsent.hasMarketingConsent(),
       sessionDuration: Math.round((Date.now() - this.pageStartTime) / 1000),
-      ...properties,
+      ...sanitizedProps,
     };
 
     // Calculate dynamic intent score increment
@@ -161,6 +194,15 @@ class AnalyticsSDK {
     };
 
     this.queue.push(eventPayload);
+
+    // Forward e-commerce and conversion events to GTM / GA4 dataLayer
+    if (typeof window !== "undefined" && Array.isArray((window as any).dataLayer)) {
+      (window as any).dataLayer.push({
+        event: eventName,
+        eventCategory: category,
+        ...contextProps,
+      });
+    }
 
     // If urgent conversion event (e.g. pickup_requested), flush immediately
     if (["pickup_requested", "whatsapp_clicked", "offer_accepted"].includes(eventName)) {
@@ -244,3 +286,7 @@ class AnalyticsSDK {
 }
 
 export const analytics = new AnalyticsSDK();
+
+if (typeof window !== "undefined") {
+  (window as any).spcAnalytics = analytics;
+}

@@ -63,6 +63,15 @@ async function safeFetch<T>(url: string, options?: RequestInit, fallback?: T): P
     }
 
     if (fallback !== undefined) {
+      // STRICT DATA INTEGRITY GUARD: Mock data is impossible in production under all circumstances
+      const isProduction = process.env.NODE_ENV === "production";
+      const isMockAllowed = !isProduction;
+
+      if (!isMockAllowed) {
+        console.error(`❌ [DATA INTEGRITY] Live API failed for ${url} in production. Silent mock fallback blocked.`);
+        throw error;
+      }
+
       console.warn(`⚠️ API Request failed for ${url}. Error: ${(error as Error).message}. Using fallback data.`);
       return fallback;
     }
@@ -323,10 +332,24 @@ export const api = {
     acquisitionChannel?: string;
     marketingAttribution?: any;
   }): Promise<{ success: boolean; message: string; order: any }> {
-    return safeFetch<{ success: boolean; message: string; order: any }>(`${API_BASE}/orders`, {
-      method: "POST",
-      body: JSON.stringify(order),
-    });
+    return safeFetch<{ success: boolean; message: string; order: any }>(
+      `${API_BASE}/orders`,
+      {
+        method: "POST",
+        body: JSON.stringify(order),
+      },
+      process.env.NODE_ENV !== "production"
+        ? {
+            success: true,
+            message: "Valuation order created successfully (local mode)",
+            order: {
+              _id: "ORD-" + Date.now(),
+              ...order,
+              createdAt: new Date().toISOString(),
+            },
+          }
+        : undefined
+    );
   },
 
   async getOrders(): Promise<any[]> {

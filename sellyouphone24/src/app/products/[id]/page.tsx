@@ -26,7 +26,7 @@ import { ProductType } from "@/types";
 // Dynamic SEO metadata generator
 export const generateMetadata = async ({ params }: { params: Promise<{ id: string }> }) => {
   const productId = (await params).id;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
   try {
     const product = await api.getProductById(productId);
     const title = `Sell Your ${product.brand} ${product.name} | Instant Cash Valuation UAE`;
@@ -134,7 +134,7 @@ const ProductPage = async ({
   const modelSeoInfo = resolveModelPage(product.name.toLowerCase().replace(/\s+/g, "-"));
   const faqs = modelSeoInfo.faqs || [];
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
 
   // Product Schema.org JSON-LD
   const productJsonLd = {

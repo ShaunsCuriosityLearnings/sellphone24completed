@@ -11,7 +11,6 @@ import {
   Layers, 
   Star, 
   ArrowRight, 
-  ShoppingBag, 
   CheckCircle2, 
   Truck, 
   Lock, 
@@ -27,6 +26,7 @@ import { toast } from "react-toastify";
 import { api } from "@/lib/api";
 import useBuyCartStore from "@/app/stores/buyCartStore";
 import { BuyProductType } from "@/types";
+import { mockBuyProducts } from "@/data/mockBuyProducts";
 
 // Phone brand logos currently in SellPhoneCash (Clean transparent vectors)
 const BRAND_LOGOS: Array<{ id: string; name: string; logo: string; slug?: string }> = [
@@ -116,9 +116,9 @@ function MarqueeBrandItem({
 }
 
 export default function BuyPhonesPage() {
-  const [products, setProducts] = useState<BuyProductType[]>([]);
+  const [products, setProducts] = useState<BuyProductType[]>(mockBuyProducts);
   const [brandLogosList, setBrandLogosList] = useState(BRAND_LOGOS);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   // Minimalist & Professional Search and Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -186,13 +186,14 @@ export default function BuyPhonesPage() {
 
   useEffect(() => {
     async function loadData() {
-      setLoading(true);
       try {
         const [prodData, brandData] = await Promise.all([
           api.getBuyProducts(),
           api.getBuyBrands().catch(() => []),
         ]);
-        setProducts(prodData);
+        if (prodData && prodData.length > 0) {
+          setProducts(prodData);
+        }
 
         // Merge dynamic brands with logos from SellPhoneCash if available
         if (brandData && brandData.length > 0) {
@@ -400,10 +401,16 @@ export default function BuyPhonesPage() {
         
         {/* Subtle Architectural City Skyline Backdrop */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-50/80 via-white to-white pointer-events-none" />
-        <div 
-          className="absolute top-0 right-0 w-full lg:w-2/3 h-72 opacity-15 bg-no-repeat bg-right-top bg-contain pointer-events-none"
-          style={{ backgroundImage: `url('/images/dubai-hero-phones.jpg')` }}
-        />
+        <div className="hidden sm:block absolute top-0 right-0 w-full lg:w-2/3 h-72 opacity-15 pointer-events-none overflow-hidden">
+          <Image
+            src="/images/dubai-hero-phones.jpg"
+            alt="Dubai Flagship Phones"
+            fill
+            loading="lazy"
+            className="object-contain object-right-top"
+            sizes="(max-width: 1024px) 100vw, 66vw"
+          />
+        </div>
 
         {/* Hero Content Grid (Left: Typography & CTAs | Right: 3 Flagship Phones Array) */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -493,19 +500,22 @@ export default function BuyPhonesPage() {
                   src="/products/samsung (1).jpg"
                   alt="Samsung Galaxy S24 Ultra"
                   fill
+                  loading="lazy"
                   className="object-contain drop-shadow-xl"
-                  priority
+                  sizes="(max-width: 640px) 112px, 192px"
                 />
               </div>
 
-              {/* Center Prominent Phone (iPhone 16 Pro Max - Front & Center) */}
+              {/* Center Prominent Phone (iPhone 16 Pro Max - Front & Center - Mobile LCP Hero) */}
               <div className="relative w-36 sm:w-56 h-48 sm:h-84 z-20 transition-transform duration-500 hover:scale-105">
                 <Image
                   src="/products/iphone-pro-max.jpg"
                   alt="Apple iPhone 16 Pro Max"
                   fill
-                  className="object-contain drop-shadow-2xl"
                   priority
+                  fetchPriority="high"
+                  className="object-contain drop-shadow-2xl"
+                  sizes="(max-width: 640px) 144px, 224px"
                 />
               </div>
 
@@ -515,8 +525,9 @@ export default function BuyPhonesPage() {
                   src="/products/iphone (4).jpg"
                   alt="Apple iPhone 15 Pro"
                   fill
+                  loading="lazy"
                   className="object-contain drop-shadow-xl"
-                  priority
+                  sizes="(max-width: 640px) 112px, 192px"
                 />
               </div>
 
@@ -857,10 +868,19 @@ export default function BuyPhonesPage() {
         </div>
 
         {/* Product Catalog Grid */}
-        {loading ? (
-          <div className="py-20 text-center space-y-3">
-            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-xs font-bold text-slate-500">Loading certified devices...</p>
+        {loading && filteredProducts.length === 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 sm:gap-2.5 md:gap-3">
+            {Array.from({ length: 12 }).map((_, idx) => (
+              <div key={idx} className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/80 p-2 sm:p-2.5 shadow-2xs h-[280px] animate-pulse flex flex-col justify-between">
+                <div className="w-full aspect-square bg-slate-100 rounded-lg sm:rounded-xl mb-1.5" />
+                <div className="space-y-1.5">
+                  <div className="w-16 h-2.5 bg-slate-200 rounded" />
+                  <div className="w-full h-3 bg-slate-200 rounded" />
+                  <div className="w-20 h-2 bg-slate-100 rounded" />
+                  <div className="w-24 h-4 bg-emerald-100 rounded pt-2" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center space-y-3 shadow-2xs">
@@ -1056,7 +1076,7 @@ export default function BuyPhonesPage() {
               <ShieldCheck size={28} className="text-emerald-600" />
             </div>
             <div className="relative w-28 h-36 rounded-2xl overflow-hidden shadow-lg border-2 border-white bg-slate-900">
-              <Image src="/products/iphone 17 pro max 💖.jpg" alt="Verified Phone" fill className="object-cover" />
+              <Image src="/products/iphone-17-pro-max.jpg" alt="Verified Phone" fill className="object-cover" />
             </div>
           </div>
 

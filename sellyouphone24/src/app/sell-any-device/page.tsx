@@ -65,7 +65,7 @@ export default function SellAnyDevicePage() {
         <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
           <Smartphone size={32} />
         </div>
-        <h1 className="text-3xl md:text-5xl font-extrabold text-slate-800" style={{ fontFamily: "var(--font-poppins)" }}>
+        <h1 className="text-3xl md:text-5xl font-extrabold text-slate-800 tracking-tight">
           Sell Any Device
         </h1>
         <p className="text-slate-500 max-w-xl mx-auto">
@@ -157,7 +157,6 @@ export default function SellAnyDevicePage() {
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-slate-900 hover:bg-emerald-500 hover:text-slate-950 text-white font-bold py-4 rounded-xl transition duration-300 flex items-center justify-center gap-2 mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
-            style={{ fontFamily: "var(--font-poppins)" }}
           >
             {isSubmitting ? "Submitting..." : "Get Custom Quote"}
             {!isSubmitting && <Send size={18} />}

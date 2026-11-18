@@ -26,7 +26,7 @@ export const mockBuyProducts: BuyProductType[] = [
       "Natural Titanium"
     ],
     "images": {
-      "frontView": "/products/iphone 17 pro max 💖.jpg",
+      "frontView": "/products/iphone-17-pro-max.jpg",
       "sideView": "/products/iphone (1).jpg",
       "backView": "/products/iphone (2).jpg"
     },

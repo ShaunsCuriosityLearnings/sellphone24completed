@@ -31,7 +31,7 @@ export const products: ProductType[] = [
     colors: ["Titanium Gray", "Desert Titanium", "White Titanium", "Black Titanium"],
     description: "Apple's next-generation flagship featuring A19 Pro chip, 48MP triple camera system, and titanium frame.",
     shortDescription: "6.9-inch Super Retina XDR OLED, A19 Pro chip, ProMotion 120Hz.",
-    images: { frontView: "/products/iphone 17 pro max 💖.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" },
+    images: { frontView: "/products/iphone-17-pro-max.jpg", sideView: "/products/iphone (1).jpg", backView: "/products/iphone (2).jpg" },
     isPopular: true,
     isLivePrice: true,
     isHeroProduct: true,

@@ -8,6 +8,7 @@ import {
 } from "@/lib/seoData";
 import { api } from "@/lib/api";
 import { ProductType } from "@/types";
+import { products as mockProducts } from "@/data/mockData";
 import ProductCard from "@/components/ProductCard";
 import QuickEvaluationWidget from "@/components/QuickEvaluationWidget";
 import SeoBreadcrumb from "@/components/SeoBreadcrumb";
@@ -38,16 +39,16 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sell Your Phone & Electronics in Dubai | Best Cash Value | SellPhoneCash",
+  title: "Sell Your Phone & Electronics in Dubai | Best Cash Value",
   description:
     "Dubai's #1 device buyback service. Sell your used iPhone, Samsung, MacBook, iPad, or smartwatch for instant cash. Free 3-hour doorstep pickup across all Dubai areas.",
   alternates: {
-    canonical: "https://sellphonecash.com/sell",
+    canonical: "https://www.sellphonecash.com/sell",
   },
   openGraph: {
     title: "Sell Your Phone & Electronics in Dubai | SellPhoneCash",
     description: "Get instant cash for used and broken phones in Dubai. Free 3-hour doorstep pickup across UAE.",
-    url: "https://sellphonecash.com/sell",
+    url: "https://www.sellphonecash.com/sell",
     siteName: "SellPhoneCash",
     type: "website",
   },
@@ -66,15 +67,17 @@ export default async function SellHubPage() {
   const services = Object.values(SERVICE_PAGES);
   const locations = Object.values(LOCATION_PAGES);
 
-  // Fetch live products and hub override from MongoDB database
-  let allProducts: ProductType[] = [];
+  // Fetch live products and hub override from MongoDB database with reliable fallback
+  let allProducts: ProductType[] = mockProducts;
   let hubOverride = null;
   try {
     const [prods, override] = await Promise.all([
       api.getProducts(),
       api.getSeoPageBySlug("sell"),
     ]);
-    allProducts = prods;
+    if (prods && prods.length > 0) {
+      allProducts = prods;
+    }
     hubOverride = override;
   } catch (err) {
     console.warn("Could not load products or override for sell hub page:", err);
@@ -204,10 +207,13 @@ export default async function SellHubPage() {
           {/* Right Column: High-Res Flagship Photo on Sandstone with Dubai Skyline */}
           <div className="lg:col-span-6 relative flex items-center justify-center mt-1 sm:mt-0">
             <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] rounded-xl sm:rounded-2xl overflow-hidden shadow-md sm:shadow-xl border border-white/80 bg-slate-100">
-              <img
+              <Image
                 src={hubOverride?.customHeroImage || "/images/dubai-hero-phones.jpg"}
                 alt="Sell phones for cash in Dubai"
-                className="w-full h-full object-cover"
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent pointer-events-none" />
             </div>

@@ -411,7 +411,7 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
       )}
 
       {/* Main Content (Product Grid - 2 Cards per row on Mobile, 4 Cards per row on Desktop) */}
-      <div className="flex-1 w-full">
+      <div className="flex-1 w-full min-h-[600px]">
         <div className="hidden lg:flex justify-between items-end mb-4">
           <p className="text-xs font-semibold text-slate-500">
             Showing <span className="text-slate-900 font-extrabold">{filteredProducts.length}</span> devices
@@ -437,8 +437,8 @@ const ProductCatalog = ({ initialProducts, brands, categoryName }: ProductCatalo
         ) : (
           /* Mobile: 2 Cards per row (grid-cols-2), Desktop: 4 Cards per row (lg:grid-cols-4 xl:grid-cols-4) */
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-2.5 sm:gap-3.5 md:gap-4">
-            {filteredProducts.map(product => (
-              <ProductCard key={product.id || product._id} product={product} />
+            {filteredProducts.map((product, idx) => (
+              <ProductCard key={product.id || product._id} product={product} priority={idx < 2} />
             ))}
           </div>
         )}

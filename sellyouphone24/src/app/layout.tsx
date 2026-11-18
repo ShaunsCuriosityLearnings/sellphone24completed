@@ -8,29 +8,27 @@ import ChatWidget from "@/components/ChatWidget";
 import PageTransitionLoader from "@/components/PageTransitionLoader";
 import Script from "next/script";
 import { GTM_ID } from "@/lib/gtm";
-import { ClerkProvider } from "@clerk/nextjs";
-
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Inter, Roboto, Poppins, Open_Sans, Lato } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-roboto", display: "swap" });
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-poppins", display: "swap" });
-const openSans = Open_Sans({ subsets: ["latin"], variable: "--font-open-sans", display: "swap" });
-const lato = Lato({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-lato", display: "swap" });
-
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
 const isBeta = baseUrl.includes("beta");
 
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
+  alternates: {
+    canonical: "./",
+  },
   title: {
     default: "SellPhoneCash | Sell Used Mobile Devices for Instant Cash in UAE",
     template: "%s | SellPhoneCash",
   },
   icons: {
-    icon: "/favicon.webp",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon.webp", type: "image/webp" },
+    ],
+    apple: "/logo.png",
   },
   robots: {
     index: !isBeta,
@@ -38,6 +36,9 @@ export const metadata: Metadata = {
   },
   description:
     "Sell your used smartphones, tablets, and smartwatches for the best price in Dubai, Abu Dhabi, and the wider UAE. Instant online valuation, free doorstep pickup, and instant payouts.",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "google-site-verification-sellphonecash",
+  },
   keywords: [
     "Sell phone Dubai",
     "Sell used iPhone UAE",
@@ -57,31 +58,84 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
         <head>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@graph": [
+                  {
+                    "@type": "Organization",
+                    "@id": "https://www.sellphonecash.com/#organization",
+                    "name": "SellPhoneCash",
+                    "url": "https://www.sellphonecash.com",
+                    "logo": {
+                      "@type": "ImageObject",
+                      "url": "https://www.sellphonecash.com/logo.png",
+                      "width": 570,
+                      "height": 133
+                    },
+                    "description": "Premier electronics re-commerce platform in UAE for selling used phones for instant cash and buying certified pre-owned devices with 12-month warranty.",
+                    "areaServed": [
+                      { "@type": "City", "name": "Dubai" },
+                      { "@type": "City", "name": "Abu Dhabi" },
+                      { "@type": "City", "name": "Sharjah" },
+                      { "@type": "Country", "name": "United Arab Emirates" }
+                    ],
+                    "contactPoint": {
+                      "@type": "ContactPoint",
+                      "telephone": "+971555549817",
+                      "contactType": "customer service",
+                      "areaServed": "AE",
+                      "availableLanguage": ["English", "Arabic"]
+                    }
+                  },
+                  {
+                    "@type": "WebSite",
+                    "@id": "https://www.sellphonecash.com/#website",
+                    "url": "https://www.sellphonecash.com",
+                    "name": "SellPhoneCash",
+                    "publisher": {
+                      "@id": "https://www.sellphonecash.com/#organization"
+                    }
+                  }
+                ]
+              }),
+            }}
+          />
           <Script
             id="gtm-script"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             dangerouslySetInnerHTML={{
               __html: `
-                (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                (function(w,d,s,l,i){
+                  w[l]=w[l]||[];
+                  function initGTM(){
+                    if (w.__gtmLoaded) return;
+                    w.__gtmLoaded = true;
+                    w[l].push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+                    var f=d.getElementsByTagName(s)[0], j=d.createElement(s), dl=l!='dataLayer'?'&l='+l:'';
+                    j.async=true; j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+                    f.parentNode.insertBefore(j,f);
+                  }
+                  if ('requestIdleCallback' in w) {
+                    w.requestIdleCallback(function(){ setTimeout(initGTM, 1500); }, { timeout: 3500 });
+                  } else {
+                    w.addEventListener('load', function(){ setTimeout(initGTM, 1500); });
+                  }
+                  ['scroll', 'touchstart', 'click'].forEach(function(e){
+                    w.addEventListener(e, initGTM, { once: true, passive: true });
+                  });
                 })(window,document,'script','dataLayer','${GTM_ID}');
               `,
             }}
           />
         </head>
         <body
-          className={`
-            ${inter.variable} ${roboto.variable} ${poppins.variable} ${openSans.variable} ${lato.variable}
-            bg-slate-50
-            text-slate-900
-            antialiased
-          `}
-          style={{ fontFamily: "var(--font-inter), sans-serif" }}
+          className="bg-slate-50 text-slate-900 antialiased"
+          style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}
         >
           <noscript>
             <iframe
@@ -107,7 +161,7 @@ export default function RootLayout({
             <Navbar />
 
             {/* Main Content */}
-            <main className="flex-1 w-full">
+            <main className="flex-1 w-full min-h-[calc(100vh-4rem)]">
               <Suspense fallback={null}>
                 <AnalyticsProvider>
                   {children}
@@ -132,7 +186,6 @@ export default function RootLayout({
           </div>
         </body>
       </html>
-    </ClerkProvider>
   );
 }
 

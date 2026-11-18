@@ -1,4 +1,5 @@
 import { api } from "@/lib/api";
+import { products as mockProducts } from "@/data/mockData";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Zap } from "lucide-react";
@@ -70,8 +71,11 @@ export const generateMetadata = async ({ params }: { params: Promise<{ category:
   const category = resolveCanonicalCategory(categories, categorySlug);
 
   return {
-    title: `Sell ${category.name} | SellPhoneCash`,
-    description: `Sell your used ${category.name.toLowerCase()} in Dubai & UAE. Get instant valuations for Apple, Samsung, Google, and more.`,
+    title: `Sell Used ${category.name} in Dubai & UAE`,
+    description: `Sell your used ${category.name.toLowerCase()} in Dubai & UAE. Get instant valuations for Apple, Samsung, Google, and more with free 30-min doorstep pickup.`,
+    alternates: {
+      canonical: `/services/${categorySlug.toLowerCase()}`,
+    },
   };
 };
 
@@ -108,11 +112,69 @@ const CategoryPage = async ({ params }: { params: Promise<{ category: string }> 
   }
 
   if (!categoryProducts || categoryProducts.length === 0) {
-    categoryProducts = await api.getProducts();
+    categoryProducts = mockProducts.filter((p) => {
+      const cat = (p.category || "").toLowerCase();
+      const slug = (categorySlug || "").toLowerCase();
+      return cat === slug || (slug === "smartphones" && cat === "mobile");
+    });
+    if (categoryProducts.length === 0) {
+      categoryProducts = mockProducts;
+    }
   }
+
+  // Lightweight projection for catalog display to slash serialized RSC payload
+  const catalogProducts: any = (categoryProducts || []).map((p) => ({
+    id: p.id || (p as any)._id,
+    name: p.name,
+    brand: p.brand,
+    category: p.category,
+    basePrice: p.basePrice || 0,
+    images: {
+      frontView: p.images?.frontView || "/products/apple logo.jpg",
+      backView: p.images?.backView || "",
+      sideView: p.images?.sideView || "",
+    },
+    storages: p.storages || [],
+    colors: p.colors || [],
+    description: "",
+    shortDescription: p.shortDescription || "",
+    isPopular: p.isPopular,
+    isLivePrice: p.isLivePrice,
+    slug: p.slug,
+  }));
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://www.sellphonecash.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Services",
+        item: "https://www.sellphonecash.com/services",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: category.name,
+        item: `https://www.sellphonecash.com/services/${categorySlug.toLowerCase()}`,
+      },
+    ],
+  };
 
   return (
     <div className="space-y-12 pb-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Schema Breadcrumb JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       {/* Back button */}
       <div>
         <Link
@@ -136,7 +198,7 @@ const CategoryPage = async ({ params }: { params: Promise<{ category: string }> 
 
       {/* Product Catalog with Sidebar Filters */}
       <ProductCatalog 
-        initialProducts={categoryProducts} 
+        initialProducts={catalogProducts} 
         brands={categoryBrands} 
         categoryName={category.name} 
       />

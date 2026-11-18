@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { serviceSlug } = await params;
   const page = resolveServicePage(serviceSlug);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
   const canonicalUrl = `${baseUrl}/sell/${page.slug}`;
 
   return {
@@ -107,7 +107,7 @@ export default async function ServicePage({ params }: Props) {
     console.warn("Could not load live products for SEO service page:", err);
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
 
   // Schema.org Service JSON-LD
   const serviceJsonLd = {

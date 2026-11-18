@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, User, Calendar, Clock, Tag, Zap, ShieldCheck, CheckCircle2, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Calendar, Clock, Tag, Zap, ShieldCheck, CheckCircle2, ChevronRight, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import CommentsSection from "./CommentsSection";
 import { ArticleActions } from "./ArticleActions";
@@ -10,15 +10,15 @@ import { parseMarkdownToHtml, extractTableOfContents } from "@/lib/markdown";
 
 export const generateMetadata = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const blogSlug = (await params).slug;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
   try {
     const blog = await api.getBlogBySlug(blogSlug);
-    const title = `${blog.title} | SellPhoneCash Tech Blog`;
+    const title = `${blog.title} - Tech Guide`;
     const description = blog.desc || `Read about ${blog.title} on SellPhoneCash. Get top device valuation and e-waste recycling tips in Dubai, UAE.`;
     const pageUrl = `${baseUrl}/blogs/${blogSlug}`;
     const imageUrl = blog.img 
       ? (blog.img.startsWith("http") ? blog.img : `${baseUrl}${blog.img}`)
-      : `${baseUrl}/products/iphone 17 pro max 💖.jpg`;
+      : `${baseUrl}/images/dubai-hero-phones.jpg`;
 
     return {
       title,
@@ -61,7 +61,7 @@ export const generateMetadata = async ({ params }: { params: Promise<{ slug: str
       },
     };
   } catch (error) {
-    return { title: "Blog Article | SellPhoneCash" };
+    return { title: "Blog Article" };
   }
 };
 
@@ -94,11 +94,11 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
   // Convert Markdown or raw text content to clean structured HTML
   const parsedContentHtml = parseMarkdownToHtml(blog.content || "");
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://sellphonecash.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.sellphonecash.com";
   const pageUrl = `${baseUrl}/blogs/${blog.slug}`;
   const imageUrl = blog.img 
     ? (blog.img.startsWith("http") ? blog.img : `${baseUrl}${blog.img}`)
-    : `${baseUrl}/products/iphone 17 pro max 💖.jpg`;
+    : `${baseUrl}/products/iphone-17-pro-max.jpg`;
 
   // JSON-LD Structured Schema Markup for SEO
   const jsonLd = {
@@ -300,6 +300,25 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
             <p className="text-xs text-slate-500 leading-relaxed text-justify">
               We help consumers across the UAE turn pre-owned smartphones, laptops & tablets into instant cash while reducing electronic waste.
             </p>
+          </div>
+
+          {/* Certified Pre-Owned Resale Cross-Link Card */}
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-6 shadow-md space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider">
+              <Sparkles size={11} /> Certified Resale
+            </div>
+            <h4 className="font-extrabold text-sm text-white leading-snug">
+              Looking to Buy Instead?
+            </h4>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Explore 30+ inspected pre-owned iPhones, Samsungs, & MacBooks with 12-month store warranty and free UAE delivery.
+            </p>
+            <Link
+              href="/buy-phones"
+              className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition duration-200 shadow-sm"
+            >
+              Browse Certified Devices <ChevronRight size={13} />
+            </Link>
           </div>
         </aside>
 

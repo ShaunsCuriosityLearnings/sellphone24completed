@@ -80,7 +80,7 @@ export interface LocationPageData {
 export const SERVICE_PAGES: Record<string, ServicePageData> = {
   "iphone-dubai": {
     slug: "iphone-dubai",
-    title: "Sell iPhone in Dubai | Instant Cash On The Spot | SellPhoneCash",
+    title: "Sell iPhone in Dubai | Instant Cash On The Spot",
     metaDescription: "Sell your used or new iPhone in Dubai for the highest cash payout. Free doorstep pickup within 3 hours across all Dubai areas. Instant payment guaranteed.",
     h1: "Sell iPhone in Dubai for Instant Cash",
     subtitle: "Turn your pre-owned, sealed, or even broken Apple iPhone into immediate cash today. Free collection at your home, office, or cafe anywhere in Dubai.",
@@ -140,7 +140,7 @@ export const SERVICE_PAGES: Record<string, ServicePageData> = {
 
   "samsung-dubai": {
     slug: "samsung-dubai",
-    title: "Sell Samsung in Dubai | Best Cash Value Today | SellPhoneCash",
+    title: "Sell Samsung in Dubai | Best Cash Value Today",
     metaDescription: "Sell your used Samsung Galaxy in Dubai. We buy Galaxy S24, S23, Z Fold, Z Flip, and Note devices for top instant cash. Free 3-hour doorstep collection.",
     h1: "Sell Samsung Phone in Dubai for Immediate Cash",
     subtitle: "Get the best market valuation for your Samsung Galaxy S-Series, Z Fold, Z Flip, or A-Series smartphone. Fast, reliable, and completely hassle-free.",
@@ -200,7 +200,7 @@ export const SERVICE_PAGES: Record<string, ServicePageData> = {
 
   "used-phone-dubai": {
     slug: "used-phone-dubai",
-    title: "Sell Used Phone in Dubai | Instant Cash & Free Pickup | SellPhoneCash",
+    title: "Sell Used Phone in Dubai | Instant Cash & Free Pickup",
     metaDescription: "Sell any used mobile phone in Dubai today. Best prices paid for used Apple, Samsung, Google, Xiaomi & OnePlus phones. Free 3-hr home pickup, cash paid on spot.",
     h1: "Sell Any Used Mobile Phone in Dubai",
     subtitle: "Get the highest trade-in cash value for your second-hand smartphone in Dubai. No lowballers, no meetups in shady parking lots — professional, safe, and instant.",
@@ -260,7 +260,7 @@ export const SERVICE_PAGES: Record<string, ServicePageData> = {
 
   "phone-for-cash-dubai": {
     slug: "phone-for-cash-dubai",
-    title: "Sell Phone for Cash in Dubai | Instant Cash Payout | SellPhoneCash",
+    title: "Sell Phone for Cash in Dubai | Instant Cash Payout",
     metaDescription: "Get instant cash for your phone in Dubai today! Free doorstep collection within 3 hours. We pay top AED cash on the spot for all phone brands and conditions.",
     h1: "Sell Your Phone for Instant Cash in Dubai",
     subtitle: "Need fast cash for your mobile phone? Get an upfront online quote and receive real physical cash or instant bank transfer right at your door.",
@@ -320,7 +320,7 @@ export const SERVICE_PAGES: Record<string, ServicePageData> = {
 
   "broken-phone-dubai": {
     slug: "broken-phone-dubai",
-    title: "Sell Broken Phone in Dubai | Cash for Damaged & Cracked Phones | SellPhoneCash",
+    title: "Sell Broken Phone in Dubai | Cash for Damaged & Cracked Phones",
     metaDescription: "Sell your broken, cracked, or damaged phone in Dubai for instant cash! We buy phones with broken screens, dead batteries, or water damage with free pickup.",
     h1: "Sell Broken or Damaged Phone in Dubai",
     subtitle: "Don't throw away your cracked or non-working mobile phone. Get immediate cash for damaged Apple, Samsung, and Android devices across Dubai.",
@@ -380,7 +380,7 @@ export const SERVICE_PAGES: Record<string, ServicePageData> = {
 
   "old-phone-dubai": {
     slug: "old-phone-dubai",
-    title: "Sell Old Phone in Dubai | Highest Cash Trade-In & Recycle | SellPhoneCash",
+    title: "Sell Old Phone in Dubai | Highest Cash Trade-In & Recycle",
     metaDescription: "Sell your old phones in Dubai for instant cash! We buy previous generation iPhones, Samsungs, and older smartphones. Free doorstep pickup across Dubai.",
     h1: "Sell Old Smartphones in Dubai for Instant Cash",
     subtitle: "Clear out your drawers and turn your old phones into spending money. Safe eco-friendly recycling and top trade-in prices across Dubai.",
@@ -440,7 +440,7 @@ export const SERVICE_PAGES: Record<string, ServicePageData> = {
 
   "phone-buyback-dubai": {
     slug: "phone-buyback-dubai",
-    title: "Phone Buyback Dubai | Instant Valuation & Guaranteed Payout | SellPhoneCash",
+    title: "Phone Buyback Dubai | Instant Valuation & Guaranteed Payout",
     metaDescription: "Premier mobile phone buyback service in Dubai. Guaranteed instant online valuation, 7-day price lock, free doorstep collection, and immediate cash payment.",
     h1: "Professional Phone Buyback Service in Dubai",
     subtitle: "The simplest, fastest corporate and consumer device buyback service in the UAE. Guaranteed rates, zero haggling, and immediate cash disbursement.",
@@ -496,7 +496,99 @@ export const SERVICE_PAGES: Record<string, ServicePageData> = {
     ],
     relatedLocations: ["business-bay", "downtown-dubai", "dubai-marina", "jlt", "deira"],
     relatedServices: ["iphone-dubai", "samsung-dubai", "used-phone-dubai", "phone-for-cash-dubai"]
-  }
+  },
+  "broken-iphone-screen-dubai": {
+    slug: "broken-iphone-screen-dubai",
+    title: "Sell Broken iPhone Screen in Dubai | Cash for Cracked Glass",
+    metaDescription: "Sell your cracked or shattered screen iPhone in Dubai for instant cash! Free 3-hour doorstep pickup across Dubai. Immediate cash or bank transfer.",
+    h1: "Sell Your Broken Screen iPhone in Dubai for Instant Cash",
+    subtitle: "Don't pay thousands for costly screen replacements. Sell your cracked, bleeding, or shattered iPhone today for top market cash with free doorstep pickup.",
+    targetKeywords: ["sell broken iphone screen dubai", "sell cracked iphone dubai", "cash for shattered iphone", "broken screen iphone buyer uae", "sell damaged iphone dubai"],
+    categorySlug: "smartphones",
+    catalogLink: "/services/smartphones",
+    heroBadge: "Specialized Screen Damage Buyback",
+    introText: [
+      "Replacing an original Apple OLED or Super Retina display can cost up to 60% of your device's value. Selling it directly to SellPhoneCash gets you immediate cash without repair headaches.",
+      "We purchase iPhones with hairline cracks, completely shattered glass, black spots, bleeding LCDs, or unresponsive touch digitizers across Dubai.",
+      "Our technicians perform a fast 3-minute motherboard check at your doorstep and pay you cash on the spot."
+    ],
+    sellingSteps: [
+      { title: "1. Select Damage Level", desc: "Select 'Screen Cracked' or 'Display Faulty' in our online valuation tool." },
+      { title: "2. Lock Your Cash Price", desc: "Get an instant guaranteed cash offer with zero unexpected deductions." },
+      { title: "3. Doorstep Collection", desc: "Our courier meets you within 30-60 minutes anywhere in Dubai and hands you cash." }
+    ],
+    acceptedConditions: [
+      { title: "Minor Glass Crack", desc: "Glass is cracked but display OLED and touch function are 100% responsive.", badge: "Highest Damaged Payout" },
+      { title: "Shattered Front & Back", desc: "Both front glass and rear panel damaged, logic board fully operational.", badge: "Strong Cash Value" },
+      { title: "Black Spots / Lines", desc: "OLED matrix bleeding or vertical green lines visible on display.", badge: "Fair Buyback Rate" },
+      { title: "Completely Black / No Display", desc: "Screen does not light up, but device vibrates or rings when plugged in.", badge: "Motherboard Salvage Cash" }
+    ],
+    priceRangeEstimate: "AED 300 - AED 2,800",
+    popularModels: [
+      { name: "iPhone 16 Pro Max (Cracked)", slug: "iphone-pro-max", startingPrice: "AED 2,200" },
+      { name: "iPhone 15 Pro (Cracked)", slug: "iphone-15", startingPrice: "AED 1,600" },
+      { name: "iPhone 14 Pro (Cracked)", slug: "iphone-14", startingPrice: "AED 1,200" },
+      { name: "iPhone 13 (Cracked)", slug: "iphone-13", startingPrice: "AED 850" }
+    ],
+    faqs: [
+      {
+        question: "Can I sell my iPhone if the touchscreen is completely unresponsive?",
+        answer: "Yes! As long as the device powers on and can be factory reset (or connected to iCloud to sign out), we will buy it for immediate cash."
+      },
+      {
+        question: "Is it better to repair my cracked screen before selling?",
+        answer: "In most cases, no. Third-party screen replacements degrade resale value because Apple displays display 'Unknown Part' warnings. You will almost always net more cash by selling it as-is."
+      }
+    ],
+    relatedLocations: ["dubai-marina", "jlt", "downtown-dubai", "business-bay", "deira"],
+    relatedServices: ["iphone-dubai", "broken-phone-dubai", "used-phone-dubai"]
+  },
+
+  "water-damaged-macbook-dubai": {
+    slug: "water-damaged-macbook-dubai",
+    title: "Sell Water Damaged MacBook in Dubai | Cash for Liquid Spills",
+    metaDescription: "Sell your liquid or water-damaged MacBook in Dubai for instant cash! Free 3-hour doorstep collection. We buy MacBook Pro & Air with liquid damage.",
+    h1: "Sell Water Damaged MacBook in Dubai for Instant Cash",
+    subtitle: "Spilled water, coffee, or tea on your MacBook? Don't pay exorbitant repair quotes. Sell it today for top salvage cash with free doorstep collection.",
+    targetKeywords: ["sell water damaged macbook dubai", "sell liquid spill macbook", "sell dead macbook uae", "broken macbook buyer dubai", "cash for liquid damaged macbook"],
+    categorySlug: "laptops",
+    catalogLink: "/services/laptops",
+    heroBadge: "Liquid Damage Specialist Buyback",
+    introText: [
+      "Liquid spills cause immediate corrosion to logic boards, keyboard membranes, and battery management ICs. Authorized repair centers often quote thousands of dirhams for full tier-4 replacements.",
+      "SellPhoneCash purchases water-damaged, tea-damaged, and coffee-damaged MacBooks across Dubai for parts salvage and recycling value.",
+      "Free doorstep pickup across all Dubai areas with instant payment on the spot."
+    ],
+    sellingSteps: [
+      { title: "1. Specify Spill Type", desc: "Indicate whether the MacBook was exposed to water, coffee, or liquid." },
+      { title: "2. Lock Cash Value", desc: "Receive a transparent salvage cash valuation based on your model year and chip." },
+      { title: "3. Free Doorstep Inspection", desc: "Our field courier inspects the chassis and issues instant cash payment." }
+    ],
+    acceptedConditions: [
+      { title: "Minor Spill / Working", desc: "Device boots up but sticky keys or occasional trackpad stutter.", badge: "Top Liquid Payout" },
+      { title: "Boots to Apple Logo Only", desc: "Device powers on but fails to boot completely due to sensor damage.", badge: "High Salvage Rate" },
+      { title: "Completely Dead / No Power", desc: "Device does not turn on or charge following liquid exposure.", badge: "Component Buyback" }
+    ],
+    priceRangeEstimate: "AED 500 - AED 3,500",
+    popularModels: [
+      { name: "MacBook Pro M3 Max (Liquid Damaged)", slug: "macbook-pro", startingPrice: "AED 2,800" },
+      { name: "MacBook Pro M2 (Liquid Damaged)", slug: "macbook-pro", startingPrice: "AED 1,900" },
+      { name: "MacBook Air M2 (Liquid Damaged)", slug: "macbook-air", startingPrice: "AED 1,200" },
+      { name: "MacBook Air M1 (Liquid Damaged)", slug: "macbook-air", startingPrice: "AED 800" }
+    ],
+    faqs: [
+      {
+        question: "Can I sell a MacBook that does not turn on at all after liquid damage?",
+        answer: "Yes. Even if your MacBook has completely short-circuited and shows no power, original components such as display assemblies, aluminum unibodies, and trackpads still hold significant value."
+      },
+      {
+        question: "How do you handle my personal data on a water-damaged MacBook?",
+        answer: "If the SSD is operational, we wipe it. If the logic board is destroyed, the internal storage is physically decommissioned in compliance with data privacy standards."
+      }
+    ],
+    relatedLocations: ["dubai-marina", "business-bay", "downtown-dubai", "jlt", "palm-jumeirah"],
+    relatedServices: ["macbook-pro", "macbook-air", "broken-phone-dubai"]
+  },
 };
 
 // -------------------------------------------------------------
@@ -507,7 +599,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "iphone-17",
     brand: "Apple",
     modelName: "iPhone 17",
-    title: "Sell iPhone 17 in Dubai | Highest Cash Valuation | SellPhoneCash",
+    title: "Sell iPhone 17 in Dubai | Highest Cash Valuation",
     metaDescription: "Sell your iPhone 17 in Dubai for the highest cash payout. Free 3-hour doorstep collection across Dubai, instant cash in hand or bank transfer.",
     h1: "Sell iPhone 17 in Dubai for Top Cash",
     subtitle: "Upgrade or liquidate your Apple iPhone 17. Instant valuation with zero hidden fees and free doorstep pickup anywhere in Dubai.",
@@ -576,7 +668,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "iphone-16",
     brand: "Apple",
     modelName: "iPhone 16",
-    title: "Sell iPhone 16 in Dubai | Instant Cash On The Spot | SellPhoneCash",
+    title: "Sell iPhone 16 in Dubai | Instant Cash On The Spot",
     metaDescription: "Sell your iPhone 16 in Dubai. Best trade-in cash value guaranteed. Free 3-hour doorstep pickup across UAE. Instant cash or bank transfer.",
     h1: "Sell iPhone 16 in Dubai for Maximum Value",
     subtitle: "Get top market cash for your Apple iPhone 16 or 16 Plus today. Fast, simple, and completely transparent with free home collection.",
@@ -606,7 +698,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "iphone-15",
     brand: "Apple",
     modelName: "iPhone 15",
-    title: "Sell iPhone 15 in Dubai | Fast Doorstep Cash | SellPhoneCash",
+    title: "Sell iPhone 15 in Dubai | Fast Doorstep Cash",
     metaDescription: "Sell your iPhone 15 in Dubai today. Guaranteed high trade-in value, free 3-hour doorstep collection, and immediate cash payout. Get a free quote now.",
     h1: "Sell iPhone 15 in Dubai for Instant Cash",
     subtitle: "Get immediate dirhams for your iPhone 15, 15 Plus, or 15 Pro. Free pickup across all Dubai areas within 3 hours.",
@@ -635,7 +727,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "iphone-14",
     brand: "Apple",
     modelName: "iPhone 14",
-    title: "Sell iPhone 14 in Dubai | Instant Cash On The Spot | SellPhoneCash",
+    title: "Sell iPhone 14 in Dubai | Instant Cash On The Spot",
     metaDescription: "Sell your used iPhone 14 in Dubai. Top market buyback prices, free 3-hour home pickup across all Dubai districts, instant cash in hand.",
     h1: "Sell iPhone 14 in Dubai for Top Cash",
     subtitle: "Turn your pre-owned iPhone 14 or iPhone 14 Plus into instant cash today. Simple valuation, fast doorstep inspection, zero hassle.",
@@ -664,7 +756,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "iphone-13",
     brand: "Apple",
     modelName: "iPhone 13",
-    title: "Sell iPhone 13 in Dubai | Instant Cash Today | SellPhoneCash",
+    title: "Sell iPhone 13 in Dubai | Instant Cash Today",
     metaDescription: "Sell your iPhone 13 or iPhone 13 mini in Dubai for cash. Instant guaranteed valuation, free 3-hour courier pickup, instant cash payout on collection.",
     h1: "Sell iPhone 13 in Dubai for Immediate Cash",
     subtitle: "Cash in on your iPhone 13 before market depreciation continues. Instant price lock and free doorstep pickup throughout Dubai.",
@@ -693,7 +785,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "iphone-pro-max",
     brand: "Apple",
     modelName: "iPhone Pro Max",
-    title: "Sell iPhone Pro Max in Dubai | Highest Cash Rates | SellPhoneCash",
+    title: "Sell iPhone Pro Max in Dubai | Highest Cash Rates",
     metaDescription: "Sell your iPhone Pro Max (16, 15, 14, 13 Pro Max) in Dubai for the highest cash payout. Free doorstep pickup in 3 hours, immediate cash in hand.",
     h1: "Sell iPhone Pro Max in Dubai for Top Cash",
     subtitle: "Apple's flagship Pro Max models command the highest resale values in the UAE. Get an upfront guaranteed price and instant cash payout today.",
@@ -718,11 +810,40 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     relatedLocations: ["dubai-marina", "downtown-dubai", "business-bay", "jumeirah"]
   },
 
+  "iphone-16-pro-max": {
+    slug: "iphone-16-pro-max",
+    brand: "Apple",
+    modelName: "iPhone 16 Pro Max",
+    title: "Sell iPhone 16 Pro Max in Dubai | Guaranteed Best Price",
+    metaDescription: "Sell your iPhone 16 Pro Max in Dubai for maximum cash value. 100% upfront quote, free doorstep pickup within 2 hours, instant bank transfer or cash.",
+    h1: "Sell Your iPhone 16 Pro Max in Dubai for Instant Cash",
+    subtitle: "Apple's premier flagship commands top secondary market resale value in Dubai. Instant valuation, price lock guarantee, and on-spot cash payment.",
+    targetKeywords: ["sell iphone 16 pro max dubai", "iphone 16 pro max trade in dubai", "cash for iphone 16 pro max dubai", "iphone 16 pro max buyback uae"],
+    categorySlug: "smartphones",
+    catalogLink: "/services/smartphones/apple",
+    heroBadge: "Flagship Top Resale Value",
+    estimatedPriceRange: "AED 3,200 - AED 4,900",
+    specsSummary: ["Grade 5 Titanium finish", "A18 Pro Chip with 6-core GPU", "Camera Control Button & 48MP Fusion Camera", "6.9-inch Super Retina XDR Display", "Up to 33 hours battery life"],
+    conditionPrices: [
+      { condition: "Brand New Sealed", estimate: "AED 4,200 - 4,900", notes: "Original sealed packaging with valid Apple warranty." },
+      { condition: "Flawless", estimate: "AED 3,500 - 4,200", notes: "No scratches, clean battery health, 100% genuine parts." },
+      { condition: "Good", estimate: "AED 2,800 - 3,400", notes: "Minor case scuffs, perfect display and cameras." },
+      { condition: "Cracked Screen", estimate: "AED 1,600 - 2,500", notes: "Front glass cracked, internals and motherboard functional." }
+    ],
+    whySellWithUs: ["Guaranteed price match in UAE", "Free 2-hour doorstep pickup across Dubai", "Instant on-spot cash or wire transfer", "Zero lowballing or hidden deductions"],
+    faqs: [
+      { question: "How much cash can I get for an iPhone 16 Pro Max in Dubai?", answer: "Depending on storage (256GB, 512GB, 1TB) and physical condition, we pay between AED 2,800 and AED 4,900 with immediate cash payment." },
+      { question: "Do I need the original box and invoice?", answer: "Having the original box and invoice helps maximize your payout, but we happily buy devices without boxes provided you have valid Emirates ID for transfer." }
+    ],
+    relatedModels: ["iphone-pro-max", "iphone-16", "iphone-15", "samsung-s25"],
+    relatedLocations: ["dubai-marina", "downtown-dubai", "business-bay", "jumeirah"]
+  },
+
   "samsung-s26": {
     slug: "samsung-s26",
     brand: "Samsung",
     modelName: "Galaxy S26",
-    title: "Sell Samsung Galaxy S26 in Dubai | Top Cash Payout | SellPhoneCash",
+    title: "Sell Samsung Galaxy S26 in Dubai | Top Cash Payout",
     metaDescription: "Sell your Samsung Galaxy S26 / S26 Ultra in Dubai. Guaranteed instant valuation, free 3-hour home pickup across Dubai, cash paid on the spot.",
     h1: "Sell Samsung Galaxy S26 in Dubai",
     subtitle: "Get the best cash trade-in value for Samsung's premier flagship. Free doorstep collection anywhere in Dubai.",
@@ -751,7 +872,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "samsung-s25",
     brand: "Samsung",
     modelName: "Galaxy S25",
-    title: "Sell Samsung Galaxy S25 in Dubai | Instant Cash | SellPhoneCash",
+    title: "Sell Samsung Galaxy S25 in Dubai | Instant Cash",
     metaDescription: "Sell your Samsung Galaxy S25 / S25 Ultra in Dubai. Top market buyback price, free 3-hour doorstep collection, instant cash on the spot.",
     h1: "Sell Samsung Galaxy S25 in Dubai for Top Cash",
     subtitle: "Get maximum dirhams for your Galaxy S25, S25+, or S25 Ultra today. Transparent valuation with immediate cash payment.",
@@ -780,7 +901,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "samsung-s24",
     brand: "Samsung",
     modelName: "Galaxy S24",
-    title: "Sell Samsung Galaxy S24 in Dubai | Instant Cash Today | SellPhoneCash",
+    title: "Sell Samsung Galaxy S24 in Dubai | Instant Cash Today",
     metaDescription: "Sell your Samsung Galaxy S24, S24+, or S24 Ultra in Dubai. Guaranteed instant valuation, free 3-hour doorstep collection, cash paid immediately.",
     h1: "Sell Samsung Galaxy S24 in Dubai for Instant Cash",
     subtitle: "Exchange your Samsung Galaxy S24 for instant dirhams today. Fast valuation, free doorstep pickup across Dubai, no haggling.",
@@ -809,7 +930,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "samsung-fold",
     brand: "Samsung",
     modelName: "Galaxy Z Fold",
-    title: "Sell Samsung Galaxy Fold in Dubai | Top Buyback Rates | SellPhoneCash",
+    title: "Sell Samsung Galaxy Fold in Dubai | Top Buyback Rates",
     metaDescription: "Sell your Samsung Galaxy Z Fold 6, Fold 5, or Fold 4 in Dubai. Top cash offers, free 3-hour doorstep pickup across UAE, cash paid on collection.",
     h1: "Sell Samsung Galaxy Z Fold in Dubai for Top Cash",
     subtitle: "Get the highest cash value for your foldable smartphone. Free doorstep collection across Dubai with instant cash settlement.",
@@ -838,7 +959,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "samsung-flip",
     brand: "Samsung",
     modelName: "Galaxy Z Flip",
-    title: "Sell Samsung Galaxy Flip in Dubai | Instant Cash | SellPhoneCash",
+    title: "Sell Samsung Galaxy Flip in Dubai | Instant Cash",
     metaDescription: "Sell your Samsung Galaxy Z Flip 6, Flip 5, or Flip 4 in Dubai. Best trade-in prices, free 3-hour home pickup across Dubai, cash paid on spot.",
     h1: "Sell Samsung Galaxy Z Flip in Dubai for Cash",
     subtitle: "Turn your compact folding phone into instant dirhams today. Fast valuation, free doorstep pickup anywhere in Dubai.",
@@ -867,7 +988,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "google-pixel",
     brand: "Google",
     modelName: "Google Pixel",
-    title: "Sell Google Pixel in Dubai | Top Cash Payout | SellPhoneCash",
+    title: "Sell Google Pixel in Dubai | Top Cash Payout",
     metaDescription: "Sell your Google Pixel (Pixel 9, 8, 7 Pro) in Dubai for instant cash. Free 3-hour doorstep pickup across all Dubai areas. Cash on the spot guaranteed.",
     h1: "Sell Google Pixel Phone in Dubai for Top Cash",
     subtitle: "Get fair market cash for your Google Pixel 9 Pro, Pixel 8, or older Pixel smartphone. Free collection at your doorstep across Dubai.",
@@ -896,7 +1017,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "macbook-pro",
     brand: "Apple",
     modelName: "MacBook Pro",
-    title: "Sell MacBook Pro in Dubai | Top Cash Value | SellPhoneCash",
+    title: "Sell MacBook Pro in Dubai | Top Cash Value",
     metaDescription: "Sell your used MacBook Pro (M1, M2, M3, M4) in Dubai for instant cash! Free 3-hour doorstep collection across Dubai, instant payment guaranteed.",
     h1: "Sell MacBook Pro in Dubai for Instant Cash",
     subtitle: "Get the highest cash valuation for your Apple Silicon MacBook Pro 14\" or 16\". Free doorstep pickup and instant cash payout across Dubai.",
@@ -925,7 +1046,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "macbook-air",
     brand: "Apple",
     modelName: "MacBook Air",
-    title: "Sell MacBook Air in Dubai | Instant Cash On Spot | SellPhoneCash",
+    title: "Sell MacBook Air in Dubai | Instant Cash On Spot",
     metaDescription: "Sell your MacBook Air (M1, M2, M3 13\" & 15\") in Dubai. Best trade-in prices, free 3-hour doorstep collection across Dubai, immediate cash payout.",
     h1: "Sell MacBook Air in Dubai for Immediate Cash",
     subtitle: "Cash in on your Apple MacBook Air 13-inch or 15-inch today. Free doorstep collection anywhere in Dubai with instant cash settlement.",
@@ -954,7 +1075,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "ipad-pro",
     brand: "Apple",
     modelName: "iPad Pro",
-    title: "Sell iPad Pro in Dubai | Top Cash Payout | SellPhoneCash",
+    title: "Sell iPad Pro in Dubai | Top Cash Payout",
     metaDescription: "Sell your iPad Pro (M4, M2, M1 11\" & 13\") in Dubai for instant cash. Free 3-hour doorstep collection across Dubai, immediate cash payment.",
     h1: "Sell iPad Pro in Dubai for Instant Cash",
     subtitle: "Get the highest cash buyback price for your Apple iPad Pro. Free doorstep pickup throughout Dubai with zero haggling.",
@@ -983,7 +1104,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "ipad-air",
     brand: "Apple",
     modelName: "iPad Air",
-    title: "Sell iPad Air in Dubai | Instant Cash Today | SellPhoneCash",
+    title: "Sell iPad Air in Dubai | Instant Cash Today",
     metaDescription: "Sell your iPad Air (M2, M1, 4th Gen) in Dubai for cash. Instant valuation, free 3-hour doorstep collection across Dubai, cash paid on collection.",
     h1: "Sell iPad Air in Dubai for Immediate Cash",
     subtitle: "Upgrade or liquidate your Apple iPad Air 11-inch or 13-inch today. Fast online valuation with free doorstep pickup in Dubai.",
@@ -1012,7 +1133,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "apple-watch",
     brand: "Apple",
     modelName: "Apple Watch Series",
-    title: "Sell Apple Watch in Dubai | Top Cash Valuation | SellPhoneCash",
+    title: "Sell Apple Watch in Dubai | Top Cash Valuation",
     metaDescription: "Sell your Apple Watch Series 10, 9, 8, or SE in Dubai for instant cash! Free 3-hour doorstep collection, cash paid on spot.",
     h1: "Sell Apple Watch in Dubai for Instant Cash",
     subtitle: "Get immediate dirhams for your Apple Watch Series or SE. Free doorstep collection anywhere in Dubai with instant cash settlement.",
@@ -1041,7 +1162,7 @@ export const MODEL_PAGES: Record<string, ModelPageData> = {
     slug: "apple-watch-ultra",
     brand: "Apple",
     modelName: "Apple Watch Ultra",
-    title: "Sell Apple Watch Ultra in Dubai | Highest Cash Rates | SellPhoneCash",
+    title: "Sell Apple Watch Ultra in Dubai | Highest Cash Rates",
     metaDescription: "Sell your Apple Watch Ultra 2 or Ultra 1 in Dubai for top instant cash. Free 3-hour doorstep collection, cash paid on collection.",
     h1: "Sell Apple Watch Ultra in Dubai for Top Cash",
     subtitle: "Turn your rugged Apple Watch Ultra into immediate cash today. High market demand, transparent valuation, free doorstep pickup.",
@@ -1074,7 +1195,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "dubai-marina": {
     slug: "dubai-marina",
     locationName: "Dubai Marina",
-    title: "Sell Phone in Dubai Marina | Free 30-Min Doorstep Pickup | SellPhoneCash",
+    title: "Sell Phone in Dubai Marina | Free 30-Min Doorstep Pickup",
     metaDescription: "Sell your used phone in Dubai Marina today. Fastest 30-minute doorstep collection, instant cash on the spot. We buy iPhones, Samsungs, MacBooks & iPads.",
     h1: "Sell Your Phone in Dubai Marina for Instant Cash",
     subtitle: "Dubai Marina's top-rated device buyback service. We come directly to your tower, residence, or favorite Marina Walk cafe and pay cash on the spot.",
@@ -1097,7 +1218,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "jlt": {
     slug: "jlt",
     locationName: "Jumeirah Lake Towers (JLT)",
-    title: "Sell Phone in JLT Dubai | Instant Cash On Spot | SellPhoneCash",
+    title: "Sell Phone in JLT Dubai | Instant Cash On Spot",
     metaDescription: "Sell your used phone in JLT (Jumeirah Lake Towers). Express 30-minute collection to any cluster (A to Z), instant cash paid on the spot. Sell iPhone, Samsung & more.",
     h1: "Sell Your Phone in JLT for Instant Cash",
     subtitle: "Fastest device buyback service across all JLT clusters (Cluster A to Z). Top cash value, free doorstep collection, and immediate payment.",
@@ -1120,7 +1241,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "downtown-dubai": {
     slug: "downtown-dubai",
     locationName: "Downtown Dubai",
-    title: "Sell Phone in Downtown Dubai | Instant Cash Doorstep | SellPhoneCash",
+    title: "Sell Phone in Downtown Dubai | Instant Cash Doorstep",
     metaDescription: "Sell your phone in Downtown Dubai today. We come to Burj Khalifa, Dubai Mall, or your apartment in 45 mins. Top cash for iPhone, Samsung, MacBooks & iPads.",
     h1: "Sell Your Phone in Downtown Dubai for Instant Cash",
     subtitle: "Premium device buyback right in the heart of the city. Top market valuation and immediate payment at your residence or executive suite.",
@@ -1142,7 +1263,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "business-bay": {
     slug: "business-bay",
     locationName: "Business Bay",
-    title: "Sell Phone in Business Bay | Instant Cash at Your Office | SellPhoneCash",
+    title: "Sell Phone in Business Bay | Instant Cash at Your Office",
     metaDescription: "Sell your phone in Business Bay Dubai. Fast 45-minute pickup to your office tower or apartment. Cash paid on the spot for iPhone, Samsung, laptops.",
     h1: "Sell Your Phone in Business Bay for Top Cash",
     subtitle: "Fast, reliable device buyback for busy professionals and residents in Business Bay. Free doorstep arrival and instant cash payment.",
@@ -1164,7 +1285,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "deira": {
     slug: "deira",
     locationName: "Deira",
-    title: "Sell Phone in Deira Dubai | Instant Cash On Spot | SellPhoneCash",
+    title: "Sell Phone in Deira Dubai | Instant Cash On Spot",
     metaDescription: "Sell your used or old phone in Deira Dubai. Best cash prices, beats Naif and Sabkha shops without the haggling. Free doorstep pickup, cash paid on spot.",
     h1: "Sell Your Phone in Deira for Instant Cash",
     subtitle: "Skip the chaos and lowballing of crowded electronics markets. Get a transparent, guaranteed cash payout at your doorstep in Deira.",
@@ -1186,7 +1307,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "bur-dubai": {
     slug: "bur-dubai",
     locationName: "Bur Dubai",
-    title: "Sell Phone in Bur Dubai | Instant Cash Today | SellPhoneCash",
+    title: "Sell Phone in Bur Dubai | Instant Cash Today",
     metaDescription: "Sell your phone in Bur Dubai for instant cash today. Free doorstep pickup in Al Mankhool, Al Karama, Oud Metha. Top cash for iPhone, Samsung, laptops.",
     h1: "Sell Your Phone in Bur Dubai for Top Cash",
     subtitle: "Convenient, safe, and professional mobile buyback in historic Bur Dubai. Free doorstep collection and instant cash payout.",
@@ -1208,7 +1329,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "jumeirah": {
     slug: "jumeirah",
     locationName: "Jumeirah",
-    title: "Sell Phone in Jumeirah Dubai | Free Doorstep Pickup | SellPhoneCash",
+    title: "Sell Phone in Jumeirah Dubai | Free Doorstep Pickup",
     metaDescription: "Sell your phone in Jumeirah (Jumeirah 1, 2, 3, Umm Suqeim). Top cash for iPhones, Samsungs, MacBooks. Dispatched to your villa in 45 mins.",
     h1: "Sell Your Phone in Jumeirah for Instant Cash",
     subtitle: "Private, discreet villa collection across Jumeirah 1, 2, 3 and Umm Suqeim. Guaranteed top cash rates for your high-end electronics.",
@@ -1230,7 +1351,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "al-barsha": {
     slug: "al-barsha",
     locationName: "Al Barsha",
-    title: "Sell Phone in Al Barsha | Instant Cash Doorstep | SellPhoneCash",
+    title: "Sell Phone in Al Barsha | Instant Cash Doorstep",
     metaDescription: "Sell your used phone in Al Barsha (Barsha 1, 2, 3 & South). Quick 30-45 minute pickup near Mall of the Emirates. Cash paid on the spot.",
     h1: "Sell Your Phone in Al Barsha for Instant Cash",
     subtitle: "Get immediate dirhams for your phone in Al Barsha. Located close to Mall of the Emirates, Barsha Heights (TECOM), and Barsha South.",
@@ -1252,7 +1373,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "dubai-silicon-oasis": {
     slug: "dubai-silicon-oasis",
     locationName: "Dubai Silicon Oasis (DSO)",
-    title: "Sell Phone in Dubai Silicon Oasis | Instant Cash | SellPhoneCash",
+    title: "Sell Phone in Dubai Silicon Oasis | Instant Cash",
     metaDescription: "Sell your phone in Dubai Silicon Oasis (DSO). Fast free doorstep collection to your tower or villa in DSO. Cash paid on spot for iPhone, Samsung, MacBooks.",
     h1: "Sell Your Phone in Dubai Silicon Oasis for Instant Cash",
     subtitle: "Premier tech buyback service right in Dubai's technology hub. Free doorstep collection across DSO with instant cash payment.",
@@ -1274,7 +1395,7 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
   "palm-jumeirah": {
     slug: "palm-jumeirah",
     locationName: "Palm Jumeirah",
-    title: "Sell Phone in Palm Jumeirah | Instant Luxury Buyback | SellPhoneCash",
+    title: "Sell Phone in Palm Jumeirah | Instant Luxury Buyback",
     metaDescription: "Sell your phone in Palm Jumeirah. White-glove doorstep collection to your villa or apartment on the Crescent & Fronds. Top cash for iPhone, Samsung, MacBooks.",
     h1: "Sell Your Phone in Palm Jumeirah for Instant Cash",
     subtitle: "Ultra-luxury device buyback service across Palm Jumeirah Fronds, Crescent, and Nakheel Mall residences. Immediate cash payment on the spot.",
@@ -1291,7 +1412,72 @@ export const LOCATION_PAGES: Record<string, LocationPageData> = {
     relatedLocations: ["dubai-marina", "jumeirah", "downtown-dubai", "business-bay"],
     topModels: ["iphone-pro-max", "iphone-16", "samsung-fold", "macbook-pro", "apple-watch-ultra"],
     heroImage: "/images/locations/palm-jumeirah.jpg"
-  }
+  },
+  "abu-dhabi-reem-island": {
+    slug: "abu-dhabi-reem-island",
+    locationName: "Al Reem Island, Abu Dhabi",
+    title: "Sell Phone in Al Reem Island Abu Dhabi | Instant Cash Doorstep",
+    metaDescription: "Sell your used phone in Al Reem Island, Abu Dhabi. Same-day doorstep pickup at Shams Abu Dhabi, Marina Square & City of Lights. Instant cash or bank transfer.",
+    h1: "Sell Your Phone in Al Reem Island, Abu Dhabi for Instant Cash",
+    subtitle: "Abu Dhabi's premier device trade-in service. We collect from your high-rise residence across Gate Towers, Marina Square, and Shams Abu Dhabi with instant cash payout.",
+    targetKeywords: ["sell phone abu dhabi", "sell iphone reem island", "mobile buyback abu dhabi", "cash for used phone al reem", "sell laptop abu dhabi"],
+    pickupSpeed: "Same-Day Collection (Within 2 Hours)",
+    keyLandmarks: ["Gate Towers", "Sun & Sky Towers", "Marina Square", "Shams Boutik", "Reem Mall", "City of Lights"],
+    coverageDescription: "Full residential coverage across Al Reem Island. Our licensed Abu Dhabi couriers come directly to your apartment lobby with instant cash payment upon 5-minute hardware testing.",
+    neighborhoodsServed: ["Shams Abu Dhabi", "Marina Square", "City of Lights", "Najmat Abu Dhabi", "Reem Hills"],
+    serviceHighlights: ["Same-day Abu Dhabi doorstep dispatch", "Highest cash quotes in the capital", "Zero paperwork hassle", "Immediate cash or bank transfer"],
+    faqs: [
+      { question: "How quickly can you pick up on Al Reem Island in Abu Dhabi?", answer: "Our Abu Dhabi logistics fleet services Al Reem Island daily. We can arrive at your tower lobby within 2 hours of booking." },
+      { question: "Do you pay cash or bank transfer in Abu Dhabi?", answer: "Both options are available instantly on the spot upon device inspection." }
+    ],
+    relatedLocations: ["abu-dhabi-corniche", "dubai-marina", "downtown-dubai"],
+    topModels: ["iphone-pro-max", "iphone-16", "samsung-s24", "macbook-pro", "apple-watch-ultra"],
+    heroImage: "/images/dubai-hero-phones.jpg"
+  },
+
+  "abu-dhabi-corniche": {
+    slug: "abu-dhabi-corniche",
+    locationName: "Abu Dhabi Corniche",
+    title: "Sell Phone in Abu Dhabi Corniche | Best Cash Valuation",
+    metaDescription: "Sell your used iPhone, Samsung or MacBook near Abu Dhabi Corniche & Khalidiya. Instant cash payout, free doorstep pickup at your residence or office.",
+    h1: "Sell Your Phone in Abu Dhabi Corniche for Instant Cash",
+    subtitle: "Trusted electronics buyback along Abu Dhabi Corniche, Al Khalidiya, and Al Ras Al Akhdar. Quick on-the-spot cash payments and free doorstep collection.",
+    targetKeywords: ["sell phone abu dhabi corniche", "sell used iphone khalidiya", "cash for phones abu dhabi", "sell macbook corniche", "phone trade in abu dhabi"],
+    pickupSpeed: "Same-Day Collection (Within 2 Hours)",
+    keyLandmarks: ["Nation Towers", "World Trade Center Abu Dhabi", "Khalidiya Mall", "Corniche Beach", "Emirates Palace area"],
+    coverageDescription: "Express doorstep buyback across Corniche Road, Al Bateen, and Al Khalidiya. Fast on-site diagnostics and instant cash payment.",
+    neighborhoodsServed: ["Corniche Road", "Al Khalidiya", "Al Bateen", "Al Ras Al Akhdar", "Al Markaziyah"],
+    serviceHighlights: ["Corniche & Khalidiya express coverage", "Instant payout in cash or IBAN", "Corporate and personal device trade-ins", "Free data wipe verification"],
+    faqs: [
+      { question: "Can you collect from office buildings near Abu Dhabi Corniche?", answer: "Yes! We regularly meet clients in corporate offices along Corniche Road, Nation Towers, and WTC Abu Dhabi." },
+      { question: "What devices do you buy in Abu Dhabi?", answer: "We buy all models of iPhone, Samsung Galaxy, Google Pixel, MacBook, iPad, and Apple Watch for top cash." }
+    ],
+    relatedLocations: ["abu-dhabi-reem-island", "downtown-dubai", "business-bay"],
+    topModels: ["iphone-16", "iphone-15", "samsung-s25", "macbook-air", "ipad-pro"],
+    heroImage: "/images/dubai-hero-phones.jpg"
+  },
+
+  "sharjah-al-majaz": {
+    slug: "sharjah-al-majaz",
+    locationName: "Al Majaz, Sharjah",
+    title: "Sell Phone in Al Majaz Sharjah | Fast Doorstep Cash",
+    metaDescription: "Sell your used phone in Al Majaz, Sharjah. 45-minute doorstep collection around Buhaira Corniche, Al Majaz Waterfront & Al Khan. Instant cash on the spot.",
+    h1: "Sell Your Phone in Al Majaz, Sharjah for Instant Cash",
+    subtitle: "Sharjah's top-rated device trade-in service. Free doorstep collection across Al Majaz 1, 2, 3 and Khalid Lagoon residences with instant cash payout.",
+    targetKeywords: ["sell phone sharjah", "sell used iphone al majaz", "cash for phones sharjah", "mobile buyer buhaira corniche", "sell macbook sharjah"],
+    pickupSpeed: "45 - 60 Minutes",
+    keyLandmarks: ["Al Majaz Waterfront", "Buhaira Corniche", "Sharjah City Centre area", "Al Noor Island", "Al Nakheel Tower"],
+    coverageDescription: "Fast doorstep device collection around Khalid Lake and Al Majaz towers. Courteous appraisal specialists verify your device and pay cash immediately.",
+    neighborhoodsServed: ["Al Majaz 1", "Al Majaz 2", "Al Majaz 3", "Al Khan border", "Al Qasba border"],
+    serviceHighlights: ["Quick 45-minute Sharjah dispatch", "No classifieds haggling", "Top market cash valuation", "Immediate on-site payment"],
+    faqs: [
+      { question: "How long does doorstep pickup take in Al Majaz Sharjah?", answer: "Our dedicated Northern Emirates team typically reaches residential buildings in Al Majaz within 45 to 60 minutes." },
+      { question: "Do you buy broken screen phones in Sharjah?", answer: "Yes, we buy both pristine and damaged phones with cracked screens or worn-out batteries." }
+    ],
+    relatedLocations: ["deira", "bur-dubai", "dubai-silicon-oasis"],
+    topModels: ["iphone-15", "iphone-14", "samsung-s24", "samsung-s23", "ipad-air"],
+    heroImage: "/images/dubai-hero-phones.jpg"
+  },
 };
 
 export const SERVICE_SLUGS = [
@@ -1322,6 +1508,13 @@ export const MODEL_SLUGS = [
   "macbook-air-m3",
   "apple-watch-ultra-2",
   "playstation-5-slim",
+  "macbook-pro-m1",
+  "macbook-pro-m2",
+  "macbook-pro-m3",
+  "macbook-pro-m4",
+  "macbook-air-m1",
+  "macbook-air-m2",
+  "macbook-air-m3",
 ];
 
 export const LOCATION_SLUGS = Object.keys(LOCATION_PAGES);
@@ -1363,7 +1556,7 @@ export function resolveModelPage(rawSlug: string): ModelPageData {
   if (MODEL_PAGES[s]) return MODEL_PAGES[s];
 
   // 2. Alias mapping
-  if (s.includes("iphone-16-pro-max") || s === "iphone-16-pro-max") return MODEL_PAGES["iphone-pro-max"] || MODEL_PAGES["iphone-16"];
+  if (s.includes("iphone-16-pro-max") || s === "iphone-16-pro-max") return MODEL_PAGES["iphone-16-pro-max"];
   if (s.includes("iphone-17")) return MODEL_PAGES["iphone-17"];
   if (s.includes("iphone-16")) return MODEL_PAGES["iphone-16"];
   if (s.includes("iphone-15")) return MODEL_PAGES["iphone-15"];
@@ -1391,7 +1584,7 @@ export function resolveModelPage(rawSlug: string): ModelPageData {
     slug: s,
     brand: s.includes("samsung") ? "Samsung" : s.includes("google") || s.includes("pixel") ? "Google" : "Apple",
     modelName: formatted,
-    title: `Sell ${formatted} in Dubai | Highest Cash Valuation | SellPhoneCash`,
+    title: `Sell ${formatted} in Dubai | Highest Cash Valuation`,
     metaDescription: `Sell your ${formatted} in Dubai for instant cash payout. Free 3-hour doorstep collection across Dubai, guaranteed 7-day price lock.`,
     h1: `Sell ${formatted} in Dubai for Top Cash`,
     subtitle: `Upgrade or sell your pre-owned ${formatted}. Transparent online valuation with free doorstep collection and immediate cash payment across Dubai.`,

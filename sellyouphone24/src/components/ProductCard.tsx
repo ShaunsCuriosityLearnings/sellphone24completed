@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Zap } from "lucide-react";
 import { ProductType } from "@/types";
 
-const ProductCard = ({ product }: { product: ProductType }) => {
+const ProductCard = ({ product, priority = false }: { product: ProductType; priority?: boolean }) => {
   return (
     <article className="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 hover:border-emerald-500/40 hover:shadow-md transition-all duration-300 flex flex-col h-full">
       {/* Product Image Cover */}
@@ -17,19 +17,23 @@ const ProductCard = ({ product }: { product: ProductType }) => {
             src={product.images.frontView}
             alt={product.name}
             fill
+            priority={priority}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "low"}
             sizes="(max-width:768px) 50vw, (max-width:1200px) 25vw, 20vw"
             className="object-contain transition-transform duration-500 group-hover:scale-105"
           />
         </div>
 
-        {/* Secondary Image (Back View) */}
+        {/* Secondary Image (Back View) - Desktop Hover Only */}
         {product.images.backView && (
-          <div className="absolute inset-3 sm:inset-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
+          <div className="hidden sm:block absolute inset-3 sm:inset-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20 pointer-events-none">
             <Image
               src={product.images.backView}
               alt={`${product.name} Back`}
               fill
-              sizes="(max-width:768px) 50vw, (max-width:1200px) 25vw, 20vw"
+              loading="lazy"
+              sizes="(max-width:1200px) 25vw, 20vw"
               className="object-contain transition-transform duration-500 group-hover:scale-105"
             />
           </div>

@@ -6,9 +6,12 @@ import { CheckCircle2, Shield } from "lucide-react";
 import QuickEvaluationWidget from "@/components/QuickEvaluationWidget";
 import { api } from "@/lib/api";
 import { ProductType } from "@/types";
+import { products as mockProducts } from "@/data/mockData";
+
+const defaultHero = mockProducts.find((p) => p.isHeroProduct) || mockProducts[0];
 
 const HeroSection = () => {
-  const [heroProduct, setHeroProduct] = useState<ProductType | null>(null);
+  const [heroProduct, setHeroProduct] = useState<ProductType>(defaultHero);
 
   useEffect(() => {
     async function loadHero() {
@@ -77,6 +80,8 @@ const HeroSection = () => {
                     alt={heroName}
                     fill
                     priority
+                    fetchPriority="high"
+                    sizes="(max-width: 640px) 280px, (max-width: 1024px) 380px, 450px"
                     className="object-contain drop-shadow-2xl"
                   />
                 </div>
